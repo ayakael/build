@@ -1,6 +1,6 @@
 # Maintainer: Antoine Martin <antoine.martin@protonmail.com>
 pkgname=dam
-pkgver=0.2.6
+pkgver=0.2.6-75-g6f4b82b
 pkgrel=0
 pkgdesc="A digital audio manager built very specifically for my git-annex backed music collection"
 url="https://github.com/ayakael/dam"
@@ -33,10 +33,11 @@ snapshot() {
 	echo "Submod update"
 	git submodule update --init
 	cd bunc
-	echo "Submo archive"
+	echo "Submod archive"
 	git archive --prefix="$pkgname/bunc/" --format="tar" -o "../bunc.tar" "master"
 	cd ..
-	
+    
+   
 	tar --concatenate --file dam.tar bunc.tar
 	gzip dam.tar -c > "$SRCDEST"/$pkgname-$pkgver.tar.gz
 	ln -s "$SRCDEST"/$pkgname-$pkgver.tar.gz "$startdir"/$pkgname-$pkgver.tar.gz 
@@ -44,7 +45,7 @@ snapshot() {
 
 build() {
 	cd "$builddir"
-	./build.sh
+	./build.sh "VERSION=${pkgver}"
 }
 
 package() {
