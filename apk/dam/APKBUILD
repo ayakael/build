@@ -52,5 +52,4 @@ package() {
 	cd "$builddir"
 	install -Dm755 ./dam "$pkgdir"/usr/bin/dam
 }
-
-sha512sums="e0bcf717e9c0f94f2311429267760cd39c6d454f31dcc89466170732f7d42551cf7fab730ea7a406deab04c17d205002701d9cd55dd4e29ede08fd6bd7f6f708  dam-0.2.6.tar.gz
+sha512sums="22244e80a2b846d6900c8c1eeae2893083e33319759b7a6ba3b48acc4baeb98c536e6b3e5a7821ebb887a52e77d40ccd45b074919b4639470fa47ab1728027e8  dam-0.2.6-75-g6f4b82b.tar.gz"
