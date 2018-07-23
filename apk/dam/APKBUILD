@@ -1,6 +1,6 @@
 # Maintainer: Antoine Martin <antoine.martin@protonmail.com>
 pkgname=dam
-pkgver=0.2.6-75-g6f4b82b
+pkgver=0.3
 pkgrel=0
 pkgdesc="A digital audio manager built very specifically for my git-annex backed music collection"
 url="https://github.com/ayakael/dam"
