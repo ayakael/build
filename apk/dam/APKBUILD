@@ -6,7 +6,7 @@ pkgdesc="A digital audio manager built very specifically for my git-annex backed
 url="https://github.com/ayakael/dam"
 arch="noarch"
 license="GPL3"
-depends="bash shntool gawk sed grep bc git-annex cuetools findutils coreutils git ffmpeg imagemagick flac p7zip"
+depends="bash shntool gawk sed grep bc git-annex findutils coreutils git ffmpeg imagemagick flac p7zip"
 makedepends="bash coreutils findutils gawk git"
 source="$pkgname-$pkgver.tar.gz"
 _giturl="https://github.com/ayakael/dam"
@@ -52,4 +52,4 @@ package() {
 	cd "$builddir"
 	install -Dm755 ./dam "$pkgdir"/usr/bin/dam
 }
-sha512sums="22244e80a2b846d6900c8c1eeae2893083e33319759b7a6ba3b48acc4baeb98c536e6b3e5a7821ebb887a52e77d40ccd45b074919b4639470fa47ab1728027e8  dam-0.2.6-75-g6f4b82b.tar.gz"
+sha512sums="de509b13b5734df16e25d8082279ffdd458d26fbc745642df1d196905350b76cf4643ae3a19d7d62f1b6aaba9fe879b3214cf390377c41bfaca235b6e80c73dd  dam-0.3.tar.gz"
