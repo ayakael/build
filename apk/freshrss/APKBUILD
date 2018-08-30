@@ -2,7 +2,7 @@
 
 pkgname=freshrss
 pkgver=1.11.1
-pkgrel=3
+pkgrel=4
 pkgdesc="FreshRSS is a self-hosted RSS feed aggregator"
 arch='noarch'
 url="http://freshrss.org"
@@ -23,6 +23,7 @@ package() {
     cp -r . "${pkgdir}/usr/share/webapps/${pkgname}/"
     rm -R "${pkgdir}/usr/share/webapps/${pkgname}/data"
     ln -s "/var/lib/freshrss" "${pkgdir}/usr/share/webapps/${pkgname}/data"
+    chown 100:101 -R "${pkgdir}/usr/share/webapps/${pkgname}/data"
 }
 
 sha512sums="b0316ecbbfc3aebb20c9e47083292f07e356f468fda92641a4fefb9968df9304e7a663ba8f8a5a1f5f740c7a7e8a12999ec20611caabb3449407bbeb7bf1b27b  1.11.1.zip"
