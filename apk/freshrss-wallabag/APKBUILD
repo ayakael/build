@@ -1,13 +1,13 @@
 # Maintainer: Antoine Martin <antoine@ayakael.net>
 pkgname=freshrss-wallabag
-pkgver=1.0
-pkgrel=2
-pkgdesc="A digital audio manager built very specifically for my git-annex backed music collection"
+pkgver=0.1
+pkgrel=0
+pkgdesc="This FreshRSS extension adds a button to each article which adds the respective article to your Wallabag installation."
 url="https://github.com/ayakael/dam"
 arch="noarch"
 license="GAGPL-3.0-only"
-depends="bash freshrss wallabag"
-makedepends="bash coreutils findutils gawk git"
+depends="freshrss wallabag"
+makedepends="git"
 source="$pkgname-$pkgver.tar.gz"
 _giturl="https://git.n7r.de/nrb/freshrss-wallabag.git"
 _gittag="master"
