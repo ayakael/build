@@ -1,7 +1,7 @@
 # Maintainer: Antoine Martin <antoine@ayakael.net>
 pkgname=freshrss-wallabag
 pkgver=0.1
-pkgrel=0
+pkgrel=1
 pkgdesc="This FreshRSS extension adds a button to each article which adds the respective article to your Wallabag installation."
 url="https://github.com/ayakael/dam"
 arch="noarch"
@@ -44,6 +44,4 @@ package() {
 	mkdir -p "${pkgdir}/usr/share/webapps/freshrss/extensions"
 	cp -R "${pkgname}" "${pkgdir}/usr/share/webapps/freshrss/extensions/"
 }
-
-sha512sums="6f7152f461f379c082357fa17fd4c56dd0129919d8527ffccaaeeb1bc63ec17a2c8d2a4cc9a9dd33bcc285ba3de692d534ad40867d7e0ade83aeeb0713a85d1d  freshrss-wallabag-1.0.tar.gz"
-
+sha512sums="6f7152f461f379c082357fa17fd4c56dd0129919d8527ffccaaeeb1bc63ec17a2c8d2a4cc9a9dd33bcc285ba3de692d534ad40867d7e0ade83aeeb0713a85d1d  freshrss-wallabag-0.1.tar.gz"
