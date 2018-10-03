@@ -1,7 +1,7 @@
 # Maintainer: Antoine Martin <antoine@ayakael.net>
 pkgname=freshrss-wallabag
 pkgver=1.0
-pkgrel=0
+pkgrel=1
 pkgdesc="A digital audio manager built very specifically for my git-annex backed music collection"
 url="https://github.com/ayakael/dam"
 arch="noarch"
@@ -42,7 +42,7 @@ build() {
 package() {
 	cd "$builddir"
 	mkdir -p "${pkgdir}/usr/share/webapps/extensions"
-	cp -R "${pkgname}" "${pkgdir}/usr/share/webapps/extensions/"
+	cp -R "${pkgname}" "${pkgdir}/usr/share/webapps/freshrss/extensions/"
 }
 
 sha512sums="6f7152f461f379c082357fa17fd4c56dd0129919d8527ffccaaeeb1bc63ec17a2c8d2a4cc9a9dd33bcc285ba3de692d534ad40867d7e0ade83aeeb0713a85d1d  freshrss-wallabag-1.0.tar.gz"
