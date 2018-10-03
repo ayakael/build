@@ -1,0 +1,51 @@
+# Maintainer: Antoine Martin <antoine@ayakael.net>
+
+# Based on PKGBUILD by the following:
+# Philipp Schmitt (philipp<at>schmitt<dot>com
+
+pkgname=wallabag
+pkgver=2.3.3
+pkgrel=0
+pkgdesc='Self hostable application for saving web pages'
+arch='noarch'
+url='http://www.wallabag.org/'
+license='MIT'
+depends='php7 php7-gd php7-tidy pcre'
+options='!strip'
+source="https://static.wallabag.org/releases/wallabag-release-${pkgver}.tar.gz"
+builddir="${srcdir}/${pkgver}"
+
+_USER=nginx
+_GROUP=nginx
+
+build() {
+   return 0
+}
+
+package() {
+    cd "${builddir}"
+
+    # Make directories
+    mkdir -p "${pkgdir}/usr/share/webapps/${pkgname}" "${pkgdir}/var/lib/${pkgname}" "${pkgdir}/etc/${pkgname}"
+
+    # Copy operations
+    cp . -R "${pkgdir}/usr/share/webapps/${pkgname}"
+    mv "${pkgdir}/usr/share/webapps/${pkgname}/app/config/parameters.yml" "${pkgdir}/etc/${pkgname}/"
+    mv "${pkgdir}/usr/share/webapps/${pkgname}/var" "${pkgdir}/var/lib/${pkgname}/"
+    mv "${pkgdir}/usr/share/webapps/${pkgname}/data" "${pkgdir}/var/lib/${pkgname}/"
+
+    # Link operations
+    ln -s "/etc/${pkgname}/parameters.yml" "${pkgdir}/usr/share/webapps/${pkgname}/app/config/parameters.yml"
+    ln -s "/var/lib/${pkgname}/var" "${pkgdir}/usr/share/webapps/${pkgname}/"
+    ln -s "/var/lib/${pkgname}/data" "${pkgdir}/usr/share/webapps/${pkgname}/"
+
+    # Chown operartions
+    chown -R ${_USER}:${_GROUP} "${pkgdir}/etc/${pkgname}"
+    chown -R ${_USER}:${_GROUP} "${pkgdir}/var/lib/${pkgname}"
+    chown -R ${_USER}:${_GROUP} "${pkgdir}/usr/share/webapps/${pkgname}"
+
+    sed -i "${pkgdir}/var/lib/${pkgname}/var/bootstrap.php.cache" -e "s@__DIR__.'/../@'/usr/share/webapps/${pkgname}/@"
+
+}
+sha512sums="e74c9aae4cea33ce0a5209fcd50fca271aa16c666ef0a0c0e4b8edcd35bbb01143080b0554d4288a24cbd45c881877b334e2374af287bf20b358561f96321e5d  wallabag-release-2.3.3.tar.gz"
+
