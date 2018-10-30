@@ -1,15 +1,15 @@
 # Maintainer: Antoine Martin <antoine@ayakael.net>
-pkgname=freshrss-auto-refresh
+pkgname=freshrss-readingtime
 pkgver=1.0
-pkgrel=1
-pkgdesc="Automatically refreshes FreshRSS page once in a minute when there is no activity detected."
-url="https://github.com/Eisa01/FreshRSS---Auto-Refresh-Extension"
+pkgrel=0
+pkgdesc="Add a reading time estimation next to each article."
+url="https://framagit.org/Lapineige/FreshRSS_Extension-ReadingTime"
 arch="noarch"
 license="MIT"
 depends="freshrss"
 makedepends="git"
 source="$pkgname-$pkgver.tar.gz"
-_giturl="https://github.com/Eisa01/FreshRSS---Auto-Refresh-Extension"
+_giturl="https://framagit.org/Lapineige/FreshRSS_Extension-ReadingTime"
 _gittag="master"
 builddir="$srcdir"
 options="!check"
@@ -42,7 +42,6 @@ build() {
 package() {
 	cd "$builddir"
 	mkdir -p "${pkgdir}/usr/share/webapps/freshrss/extensions"
-	cp -R "${pkgname}/xExtension-AutoRefresh" "${pkgdir}/usr/share/webapps/freshrss/extensions/"
+	cp -R "${pkgname}" "${pkgdir}/usr/share/webapps/freshrss/extensions/"
 }
-
-sha512sums="6d5d9d1c4475cb678e540080bfe1d8bdea124a73533744edc1b1914c49d9350c58032afffe9cb8d195c2e7815d840503f35a0d0f857235cb86b334791fa6c39f  freshrss-auto-refresh-1.0.tar.gz"
+sha512sums="d06345aaaf47fd56f3a671fb794d5979a0591b376b215a14d58a83f0a4eff14ec2e43032147d063b46cbad57879449be1c318ff4157fffeb539a75fd08b73d02  freshrss-readingtime-1.0.tar.gz"
