@@ -4,8 +4,8 @@
 # Philipp Schmitt (philipp<at>schmitt<dot>com
 
 pkgname=wallabag
-pkgver=2.3.3
-pkgrel=2
+pkgver=2.3.5
+pkgrel=0
 pkgdesc='Self hostable application for saving web pages'
 arch='noarch'
 url='http://www.wallabag.org/'
@@ -47,5 +47,4 @@ package() {
     sed -i "${pkgdir}/var/lib/${pkgname}/var/bootstrap.php.cache" -e "s@__DIR__.'/../@'/usr/share/webapps/${pkgname}/@"
 
 }
-sha512sums="e74c9aae4cea33ce0a5209fcd50fca271aa16c666ef0a0c0e4b8edcd35bbb01143080b0554d4288a24cbd45c881877b334e2374af287bf20b358561f96321e5d  wallabag-release-2.3.3.tar.gz"
-
+sha512sums="46cb5c9c435bfc6e909111d294688bbddcdcd360792834d193dd538f81617c7cd1dc51fb7c6599d44d20a869b92cd4bca7520484542c9623069bab0b12c881d0  wallabag-release-2.3.5.tar.gz"

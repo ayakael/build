@@ -1,7 +1,7 @@
 # Maintainer: Antoine Martin <antoine@ayakael.net>
 
 pkgname=znapzend
-pkgver=0.19.0
+pkgver=0.19.1
 pkgrel=1
 pkgdesc="ZnapZend is a ZFS centric backup tool."
 arch='all'
@@ -34,5 +34,4 @@ package() {
     install -m 644 "man/znapzend.1" "man/znapzendzetup.1" "man/znapzendztatz.1" "${pkgdir}/usr/share/man/man1"
     chmod 777 "${pkgdir}/usr/share/znapzend/lib/x86_64-linux-thread-multi/auto/List/Util/Util.so"
 }
-sha512sums="4d820d76ee3b79308ce885467880ad160ed7b0eb4cd3b29212514c3a4b3d7536df31f7edc5d14f81ee9dcb9ab4c3f7c74022aaf6e84c101623e31eaf4ab5e780  znapzend-0.19.0.tar.gz"
-
+sha512sums="7cfd00ab813571f2b29ae51a83281f1093914fdb4a5dfcd59768d017b14110ffb969cf13052eed0de06df6c072e689f4ab041ca310e05d3e90c0bbc2f174e9cc  znapzend-0.19.1.tar.gz"
