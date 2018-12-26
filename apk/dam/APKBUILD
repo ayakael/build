@@ -1,6 +1,6 @@
 # Maintainer: Antoine Martin <antoine.martin@protonmail.com>
 pkgname=dam
-pkgver=0.3
+pkgver=0.3.1
 pkgrel=0
 pkgdesc="A digital audio manager built very specifically for my git-annex backed music collection"
 url="https://github.com/ayakael/dam"
@@ -52,4 +52,4 @@ package() {
 	cd "$builddir"
 	install -Dm755 ./dam "$pkgdir"/usr/bin/dam
 }
-sha512sums="de509b13b5734df16e25d8082279ffdd458d26fbc745642df1d196905350b76cf4643ae3a19d7d62f1b6aaba9fe879b3214cf390377c41bfaca235b6e80c73dd  dam-0.3.tar.gz"
+sha512sums="ce8f1e3ee2e300c2ee7eb3b1fe317bba257f29e974df2a7ef611dba10c2d42be715592424dbdafeb4cfbd296cb188a5d95c4b5ec64741f31a304457a2fae2578  dam-0.3.1.tar.gz"
