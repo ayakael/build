@@ -1,7 +1,7 @@
 # Maintainer: Antoine Martin <antoine@ayakael.net>
 
 pkgname=freshrss
-pkgver=1.13.0
+pkgver=1.13.1
 pkgrel=0
 pkgdesc="FreshRSS is a self-hosted RSS feed aggregator"
 arch='noarch'
@@ -26,4 +26,5 @@ package() {
     chown 100:101 -R "${pkgdir}/usr/share/webapps/${pkgname}/data"
 }
 
-sha512sums="3fe6d0019160e3ea16834f5d0beeef6f8c6ba15a3f4cd51dd676a9913a09f47a0eab4bd9e2566a1bb08e9ae159132799ed7903e5db87667ff92a2d364a245cb4  1.13.0.zip"
+sha512sums="7a28fc70155ac2d30700376661f9b4d7b6eedb8166cca3389b3d8afbb00d99ca2d219e47269fbbfc47e0045644456b93a0e6bd384004aa429cd9091af36817ed  1.13.1.zip"
+
