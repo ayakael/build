@@ -16,7 +16,7 @@ options="!check"
 
 snapshot() {
 	mkdir -p "$srcdir"
-	cd "${SRCDEST:-$srcdir}"
+	cd "${srcdir}"
 	if ! [ -d $pkgname.git ]; then
 		git clone $_giturl $pkgname.git || return 1
 		cd $pkgname.git
@@ -52,4 +52,4 @@ package() {
 	cd "$builddir"
 	install -Dm755 ./dam "$pkgdir"/usr/bin/dam
 }
-sha512sums="a712eeae25fbe0c3c37268084dab357fc705672602e1b1e3235add9caa8112b7d8b1605c663d7186a2f0c64779ecf07bc73fee377600b7ddda6e3c772f9d8124  dam-0.3.2.tar.gz"
+sha512sums="b3359c0ca0011ac6b7142aa31d0ea38c8cb5d946dfdb2a150f51c6908e4f5ea2bb81020fe4bdd8a0693c298c0bc4ae2d3648b12360aef2b99739bc55a23aebb5  dam-0.3.3.tar.gz"
