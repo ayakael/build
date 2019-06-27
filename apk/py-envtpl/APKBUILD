@@ -1,7 +1,7 @@
 # Maintainer: Antoine Martin <antoine.martin@protonmail.com>
 pkgname=py-envtpl
 pkgver=20180204
-pkgrel=2
+pkgrel=3
 pkgdesc="Render jinja2 templates on the command line using shell environment variables"
 url='https://github.com/andreasjansson/envtpl'
 arch="noarch"
@@ -48,5 +48,4 @@ package() {
 	cd "$builddir"
 	python setup.py install --root="${pkgdir}" --optimize 1 --skip-build
 }
-sha512sums="a92934be44a7e42f3004190347d7aa54f3cbfaf54b21a70b83d7214ed9c5cd6f73d7c87e9f57a9e3bad2146a2342d7488ad39848da5ca77a5b5c6003b35f9c82  py-envtpl-20180204.tar.gz"
-
+sha512sums="659e4e25b09ddcf8ca8e2208d76950b4cc2b4cf0981d8323c5c529ea8c9c57fa3560ec0d9126d1f79196659b8cce451b88ea20fbac0135df355407151496e103  py-envtpl-20180204.tar.gz"
