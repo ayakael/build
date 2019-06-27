@@ -1,16 +1,16 @@
 # Maintainer: Antoine Martin <antoine.martin@protonmail.com>
 pkgname=py-envtlp
-pkgver=master
-pkgrel=0
+pkgver=20180204
+pkgrel=1
 pkgdesc="Render jinja2 templates on the command line using shell environment variables"
 url='https://github.com/andreasjansson/envtpl'
 arch="noarch"
 license="GPL"
-depends="python py-argparse py-jinja"
-makedepends="git py-setuptools py-sh py-six"
+depends="python py-argparse py-jinja2"
+makedepends="git py-setuptools py-six"
 source="$pkgname-$pkgver.tar.gz"
 _giturl="https://github.com/andreasjansson/envtpl.git"
-_gittag="$pkgver"
+_gittag="72262ff18c20b0a55e1e113528e9d5aea55c5d00"
 builddir="$srcdir/$pkgname"
 options="!check"
 
@@ -30,15 +30,6 @@ snapshot() {
 	echo "Repo archive"
 	git archive --prefix="$pkgname/" -o dam.tar --format "tar" $_gittag
 
-	echo "Submod update"
-	git submodule update --init
-	cd bunc
-	echo "Submod archive"
-	git archive --prefix="$pkgname/bunc/" --format="tar" -o "../bunc.tar" "master"
-	cd ..
-    
-   
-	tar --concatenate --file dam.tar bunc.tar
 	gzip dam.tar -c > "$SRCDEST"/$pkgname-$pkgver.tar.gz
 	ln -s "$SRCDEST"/$pkgname-$pkgver.tar.gz "$startdir"/$pkgname-$pkgver.tar.gz 
 }
@@ -57,3 +48,5 @@ package() {
 	cd "$builddir"
 	python setup.py install --root="${pkgdir}" --optimize 1 --skip-build
 }
+sha512sums="a92934be44a7e42f3004190347d7aa54f3cbfaf54b21a70b83d7214ed9c5cd6f73d7c87e9f57a9e3bad2146a2342d7488ad39848da5ca77a5b5c6003b35f9c82  py-envtlp-20180204.tar.gz"
+
