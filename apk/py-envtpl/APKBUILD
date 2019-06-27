@@ -1,5 +1,5 @@
 # Maintainer: Antoine Martin <antoine.martin@protonmail.com>
-pkgname=py-envtlp
+pkgname=py-envtpl
 pkgver=20180204
 pkgrel=1
 pkgdesc="Render jinja2 templates on the command line using shell environment variables"
