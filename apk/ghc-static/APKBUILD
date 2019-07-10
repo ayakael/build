@@ -1,0 +1,22 @@
+# Maintainer: Mitch Tishmack <mitch.tishmack@gmail.com>
+pkgname=ghc-static
+pkgver=8.6.5
+pkgrel=2
+pkgdesc="The Glasgow Haskell Compiler"
+url="http://haskell.org"
+arch="x86_64"
+license="BSD-3-Clause"
+depends="gmp-dev perl gcc>=6.2.1 llvm5 libffi-dev"
+makedepends="perl alpine-sdk bash"
+provides="ghc"
+subpackages="$pkgname-dev $pkgname-doc"
+options="!strip"  # we strip it manually in build()
+source="https://github.com/redneb/ghc-alt-libc/releases/download/ghc-${pkgver}-musl/ghc-${pkgver}-x86_64-unknown-linux-musl.tar.xz"
+builddir="$srcdir/ghc-${pkgver}"
+
+
+package() {
+	cd $builddir
+	./configure --prefix="/usr"
+	make install DESTDIR="$pkgdir"
+}
