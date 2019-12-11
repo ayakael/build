@@ -1,0 +1,114 @@
+# Maintainer: Johann Klähn <kljohann@gmail.com>
+
+pkgname=git-annex
+pkgdesc='manage files with git, without checking their contents into git (cabal sandbox build)'
+pkgver=7.20190708
+pkgrel=0
+
+url='http://git-annex.branchable.com/'
+license='GPL3'
+arch='i686 x86_64'
+
+depends='curl git gmp gnupg libgsasl libidn libxml2 lsof openssh rsync util-linux'
+options='!makeflags'
+makedepends='ghc happy alex libmagic file-dev'
+source="https://git.kitenet.net/index.cgi/git-annex.git/snapshot/$pkgname-$pkgver.tar.gz"
+builddir="$srcdir/$pkgname-$pkgver"
+
+# The following flags are used when building git-annex.
+# Features can be disabled by prepending them with a dash in $_features below.
+# You can use this to disable the webapp, for example (→ less build time).
+
+# S3 ............. Enable S3 support
+# WebDAV ......... Enable WebDAV support
+# Inotify ........ Enable inotify support
+# Dbus ........... Enable dbus support
+# Assistant ...... Enable git-annex assistant and watch command
+# Webapp ......... Enable git-annex webapp
+# Webapp-secure .. Secure webapp
+# Pairing ........ Enable pairing
+# XMPP ........... Enable notifications using XMPP
+# DNS ............ Enable the haskell DNS library for DNS lookup
+# Production ..... Enable production build (slower build; faster binary)
+# -Android ....... Cross building for Android
+# -AndroidSplice . Building to get TH splices for Android
+# TestSuite ...... Embed the test suite into git-annex
+# TDFA ........... Use regex-tdfa for wildcards
+# Feed ........... Enable podcast feed support
+# Quvi ........... Enable use of quvi to download videos
+# Tahoe .......... Enable the tahoe special remote
+# CryptoHash ..... Enable use of cryptohash for checksumming
+# DesktopNotify .. Enable desktop environment notifications
+# -EKG ........... Enable use of EKG to monitor git-annex as it runs
+
+_features='
+  S3
+  -WebDAV
+  Inotify
+  Dbus
+  Assistant
+  Webapp
+  Webapp-secure
+  Pairing
+  -XMPP
+  DNS
+  Production
+  -Android
+  -AndroidSplice
+  TestSuite
+  TDFA
+  Feed
+  Quvi
+  -Tahoe
+  CryptoHash
+  DesktopNotify
+  -EKG
+'
+
+_features=`echo $_features | tr -d '\n'`
+
+case " ${_features}" in
+  *" Dbus"*)
+    makedepends="${makedepends} dbus"
+    ;;
+esac
+
+_cabal_flags='--force-reinstalls --reinstall --user'
+
+build() {
+  cd "$builddir"
+
+  cabal sandbox init
+  export PATH="$PWD/.cabal-sandbox/bin:$PATH"
+
+  cabal update
+
+  msg "Building dependencies..."
+  msg2 "Features: ${_features}"
+  msg2 "Cabal flags: ${_cabal_flags}"
+
+  which c2hs || cabal install ${_cabal_flags} c2hs
+  cabal install ${_cabal_flags} --only-dependencies `printf '-f %s ' ${_features}`
+
+  msg "Configuring..."
+  cabal configure `printf '-f %s ' ${_features}`
+
+  msg "Starting build..."
+  make
+}
+
+check() {
+  cd "$builddir"
+
+  GNUPGHOME="$PWD/.gnupg" make test
+}
+
+package() {
+  cd "$builddir"
+
+  cabal sandbox init
+  export PATH="$PWD/.cabal-sandbox/bin:$PATH"
+
+  make GHC="cabal exec ghc --" DESTDIR="$pkgdir" install
+}
+sha512sums="b19e829be1d38b14985bd7dda565b8cb59852a54ade529b9dc8ccc19e563f4c15f1e86c239dc368e4c55098e0fde8722f22d2c557cb9d72f3886d17d09a7f1d7  git-annex-7.20190708.tar.gz"

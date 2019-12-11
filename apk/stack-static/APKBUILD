@@ -1,0 +1,27 @@
+# Maintainer: Johann Klähn <kljohann@gmail.com>
+
+pkgname=stack-static
+pkgdesc="The Haskell Tool Stack"
+pkgver=2.1.1
+pkgrel=2
+url="https://github.com/commercialhaskell/stack"
+license="BSD"
+arch='x86_64'
+depends='vim emacs curl git libc-dev xz coreutils automake python3 zlib-dev shadow gmp-dev ghc'
+provides='stack'
+source="https://github.com/commercialhaskell/stack/releases/download/v$pkgver/stack-$pkgver-linux-x86_64-static.tar.gz"
+builddir="$srcdir/stack-$pkgver-linux-x86_64-static"
+
+package() {
+  cd "$builddir"
+
+  install -Dm755 stack "$pkgdir/usr/bin/stack"
+
+}
+
+# This involves a recompile, uncomment if you're patient.
+# check() {
+#   cd git-annex
+#   stack test
+# }
+sha512sums="ee7bf112c32eb54d0a1507179f91bbe56f82a491a8f5ae340da8321b3842c5de23eaded5d38bc3050c06f0865bcf621e36b918ccad15badd43952fecb4669ccd  stack-2.1.1-linux-x86_64-static.tar.gz"
