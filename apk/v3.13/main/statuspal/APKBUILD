@@ -1,0 +1,43 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+pkgname=statuspal
+pkgver=1.12.5
+pkgrel=0
+pkgdesc="Statuspal lets you communicate your web apps/services status"
+arch='noarch'
+url="https://github.com/statuspal/statuspal"
+license='AGPL-3.0'
+makedepends='elixir'
+depends='npm yarn nodejs python2 postgresql'
+source="$pkgname-$pkgver.tar.gz::https://github.com/statuspal/${pkgname}/archive/v${pkgver}.tar.gz"
+noextract="$pkgname-$pkgver.tar.gz"
+subpackages="$pkgname-doc"
+builddir="${srcdir}"/$pkgname-$pkgver/build
+options="!check"
+
+build() {
+	mkdir -p "$builddir"/apps/statushq/lib/statushq_web
+	cd "$builddir"
+
+	# mix deps
+	export MIX_ENV=prod
+	cp ../mix.* .
+	cp ../apps/statushq/mix.* ./apps/statushq/.
+	mix do local.hex --force, local.rebar --force, deps.get, compile
+
+	# install npm modules
+	cp ../package.json .
+	cp ../yarn.lock .
+	cp ../.babelrc .
+	cp ../apps/statushq/webpack*.js ./apps/statushq/.
+	cp -R ../apps/statushq/lib/statushq_web/static ./apps/statushq/lib/statushq_web/static
+
+	# building static assets
+	mpdir -p "$builddir"/apps/statushq/priv/status
+	yarn
+	npm run prod:build
+	
+	
+
+}
+sha512sums="3d7ea5b610b0ca3e9068472cc71a23c7b5d5dd4cc189e44be1cd5f27c7d0bae2181124548371081f37f06402f8b4313677cc65f137ee6e7d1ed06163a9a87020  statuspal-1.12.5.tar.gz"

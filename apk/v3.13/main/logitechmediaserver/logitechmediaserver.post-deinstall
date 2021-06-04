@@ -1,0 +1,6 @@
+#!/bin/sh
+
+getent passwd logitechmediaserver &>/dev/null && userdel logitechmediaserver >/dev/null
+getent group logitechmediaserver &>/dev/null && groupdel logitechmediaserver >/dev/null || true
+
+exit 0

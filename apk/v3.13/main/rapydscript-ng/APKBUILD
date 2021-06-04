@@ -1,0 +1,42 @@
+# Maintainer: Eli Schwartz <eschwartz@archlinux.org>
+
+pkgname=rapydscript-ng
+pkgver=0.7.20
+pkgrel=1
+pkgdesc="Pythonic JavaScript that doesn't suck"
+arch='noarch'
+url="https://github.com/kovidgoyal/${pkgname}"
+license='BSD'
+depends='nodejs'
+makedepends='npm'
+source="$pkgname-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz"
+
+build() {
+    cd "${srcdir}/${pkgname}-$pkgver"
+
+    npm install --no-optional
+    bin/rapydscript self --complete
+    rm -rf release/ && mv dev/ release/
+}
+
+check() {
+    cd "${srcdir}/${pkgname}-$pkgver"
+
+    bin/rapydscript test
+}
+
+package() {
+    cd "${srcdir}/${pkgname}-$pkgver"
+
+    mkdir -p "${pkgdir}"/usr/bin/node_modules/rapydscript-ng/
+    mkdir -p "${pkgdir}"/usr/lib/node_modules/rapydscript-ng/
+    cp -r * "${pkgdir}"/usr/lib/node_modules/rapydscript-ng/
+    # Non-deterministic race in npm gives 777 permissions to random directories.
+    # See https://github.com/npm/npm/issues/9359 for details.
+    find "${pkgdir}"/usr -type d -exec chmod 755 {} +
+
+    ln -s ../lib/node_modules/rapydscript-ng/bin/rapydscript "${pkgdir}"/usr/bin/rapydscript
+
+    install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
+sha512sums="a8cf5d3adbb5a91ff6a6cc92b315b424faa9842929e92589d02dc74d7dec28af541efd2a79065f270719e6ff43585163bdd8d5ee778d95cb4ab11fdc3e4ef838  rapydscript-ng-0.7.20.tar.gz"

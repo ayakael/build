@@ -1,0 +1,100 @@
+# Maintainer: Antoine Martin <antoine@ayakael.net>
+
+pkgname=logitechmediaserver
+pkgver=7.9.2
+_pkgver=$pkgver.arch2
+pkgrel=6
+pkgdesc='Slimserver for Logitech Squeezebox players. This server is also called Logitech Media Server.'
+arch='i686 x86_64 arm armv6h armv7h aarch64'
+url='https://github.com/stefansielaff/slimserver'
+license='GPL custom'
+depends='perl>=5.26
+	perl-anyevent
+         perl-archive-zip
+         perl-cgi
+         perl-common-sense
+         perl-data-dump
+	 perl-dbd-mysql
+	 perl-dbd-sqlite
+         perl-dbi
+         perl-digest-sha1
+         perl-ev
+         perl-html-form
+         perl-html-parser
+         perl-html-tree
+         perl-http-cookies
+         perl-http-daemon
+         perl-http-date
+         perl-http-message
+         perl-json-xs
+         perl-log-log4perl
+         perl-lwp-mediatypes
+         perl-lwp-protocol-https
+         perl-module-build
+         perl-net-ipv4addr
+         perl-path-class
+         perl-soap-lite
+         perl-readonly
+         perl-sub-name
+         perl-sub-uplevel
+         perl-template-toolkit
+         perl-test-nowarnings
+         perl-test-warn
+         perl-text-glob
+         perl-uri
+	 perl-xml-parser
+         perl-xml-simple
+	 perl-io-socket-ssl
+         perl-yaml-libyaml
+         ffmpeg giflib libexif libjpeg-turbo libpng'
+makedepends='nasm yasm rsync gd-dev zlib-dev libpng-dev libjpeg-turbo-dev perl-dev'
+install="$pkgname.post-deinstall $pkgname.post-upgrade $pkgname.post-install"
+source="slimserver-${_pkgver}.tar.gz::${url}/archive/${_pkgver}.tar.gz
+        slimserver-vendor-${_pkgver}.tar.gz::${url}-vendor/archive/${_pkgver}.tar.gz
+        logitechmediaserver.initd
+	logitechmediaserver.conf"
+options="!check"
+
+prepare() {
+    cd "${srcdir}/slimserver-${_pkgver}"
+    case $CARCH in
+        x86_64) rm -rf Bin/arm-linux Bin/armhf-linux Bin/aarch64-linux ;;
+        i686)  rm -rf Bin/arm-linux Bin/armhf-linux Bin/aarch64-linux ;;
+        aarch64) rm -rf Bin/i386-linux Bin/x86_64-linux Bin/arm-linux Bin/armhf-linux ;;
+        arm*)  rm -rf Bin/i386-linux Bin/x86_64-linux Bin/aarch64-linux ;;
+    esac
+    cd "${srcdir}/slimserver-${_pkgver}/CPAN"
+    mkdir _PRESERVE
+    cp -p --parents URI/Find.pm _PRESERVE
+    cp -pr --parents Net/UPnP* _PRESERVE
+    rm -f AE.pm AnyEvent.pm CGI.pm DBI.pm Error.pm EV.pm JSON/XS.pm LWP.pm Readonly.pm Template.pm Text/Glob.pm URI.pm version.pm 
+    rm -rf AnyEvent Archive CGI common DBI DBD Digest EV HTML HTTP I18N Mac Log LWP Net Path SOAP Sub Template Test URI version XML YAML 
+    cp -rf _PRESERVE/* .
+    rm -rf _PRESERVE
+}
+
+build() {
+    cd "${srcdir}/slimserver-vendor-${_pkgver}/CPAN"
+    sh buildme.sh -t
+}
+
+package() {
+    cd "${srcdir}"
+    install -Dm755 $srcdir/logitechmediaserver.initd $pkgdir/etc/init.d/logitechmediaserver
+    install -Dm644 $srcdir/logitechmediaserver.conf $pkgdir/etc/conf.d/logitechmediaserver
+    cd "${srcdir}/slimserver-${_pkgver}"
+    install -d "${pkgdir}"/usr/share/webapps/"${pkgname}" 
+    install -d "${pkgdir}"/usr/share/licenses/"${pkgname}"
+    install -d "${pkgdir}"/usr/bin
+    ln -s "/usr/share/webapps/${pkgname}/License.txt" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+    cp -a * "${pkgdir}/usr/share/webapps/${pkgname}"
+    cd "${srcdir}/slimserver-vendor-${_pkgver}"
+    cp -a CPAN/build/5.*/lib/*/*linux*/* "${pkgdir}/usr/share/webapps/${pkgname}/CPAN"
+    printf "ARCH-AUR-REL.%s\n%s" "${_pkgver}" "$(date)" > "${pkgdir}/usr/share/webapps/${pkgname}/revision.txt"
+    ln -s /usr/share/webapps/logitechmediaserver/slimserver.pl "${pkgdir}/usr/bin/logitechmediaserver"
+}
+
+sha512sums="034a4d7330c4de502d41f5048d95afb678bdbdb49cde83316dd51ffedf754cdb9a588295b21a5a4532f1ecda35bfca35ba18c88d433ec0b7ade964c38d1cdd9d  slimserver-7.9.2.arch2.tar.gz
+3c5b0220cf0f53bdda8d08269a9a715c211e79dfa228ad175f251dcb429479b96e936a5c3fc337c4b9b03f859b8c5c502bb979a3bd96621c7393407ecffb0179  slimserver-vendor-7.9.2.arch2.tar.gz
+e643b30445e92ad759d2073658468fd6ce791cf29e0af41cd0abd47574be03d6c6c40d5222432b07ec2a1ea834c4b02cad66e6e64e23988ba5050febf9f40882  logitechmediaserver.initd
+9746ed4fd155b7550cfc235a6b92ed1c697cb503039eb35ebfc50c1f35fe413223bcdb49e611d92158e31f8d1d08cc707fcd15ba778e923734db17190971574c  logitechmediaserver.conf"

@@ -1,0 +1,93 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+pkgname=mastodon
+pkgver=3.3.0
+pkgrel=9
+pkgdesc='Self-hosted social media and network server based on ActivityPub and OStatus'
+arch='x86_64'
+url=https://github.com/tootsuite/mastodon
+license='AGPL3'
+depends='ffmpeg
+         imagemagick
+         libidn
+         libpqxx
+         libxml2
+         libxslt
+         libyaml
+	 icu-libs
+	 libpq
+	 libressl
+         nodejs
+	 nodejs-npm
+         postgresql
+         redis
+	 ruby
+         ruby-bundler
+         protobuf
+         yarn
+	 gnu-libiconv
+         zlib
+	 ruby-bigdecimal 
+	 ruby-io-console 
+    	 ruby-irb 
+         ruby-json 
+	 gcompat
+         ruby-etc'
+
+makedepends='git libffi-dev ruby-rdoc ruby-dev icu-dev protobuf-dev libidn-dev openssl-dev postgresql-dev libxml2-dev libxslt-dev'
+install="$pkgname.post-install $pkgname.post-upgrade"
+source="mastodon-$pkgver.tar.gz::https://github.com/tootsuite/mastodon/archive/v$pkgver.tar.gz mastodon-web.initd mastodon-sidekiq.initd mastodon-streaming.initd"
+subpackages="$pkgname-openrc"
+options="!check"
+
+prepare() {
+  cd "$srcdir"/mastodon-$pkgver
+
+  # Allow use of any bundler
+  sed -i -e '/BUNDLED/,+1d' Gemfile.lock
+
+  # Allow use of higher Node versions
+  sed -i 's/"node": .*"/"node": ">=14.15"/' package.json
+}
+
+build() {
+  cd "$srcdir"/mastodon-$pkgver
+  bundle config set deployment 'true'
+  bundle config set without 'development test'
+  bundle config build.nokogiri --use-system-libraries --with-iconv-lib=/usr/lib --with-iconv-include=/usr/include
+  bundle install -j$(getconf _NPROCESSORS_ONLN) 
+  yarn install --pure-lockfile --ignore-engines
+
+#  RAILS_ENV='production' OTP_SECRET=precompile_placeholder SECRET_KEY_BASE=precompile_placeholder bundle exec rails assets:precompile
+}
+
+package() {
+  cd "$srcdir"/mastodon-$pkgver/dist
+
+  # Fix path discrepancies
+  for f in mastodon-*.service; do
+    sed -e '0,/home/s/home/var\/lib/' \
+      -e 's/\/live//' \
+      -e 's/=\/usr\/bin/=\/var\/lib\/mastodon/' \
+      -e 's/home\/mastodon\/.rbenv\/shims/usr\/bin/' \
+      -i $f
+  done
+
+  install -d "$pkgdir"/usr/share/webapps
+  install -d "$pkgdir"/etc
+  cp -a "$srcdir"/mastodon-$pkgver "$pkgdir"/usr/share/webapps/mastodon
+
+  # Put the config file in /etc and link to it
+  touch "$pkgdir"/etc/mastodon.conf
+  ln -s /etc/mastodon.conf "$pkgdir"/usr/share/webapps/mastodon/.env.production
+  ln -s /usr/bin/node "$pkgdir"/usr/share/webapps/mastodon/node
+
+  install -Dm 755 "$srcdir"/mastodon-web.initd "$pkgdir"/etc/init.d/mastodon-web
+  install -Dm 755 "$srcdir"/mastodon-streaming.initd "$pkgdir"/etc/init.d/mastodon-streaming
+  install -Dm 755 "$srcdir"/mastodon-sidekiq.initd "$pkgdir"/etc/init.d/mastodon-sidekiq
+
+}
+sha512sums="98abde15d7b547f5aa913810a7b743bef181d74b163747fb18096fe82c4f6d0f24b223dd433a7edc4edf3cd08c0c3c9ad7eaceaa96f1a85709825382fee67314  mastodon-3.3.0.tar.gz
+9e77061fbdebe90492398f8089a7d2612ff4b6e70b5462dd67330b66d9788cb0133eab38c372b1f27a7214aacdd9f7f70381d4ecc6e92c8c38d794404ae0f840  mastodon-web.initd
+06ebff4b4f51e0c7122db9ed175958fbcadf7e25d1d33c4cfd43992865b1ba183dbe6b4c8c244575f30a45a72d7d4ea3d887c597060e9cf2203bb00ae1a7ac79  mastodon-sidekiq.initd
+eb8af0188c49b3507f9eedf54baf9d848f11288ce475963bde70686a1e5ff8960d32560771479651597703728bf0c8663a7bd068ccd8d32b620eba442a9a8ff1  mastodon-streaming.initd"

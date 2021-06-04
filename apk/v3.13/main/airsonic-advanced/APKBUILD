@@ -1,0 +1,42 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+pkgname=airsonic-advanced
+_pkgver=11.0.0
+_snapshot=20210504201650
+pkgver=${_pkgver}.${_snapshot}
+_pkgver=${_pkgver}-SNAPSHOT.${_snapshot}
+pkgrel=1
+pkgdesc="A free, web-based media streamer and jukebox."
+arch='noarch'
+url="https://github.com/airsonic-advanced/airsonic-advanced/"
+license='GPL3'
+depends="openjdk11-jre flac lame ffmpeg"
+backup='etc/airsonic/airsonic.conf'
+noextract=airsonic.war
+source="$pkgname-$_pkgver.war::https://github.com/airsonic-advanced/airsonic-advanced/releases/download/${_pkgver}/airsonic.war
+	airsonic.conf
+	airsonic.initd
+	airsonic.sh"
+subpackages="$pkgname-openrc"
+provides="airsonic"
+options="!check"
+
+package() {
+  cd ${srcdir}
+  mkdir -p $pkgdir/var/lib/airsonic
+  mkdir -p $pkgdir/etc/init.d
+  mkdir -p $pkgdir/etc/conf.d
+  mkdir -p $pkgdir/etc/airsonic
+  mkdir -p $pkgdir/usr/bin
+
+  install -Dm755 $srcdir/airsonic-advanced-$_pkgver.war $pkgdir/var/lib/airsonic/airsonic.war
+  install -Dm755 $srcdir/airsonic.initd $pkgdir/etc/init.d/airsonic
+  install -Dm644 $srcdir/airsonic.conf $pkgdir/etc/conf.d/airsonic
+  ln -s /etc/conf.d/airsonic $pkgdir/etc/airsonic/airsonic.conf
+  install -Dm755 $srcdir/airsonic.sh $pkgdir/usr/bin/airsonic
+
+}
+sha512sums="f1397fdb2e02300d327f7a1e42a89e5042b521756ddf995fc6eb46501cc4248580b8c9634fd9a449a8fb336471dd3831dadb50701e76572886417710f96d7fb8  airsonic-advanced-11.0.0-SNAPSHOT.20210504201650.war
+0d0c543986a7db15202667461796ed1281e90c0f9c1b5b44bc0df48693f8b1f604b333bef54408c598c23bd9173b8641f102ad7f24ed7abf3316c61d0ca82cb6  airsonic.conf
+1f190647bac0b09153de9121c7bb7a4d7ed316a388bbea7087f2a39d2cbe937b3b2f75c4598f887baf9110a4aa2b31745aadf1cade0dfe6a0e4d0f06b00facce  airsonic.initd
+cebf02fb303fa2587c35c06b86fa0235033aa991f74492ed14b8a777793ba2d832cc67fb66aab0ea5272513960314fafd217d7be32101fc47acb44ea68e03c4c  airsonic.sh"

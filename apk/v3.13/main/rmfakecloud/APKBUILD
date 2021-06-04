@@ -1,0 +1,56 @@
+# Maintainer: Antoine Martin <antoine.martin@protonmail.com>
+pkgname=rmfakecloud
+pkgver=20210501
+pkgrel=0
+pkgdesc="rmfakecloud is fake of the cloud sync the remarkable tablet is using"
+url="https://github.com/ddvk/rmfakecloud"
+arch="x86_64"
+license="AGPL3"
+depends="nginx"
+makedepends="go yarn"
+source="$pkgname-$pkgver.tar.gz rmfakecloud.conf rmfakecloud.nginx rmfakecloud.initd"
+_giturl="https://github.com/ddvk/rmfakecloud"
+_gittag=c3664274f667b115eb01ba9c277c5cec774d43c1
+builddir="$srcdir/$pkgname"
+subpackages="$pkgname-openrc"
+options="!check chmod-clean"
+
+snapshot() {
+	mkdir -p "$srcdir"
+	cd "${srcdir}"
+	if ! [ -d $pkgname.git ]; then
+		git clone $_giturl $pkgname.git || return 1
+		cd $pkgname.git
+	else
+		cd $pkgname.git
+		git fetch || return 1
+	fi
+
+	echo "Checking out"
+	git checkout $_gittag
+	echo "Repo archive"
+	git archive --prefix="$pkgname/" -o $pkgname.tar --format "tar" $_gittag
+
+	gzip $pkgname.tar -c > "$SRCDEST"/$pkgname-$pkgver.tar.gz
+	ln -s "$SRCDEST"/$pkgname-$pkgver.tar.gz "$startdir"/$pkgname-$pkgver.tar.gz 
+}
+
+build() {
+	cd "$builddir"
+	export GOPATH="$srcdir/go"
+	make dist/rmfakecloud-x64
+}
+
+package() {
+	cd "$builddir"
+	install -Dm755 ${builddir}/dist/rmfakecloud-x64 "$pkgdir"/usr/bin/rmfakecloud
+	install -Dm644 ${srcdir}/rmfakecloud.nginx "$pkgdir"/etc/nginx/conf.d/rmfakecloud.conf
+	install -Dm644 ${srcdir}/rmfakecloud.conf "$pkgdir"/etc/conf.d/rmfakecloud.conf
+	install -Dm755 ${srcdir}/rmfakecloud.initd "$pkgdir"/etc/init.d/rmfakecloud
+	install -Dm777 -d "$pkgdir"/var/lib/rmfakecloud
+	install -Dm777 -d "$pkgdir"/var/log/rmfakecloud
+}
+sha512sums="46bd5df3ad7ccce8e80675380308645d454f03f11f6c0e6e7ee06c41c82c4bdd14578c06f63006f7827bf0c66529f736719542b7d7b8fe0ddb41141c8c7840c9  rmfakecloud-20210501.tar.gz
+b9f47b7a0a640b4ec565850f77df7356daa7760ea94499f13350cabc42c2bcb5c8d64188908e46b58b0f4a929776c6f0f42b67de014267a8674fc772c6efa10d  rmfakecloud.conf
+463f0a922c206dabd0dc4c6e43a3b0269245aeca6b4176c894e45e476aee6466965bd50863e60f619c6829dbf765ba66e3827f5eff06046e0a911fde50ef9e97  rmfakecloud.nginx
+32ee768a73a8e16b3d8097f4f5136a5ac0258f6a33ea8bff2e94ae11e658f4ee013f3149bd695d11ad2caeb54c8f82251e568f37683fcd84d5e41c51a34018e9  rmfakecloud.initd"

@@ -1,0 +1,28 @@
+# Maintainer: Rysh Glene <thereisnoescape18751 at protonmail dot ch>
+# Maintainer: Sibren Vasse <arch at sibrenvasse dot nl>
+# Maintainer: Michał Lemke <lemke.michal@gmail.com>
+
+pkgname=dmenu2
+pkgver=0.2
+pkgrel=1
+pkgdesc="Fork of dmenu with many useful patches applied and additional options like screen select, dim or opacity change"
+url="https://bitbucket.org/melek/dmenu2"
+arch='i686 x86_64'
+license='MIT GPL'
+depends='libxinerama libxft'
+provides=dmenu
+conflicts=dmenu
+
+source="https://bitbucket.org/melek/dmenu2/downloads/dmenu2-$pkgver.tar.gz"
+
+build() {
+	cd "$srcdir/$pkgname-$pkgver"
+	make
+}
+
+package() {
+	cd "$srcdir/$pkgname-$pkgver"
+	make DESTDIR="$pkgdir" PREFIX=/usr install
+	install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
+sha512sums="45815cfbe11fc9cf3b1c1523fd72eb6bc38c4cb80f53f76e747e73bb8e4370f951cc4cc8921e136cebe608918ba1462da845626bd7d994d0fa916be1068d7c99  dmenu2-0.2.tar.gz"

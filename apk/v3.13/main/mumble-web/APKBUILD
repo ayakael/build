@@ -1,0 +1,42 @@
+# Maintainer: Edouard Lafon <dev+arch@elafon.98.wf>
+
+pkgname=mumble-web
+pkgver=0.5.1
+pkgrel=0
+pkgdesc="An HTML5 Mumble client - stable"
+arch='noarch'
+url="https://github.com/johni0702/mumble-web"
+license='custom:ISC'
+makedepends='npm jq'
+source="https://registry.npmjs.org/$pkgname/-/$pkgname-$pkgver.tgz LICENSE"
+noextract="$pkgname-$pkgver.tgz"
+subpackages="$pkgname-doc"
+options="!check"
+
+package() {
+	npm install -g --user root --prefix "$pkgdir/usr" "$srcdir/$pkgname-$pkgver.tgz"
+	find "$pkgdir/usr" -type d -exec chmod 755 {} +
+
+	# Remove references to $pkgdir
+	find "$pkgdir" -type f -name package.json -print0 | xargs -0 sed -i "/_where/d"
+
+	# Remove references to $srcdir
+	local tmppackage="$(mktemp)"
+	local pkgjson="$pkgdir/usr/lib/node_modules/$pkgname/package.json"
+	jq '.|=with_entries(select(.key|test("_.+")|not))' "$pkgjson" > "$tmppackage"
+	mv "$tmppackage" "$pkgjson"
+	chmod 644 "$pkgjson"
+
+	# Install license since the package doesn't include it
+	install -Dm 644 "$srcdir/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+
+	# Move README to doc
+	install -dm 755 $pkgdir/usr/share/doc/$pkgname/
+	mv "$pkgdir/usr/lib/node_modules/$pkgname/README.md" "$pkgdir/usr/share/doc/$pkgname/README.md"
+
+	# npm gives ownership of ALL FILES to build user
+	# https://bugs.archlinux.org/task/63396
+	chown -R root:root "${pkgdir}"
+}
+sha512sums="87de66921c5ac00cfd91c6dde064d3427dbbc979c6e94f18cc3e84e77799e9f2bba361818f08ceedc08ded91865decde24da306e6e3d74f3a42ec5d231105bf6  mumble-web-0.5.1.tgz
+a9e2bbe2ae661a0a39852414100ae3b25f5e5915c0d3f6eda4bd17ce3fbc8fc48418315a936d5305212ca4a550ddb1054206a450d1ffbcdb6281d59402afa8ef  LICENSE"

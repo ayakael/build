@@ -1,0 +1,37 @@
+# Maintainer: Antoine Martin <antoine@ayakael.net>
+
+pkgname=znapzend
+pkgver=0.20.0
+pkgrel=1
+pkgdesc="ZnapZend is a ZFS centric backup tool."
+arch='all'
+url="http://www.znapzend.org/"
+license='GPL'
+depends='perl zfs mbuffer'
+makedepends='perl-dev wget'
+source="https://github.com/oetiker/${pkgname}/releases/download/v${pkgver}/${pkgname}-${pkgver}.tar.gz"
+subpackages="${pkgname}-doc"
+
+prepare() {
+    cd "${srcdir}/${pkgname}-${pkgver}"
+    sed -i 's:@BINDIR@:/usr/bin:' "init/znapzend.sysv.in"
+}
+
+build() {
+    cd "${srcdir}/${pkgname}-${pkgver}"
+    ./configure --prefix="/usr/share/${pkgname}"
+    make
+}
+
+package() {
+    cd "${srcdir}/${pkgname}-${pkgver}"
+    make DESTDIR="${pkgdir}" install
+    mkdir -p "${pkgdir}/usr/bin" "${pkgdir}/etc/init.d" "${pkgdir}/usr/share/man/man1"
+    ln -s "/usr/share/${pkgname}/bin/znapzend" "${pkgdir}/usr/bin/znapzend"
+    ln -s "/usr/share/${pkgname}/bin/znapzendzetup" "${pkgdir}/usr/bin/znapzendzetup"
+    ln -s "/usr/share/${pkgname}/bin/znapzendztatz" "${pkgdir}/usr/bin/znapzendztatz"
+    install -m 644 "init/znapzend.sysv" "${pkgdir}/etc/init.d/znapzend"
+    install -m 644 "man/znapzend.1" "man/znapzendzetup.1" "man/znapzendztatz.1" "${pkgdir}/usr/share/man/man1"
+    chmod 777 "${pkgdir}/usr/share/znapzend/lib/x86_64-linux-thread-multi/auto/List/Util/Util.so"
+}
+sha512sums="d0b7a488412dc9231f7fdf679bef130e2d66bcc3cfd7c64ae74f4cd5cbf7d107e9d5418a5b19b931f488f05fa576d3b049f47b58caea2d71689eb5dad1a31c90  znapzend-0.20.0.tar.gz"

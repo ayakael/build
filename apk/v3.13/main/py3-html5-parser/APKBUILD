@@ -1,0 +1,34 @@
+# Maintainer: Jelle van der Waa <jelle@archlinux.org>
+# Maintainer: Eli Schwartz <eschwartz@archlinux.org>
+
+_pkgname="html5-parser"
+pkgname='py3-html5-parser'
+pkgver=0.4.9
+pkgrel=0
+pkgdesc="Fast C based HTML 5 parsing for python"
+arch='x86_64'
+url="https://github.com/kovidgoyal/${_pkgname}"
+license='Apache'
+checkdepends='py3-beautifulsoup4'
+makedepends='py3-chardet py3-lxml py3-setuptools libxml2-dev python3-dev'
+source="${pkgname}-${pkgver}.tar.gz::${url}/archive/v${pkgver}.tar.gz"
+
+build() {
+    cd "${srcdir}"/${_pkgname}-${pkgver}
+
+    python3 setup.py build
+}
+
+check() {
+    cd "${srcdir}"/${_pkgname}-${pkgver}
+
+    python3 setup.py test
+}
+
+package() {
+    cd "${srcdir}"/${_pkgname}-${pkgver}
+    python3 setup.py install --root="${pkgdir}" --optimize=1 --skip-build
+}
+
+
+sha512sums="31d0499e690c1cfe86fcaabddf4a5842b504706f6d95268dfad4ce80a8b91df6ba779c27dd4fe877232f6664142ed04b9d2af0aff601aa1855f91d9720adf512  py3-html5-parser-0.4.9.tar.gz"

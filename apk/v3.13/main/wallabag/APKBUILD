@@ -1,0 +1,51 @@
+# Maintainer: Antoine Martin <antoine@ayakael.net>
+
+# Based on PKGBUILD by the following:
+# Philipp Schmitt (philipp<at>schmitt<dot>com
+
+pkgname=wallabag
+pkgver=2.4.2
+pkgrel=0
+pkgdesc='Self hostable application for saving web pages'
+arch='noarch'
+url='http://www.wallabag.org/'
+license='MIT'
+depends='php7 php7-gd php7-tidy pcre php7-tokenizer php7-bcmath php7-dom php7-curl php7-session php7-ctype php7-simplexml php7-xml php7-sockets php7-xmlreader composer'
+options='!strip'
+source="https://static.wallabag.org/releases/wallabag-release-${pkgver}.tar.gz"
+builddir="${srcdir}/${pkgver}"
+options="!check"
+
+_USER=nginx
+_GROUP=nginx
+
+build() {
+   return 0
+}
+
+package() {
+    cd "${builddir}"
+
+    # Make directories
+    mkdir -p "${pkgdir}/usr/share/webapps/${pkgname}" "${pkgdir}/var/lib/${pkgname}" "${pkgdir}/etc/${pkgname}"
+
+    # Copy operations
+    cp . -R "${pkgdir}/usr/share/webapps/${pkgname}"
+    mv "${pkgdir}/usr/share/webapps/${pkgname}/app/config/parameters.yml" "${pkgdir}/etc/${pkgname}/"
+    mv "${pkgdir}/usr/share/webapps/${pkgname}/var" "${pkgdir}/var/lib/${pkgname}/"
+    mv "${pkgdir}/usr/share/webapps/${pkgname}/data" "${pkgdir}/var/lib/${pkgname}/"
+
+    # Link operations
+    ln -s "/etc/${pkgname}/parameters.yml" "${pkgdir}/usr/share/webapps/${pkgname}/app/config/parameters.yml"
+    ln -s "/var/lib/${pkgname}/var" "${pkgdir}/usr/share/webapps/${pkgname}/"
+    ln -s "/var/lib/${pkgname}/data" "${pkgdir}/usr/share/webapps/${pkgname}/"
+
+    # Chown operartions
+    chown -R ${_USER}:${_GROUP} "${pkgdir}/etc/${pkgname}"
+    chown -R ${_USER}:${_GROUP} "${pkgdir}/var/lib/${pkgname}"
+    chown -R ${_USER}:${_GROUP} "${pkgdir}/usr/share/webapps/${pkgname}"
+
+    sed -i "${pkgdir}/var/lib/${pkgname}/var/bootstrap.php.cache" -e "s@__DIR__.'/../@'/usr/share/webapps/${pkgname}/@"
+
+}
+sha512sums="641a7e99aadace2e820cd3083555520f4f17a7ac16a6f98136501050be228e83da19466420e14f0850025fd7ff9749e6d3e9a7bc9679c6ecd3c5e0ae49cfdb15  wallabag-release-2.4.2.tar.gz"

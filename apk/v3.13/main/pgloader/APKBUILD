@@ -1,0 +1,46 @@
+# Maintainer: Pedro Filipe <xpecex@outlook.com>
+pkgname=pgloader
+pkgver=3.6.2
+pkgrel=2
+pkgdesc="pgloader is a data loading tool for PostgreSQL, using the COPY command"
+url="https://pgloader.io/"
+arch="x86 x86_64 armv7 aarch64"
+license="PostgreSQL"
+makedepends="sbcl sqlite-libs curl unzip gawk freetds-dev libzip-dev py3-sphinx py3-sphinx_rtd_theme"
+subpackages="$pkgname-doc"
+source="$pkgname-$pkgver.tar.gz::https://github.com/dimitri/pgloader/archive/v$pkgver.tar.gz"
+options="!check !strip" # Test suite requires PostgreSQL and MySQL configured
+
+case "$CTARGET_ARCH" in
+	aarch64)	_DYNSIZE=4096 ;;
+	x86_64)		_DYNSIZE=4096 ;;
+	*)		_DYNSIZE=1048 ;;
+esac
+
+build() {
+	make -j1 DYNSIZE=$_DYNSIZE pgloader
+}
+
+check() {
+	export PGHOST=localhost
+	cd "$builddir/test"
+	make prepare
+	cd "$builddir"
+	make test
+}
+
+doc() {
+	# build docs
+	cd "$builddir/docs"
+	make html
+	mkdir -p "$pkgdir/usr/share/"
+	mv "$builddir/docs/_build/html" "$pkgdir/usr/share/"
+	default_doc
+}
+
+package() {
+	install -Dm755 build/bin/pgloader "$pkgdir/usr/bin/pgloader"
+}
+
+sha512sums="d65ca54610ceeb68505935b21ac364b731cc0c9a9b070e65cac9be00f2d1c386c73f7f1ca1524deefc5cfd36289d040f8babc28547d64bd23bf19c1ea8f527f4  pgloader-3.6.2.tar.gz"
+

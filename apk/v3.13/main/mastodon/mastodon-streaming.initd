@@ -1,0 +1,33 @@
+#!/sbin/openrc-run
+
+name="Mastodon streaming API service"
+root="/usr/share/webapps/mastodon"
+pidfile="/run/mastodon-streaming.pid"
+logfile="/var/log/mastodon/streaming.log"
+
+depend() {
+    use net
+}
+
+start() {
+    ebegin "Starting Mastodon streaming API"
+
+    cd $root
+
+    start-stop-daemon --start \
+        --background --quiet \
+        --chdir "${root}" \
+        --user="mastodon" \
+        --make-pidfile --pidfile="${pidfile}" \
+        --stdout "${logfile}" --stderr "${logfile}" \
+        --exec /usr/bin/env -- NODE_ENV=production PORT=4000 /usr/bin/npm run start 
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping Mastodon streaming API"
+    start-stop-daemon --stop \
+        --pidfile="${pidfile}" \
+    eend $?
+}
+

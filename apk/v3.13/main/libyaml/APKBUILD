@@ -1,0 +1,23 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+pkgname=libyaml
+pkgver=0.2.5
+pkgrel=0
+pkgdesc="YAML 1.1 library"
+arch='x86_64'
+url="https://pyyaml.org/wiki/LibYAML"
+license='MIT'
+source="https://pyyaml.org/download/libyaml/yaml-$pkgver.tar.gz"
+
+build() {
+  cd "$srcdir/yaml-$pkgver"
+  ./configure --prefix=/usr
+  make
+}
+
+package() {
+  cd "$srcdir/yaml-$pkgver"
+  make DESTDIR="$pkgdir" install
+  install -Dm644 License "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
+sha512sums="dadd7d8e0d88b5ebab005e5d521d56d541580198aa497370966b98c904586e642a1cd4f3881094eb57624f218d50db77417bbfd0ffdce50340f011e35e8c4c02  yaml-0.2.5.tar.gz"

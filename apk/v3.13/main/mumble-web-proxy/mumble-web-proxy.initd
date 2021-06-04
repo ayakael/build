@@ -1,0 +1,26 @@
+#!/sbin/openrc-run
+
+name="Mumble web proxy"
+logfile="/var/log/mumble-web-proxy/mumble-web-proxy.log"
+pidfile="/run/mumble-web-proxy.pid"
+
+depend() {
+    use net
+}
+
+start() {
+    ebegin "Starting Mumble web proxy"
+    start-stop-daemon --start --background \
+        --user="mumble" \
+        --make-pidfile --pidfile="${pidfile}" \
+	--stdout "${logfile}" --stderr "${logfile}" \
+	--exec /usr/bin/env -- /usr/bin/mumble-web-proxy --config /etc/mumble-web-proxy.conf
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping Mumble web proxy" 
+    start-stop-daemon --stop \
+        --pidfile=${pidfile} \
+    eend $?
+}

@@ -1,0 +1,39 @@
+# Maintainer: Antoine Martin <antoine.martin@pm.me>
+# Based on PKGBUILD from Lukas Jirkovsky <l.jirkovsky@gmail.com>
+pkgname=cuetools
+pkgver=1.4.1
+pkgrel=0
+pkgdesc="Cue and toc file parsers and utilities"
+arch='x86_64'
+url="https://github.com/svend/cuetools"
+#url="http://developer.berlios.de/projects/cuetools/"
+license='GPL'
+depends='musl'
+makedepends='automake autoconf byacc flex'
+subpackages="$pkgname-doc"
+source="$pkgname-$pkgver.tar.gz::https://github.com/svend/cuetools/archive/${pkgver}.tar.gz"
+builddir="$srcdir/$pkgname-$pkgver"
+
+prepare() {
+  cd "$builddir"
+
+  aclocal
+  autoheader
+  automake --force-missing --add-missing
+  autoconf
+}
+
+build() {
+  cd "$builddir"
+
+  ./configure --prefix=/usr
+  make
+}
+
+package() {
+  cd "$builddir"
+
+  make DESTDIR="$pkgdir" install
+}
+sha512sums="dc81e6ec756f9d040dd913e8f340be136d68619caa24bdec21364f94b4fc0ffcbcf21325c7fd53c9230d6d70a2856b45a32c5ca7f41ec76fa47298bf226d959e  cuetools-1.4.1.tar.gz"
+

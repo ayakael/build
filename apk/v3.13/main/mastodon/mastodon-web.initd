@@ -1,0 +1,29 @@
+#!/sbin/openrc-run
+
+name="Mastodon Web Service"
+root="/usr/share/webapps/mastodon"
+pidfile="/run/mastodon-web.pid"
+logfile="/var/log/mastodon/web.log"
+
+depend() {
+    use net
+}
+
+start() {
+    ebegin "Starting Mastodon web workers"
+    cd $root
+    start-stop-daemon --start --background \
+        --chdir "${root}" \
+        --user="mastodon" \
+        --pidfile="${pidfile}" --make-pidfile \
+	--stdout="${logfile}" --stderr="${logfile}" \
+        --exec /usr/bin/env -- RAILS_ENV=production PORT=3000 bundle exec puma -C config/puma.rb
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping Mastodon web workers"
+    start-stop-daemon --stop \
+        --pidfile=${pidfile} \
+    eend $?
+}

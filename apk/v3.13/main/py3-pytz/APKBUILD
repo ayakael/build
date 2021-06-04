@@ -1,0 +1,29 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+pkgname='py3-pytz'
+pkgver=2020.5
+pkgrel=0
+arch='noarch'
+pkgdesc="Cross platform time zone library for Python"
+url="https://pypi.python.org/pypi/pytz"
+license="MIT"
+depends=python3
+makedepends=python3
+source="${pkgname}-${pkgver}.tar.gz::https://pypi.io/packages/source/p/pytz/pytz-${pkgver}.tar.gz"
+
+check(){
+    cd $srcdir/pytz-$pkgver/pytz/tests
+
+    python3 test_tzinfo.py
+}
+
+package() {
+
+    cd $srcdir/pytz-$pkgver
+
+    python3 setup.py install --root=$pkgdir/
+
+    install -Dm644 LICENSE.txt $pkgdir/usr/share/licenses/$pkgname/LICENSE
+}
+
+sha512sums="0845c0b7cefb8732e3016568b17ae73232fe6537bac6da89cb1bf911ba5786ee1be6b5e3aa8767225291e3a7e9afd5b8e40e4051671a3a006f9e2f71c551e13e  py3-pytz-2020.5.tar.gz"

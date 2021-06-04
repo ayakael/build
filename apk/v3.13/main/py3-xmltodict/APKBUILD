@@ -1,0 +1,22 @@
+# Maintainer: Kyle Keen <keenerd@gmail.com>
+# Contributor: Lex Black <autumn-wind at web dot de>
+# Contributor: PiC0 <guill.p.linux@gmail.com>
+
+pkgname=py3-xmltodict
+pkgver=0.12.0
+pkgrel=1
+pkgdesc="Python module that makes working with XML feel like working with JSON"
+url="https://github.com/martinblech/xmltodict"
+arch='noarch'
+license='MIT'
+depends='python'
+makedepends='py3-setuptools'
+source="xmltodict-${pkgver}.tar.gz::https://files.pythonhosted.org/packages/source/x/xmltodict/xmltodict-$pkgver.tar.gz"
+options=!check
+
+package() {
+  cd "$srcdir/xmltodict-$pkgver"
+  python setup.py install --root="${pkgdir}"
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
+sha512sums="1ec3de3ebd05adbe032ca569a71048e72097c0f5fc864b63f168d661f72d13d0981e6e62bb9ca2ffe925a3b2f7c2fb90a44177427d4bdf68137842342a9cd2c8  xmltodict-0.12.0.tar.gz"

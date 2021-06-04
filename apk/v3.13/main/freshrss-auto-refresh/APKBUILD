@@ -1,0 +1,48 @@
+# Maintainer: Antoine Martin <antoine@ayakael.net>
+pkgname=freshrss-auto-refresh
+pkgver=1.1
+pkgrel=1
+pkgdesc="Automatically refreshes FreshRSS page once in a minute when there is no activity detected."
+url="https://github.com/Eisa01/FreshRSS---Auto-Refresh-Extension"
+arch="noarch"
+license="MIT"
+depends="freshrss"
+makedepends="git"
+source="$pkgname-$pkgver.tar.gz"
+_giturl="https://github.com/Eisa01/FreshRSS---Auto-Refresh-Extension"
+_gittag="master"
+builddir="$srcdir"
+options="!check"
+
+snapshot() {
+	mkdir -p "$srcdir"
+	cd "${SRCDEST:-$srcdir}"
+	if ! [ -d $pkgname.git ]; then
+		git clone $_giturl $pkgname.git || return 1
+		cd $pkgname.git
+	else
+		cd $pkgname.git
+		git fetch || return 1
+	fi
+
+	echo "Checking out"
+	git checkout $_gittag
+	echo "Repo archive"
+	git archive --prefix="$pkgname/" -o ${pkgname}-${pkgver}.tar --format "tar" $_gittag
+    
+   
+	gzip ${pkgname}-${pkgver}.tar -c > "$SRCDEST"/$pkgname-$pkgver.tar.gz
+	ln -s "$SRCDEST"/$pkgname-$pkgver.tar.gz "$startdir"/$pkgname-$pkgver.tar.gz 
+}
+
+build() {
+    return 0
+}
+
+package() {
+	cd "$builddir"
+	mkdir -p "${pkgdir}/usr/share/webapps/freshrss/extensions"
+	cp -R "${pkgname}/xExtension-AutoRefresh" "${pkgdir}/usr/share/webapps/freshrss/extensions/"
+}
+
+sha512sums="d67c224520b1702ea8671ff4d77e2f852d2fb75b581a7d50f9cdf8e99f064389ef5ac8fd4c18c077f9633fe5d051e20d44ff3615cf0dcbf7ff91105c2f12e9e0  freshrss-auto-refresh-1.1.tar.gz"

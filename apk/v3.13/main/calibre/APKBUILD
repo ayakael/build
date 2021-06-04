@@ -1,0 +1,78 @@
+# Maintainer: Antoine Martin <antoine@ayakael.net>
+
+pkgname='calibre' 
+pkgver=4.16.0
+pkgrel=0
+pkgdesc="Ebook management application"
+arch='x86_64'
+url="https://calibre-ebook.com/"
+license='GPL3'
+depends='hunspell hyphen icu jxrlib libmtp libusb libwmf mathjax2 mtdev optipng podofo udisks2 ipython'
+makedepends='rapydscript-ng py2-sip xdg-utils py-apsw py2-beautifulsoup4 py2-cssselect py2-css-parser py2-dateutil py2-dbus py2-dnspython py-feedparser py3-html2text py2-html5-parser py2-lxml py2-markdown py-mechanize py2-msgpack py2-netifaces py2-unrardll py2-pillow py2-psutil py2-pychm py2-pygments py2-qt5 py3-qtwebengine py2-regex py2-ipaddress python2-dev qt5-qtbase-dev'
+# TODO makedepends=qt5-x11extrad
+# TODO depends=qt5-svg
+source="https://download.calibre-ebook.com/${pkgver}/calibre-${pkgver}.tar.xz
+        0001-De-vendor-pychm.patch"
+
+prepare(){
+    cd "$srcdir/${pkgname}-${pkgver}"
+
+    # Desktop integration (e.g. enforce arch defaults)
+    # Use uppercase naming scheme, don't delete config files under fakeroot.
+    sed -e "/import config_dir/,/os.rmdir(config_dir)/d" \
+        -e "s/'ctc-posml'/'text' not in mt and 'pdf' not in mt and 'xhtml'/" \
+        -e "s/^Name=calibre/Name=Calibre/g" \
+        -i  src/calibre/linux.py
+
+    # cherry-picked bits of python2-backports.functools_lru_cache
+    # needed for frozen builds + beautifulsoup4
+    # see https://github.com/kovidgoyal/calibre/commit/b177f0a1096b4fdabd8772dd9edc66662a69e683#commitcomment-33169700
+    rm -r src/backports
+    # biplist is only used on macOS + python2
+    rm -r src/biplist/
+    # devendor pychm now, from the py3 building branch:
+    # https://github.com/kovidgoyal/calibre/commit/959b7e3fafff5faad6ae59263f825b23c7563dd4
+#    patch -p1 -i ../0001-De-vendor-pychm.patch
+
+    cd resources
+
+    # Remove unneeded files
+    rm ${pkgname}-portable.* mozilla-ca-certs.pem
+
+    # use system mathjax
+    rm -r mathjax
+}
+
+build() {
+    cd "$srcdir/${pkgname}-${pkgver}"
+
+    LANG='en_US.UTF-8' python2 setup.py build
+    LANG='en_US.UTF-8' python2 setup.py gui
+    LANG='en_US.UTF-8' python2 setup.py mathjax --path-to-mathjax /usr/share/mathjax2 --system-mathjax
+    LANG='en_US.UTF-8' python2 setup.py rapydscript
+}
+
+package() {
+    cd "$srcdir/${pkgname}-${pkgver}"
+
+    LANG='en_US.UTF-8' python2 setup.py install \
+        --staging-root="${pkgdir}/usr" \
+        --prefix=/usr \
+        --no-postinstall \
+        --bindir=/usr/lib/calibre/bin-py2 \
+        --staging-bindir="${pkgdir}/usr/lib/calibre/bin-py2" \
+        --staging-sharedir="${srcdir}"/temp
+
+    # Compiling bytecode FS#33392
+    # This is kind of ugly but removes traces of the build root.
+    for _file in $(find "${pkgdir}"/usr/lib/ -name '*.py' -print); do
+        _path="$(echo ${_file} | sed "s|${pkgdir}||g")"
+	_destdir="$(dirname ${_path})"
+        python2 -m compileall -d "${_destdir}" "${_file}"
+        python2 -O -m compileall -d "${_destdir}" "${_file}"
+    done
+}
+
+
+sha512sums="96803578c7b609cf146571df38cd9ab75c3fcc6e8b429d7083b4383974161193d544a22c249ad3934c621823a3b1d1bd52e564c6ef70fd4012aae40a1056715b  calibre-4.16.0.tar.xz
+84073554f6e283bf8e336f701c92f72c57431dc34eda53ef7e4c64d6dc51291a23b362a20cc963944ee9ecf2ae0b3e8e9f1dfbdc805f32fe876e85b8410f996c  0001-De-vendor-pychm.patch"

@@ -1,0 +1,45 @@
+# Maintainer: Antoine Martin <antoine@ayakael.net>
+
+pkgname=mattermost 
+pkgver=5.31.0
+pkgrel=0
+pkgdesc="Open source Slack-alternative in Golang and React"
+arch='x86_64'
+url="https://mattermost.com"
+license='AGPL'
+source="https://releases.mattermost.com/${pkgver}/mattermost-${pkgver}-linux-amd64.tar.gz"
+builddir="${srcdir}"
+subpackages="$pkgname-doc"
+
+build() {
+   return 0
+}
+
+package() {
+    cd ${builddir}
+
+    install -dm755 \
+    "$pkgdir"/usr/bin \
+    "$pkgdir"/usr/share/webapps/${pkgname} \
+    "$pkgdir"/etc/${pkgname} \
+    "$pkgdir"/usr/share/doc/"$pkgname"
+
+    cp -a mattermost "$pkgdir"/usr/share/webapps/.
+
+    install -dm755 $pkgdir/usr/share/webapps/$pkgname/client/plugins
+
+    mv "$pkgdir"/usr/share/webapps/$pkgname/config/* "$pkgdir"/etc/$pkgname/.
+    rmdir "$pkgdir"/usr/share/webapps/$pkgname/config
+    ln -s /etc/$pkgname/config "$pkgdir"/usr/share/webapps/$pkgname/config
+
+    sed -e 's@"Directory": ".*"@"Directory": "/var/lib/mattermost/"@g' \
+        -e 's@tcp(dockerhost:3306)@unix(/run/mysqld/mysqld.sock)@g' \
+        -i "$pkgdir"/etc/"$pkgname"/config.json
+
+    mv mattermost/NOTICE.txt mattermost/README.md "$pkgdir"/usr/share/doc/"$pkgname"
+
+    ln -s "/usr/share/webapps/$pkgname/bin/$pkgname" "$pkgdir/usr/bin/$pkgname"
+}
+
+
+sha512sums="a321fb5f51c96f80b2e7d176c5157f3e152c6dddf41b0561a2b07e731b0640b1bc63cc0f673d92cf79d5fd4e925e3dfafafa838433a5dfb3a03057dadba3f77b  mattermost-5.31.0-linux-amd64.tar.gz"
