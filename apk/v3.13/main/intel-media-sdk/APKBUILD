@@ -1,0 +1,76 @@
+# Maintainer: Daniel Bermond <dbermond@archlinux.org>
+
+pkgname=intel-media-sdk
+pkgver=21.1.3
+pkgrel=0
+pkgdesc='API to access hardware-accelerated video on Intel Gen graphics hardware platforms'
+arch='x86_64'
+url='https://software.intel.com/en-us/media-sdk/'
+license='MIT'
+makedepends='
+	libdrm-dev
+	libva-dev
+	wayland-dev
+	intel-media-driver-dev
+	cmake
+	libpciaccess-dev
+	libx11-dev
+	libxcb-dev
+	python3'
+
+source="https://github.com/Intel-Media-SDK/MediaSDK/archive/intel-mediasdk-${pkgver}.tar.gz
+        https://github.com/Intel-Media-SDK/MediaSDK/commit/f6925886f27a39eed2e43c5b7b6c342d00f7a970.patch
+	0001-Fixed-build-for-musl.patch"
+
+subpackages="libmfx:libmfx"
+builddir="${srcdir}/MediaSDK-intel-mediasdk-${pkgver}"
+
+build() {
+    cd "${builddir}"
+    cmake -B build \
+        -DBUILD_ALL:BOOL='ON' \
+        -DBUILD_TOOLS:BOOL='ON' \
+        -DCMAKE_BUILD_TYPE:STRING='None' \
+        -DCMAKE_INSTALL_PREFIX:PATH='/usr' \
+	-DCMAKE_INSTALL_LIBDIR:PATH='lib' \
+        -DENABLE_ITT:BOOL='OFF' \
+        -DENABLE_OPENCL:BOOL='OFF' \
+        -DENABLE_WAYLAND:BOOL='ON' \
+        -DENABLE_X11_DRI3:BOOL='ON' \
+        -Wno-dev
+    make -C build
+}
+
+check() {
+    cd "${builddir}"
+    make -C build test
+}
+
+package() {
+    depends="libdrm libva wayland libmfx=${pkgver} intel-media-driver"
+    cd "${builddir}"
+    
+    make -C build DESTDIR="$pkgdir" install
+    ln -s ../share/mfx/samples/libcttmetrics.so "${pkgdir}/usr/lib/libcttmetrics.so"
+    install -D -m644 "${builddir}/LICENSE" -t "${pkgdir}/usr/share/licenses/${pkgname}"
+    
+    mkdir -p "${srcdir}"/libmfx/include "${srcdir}"/libmfx/lib/pkgconfig 
+    mv "${pkgdir}/usr/include/mfx" "${srcdir}"/libmfx/include
+    mv "${pkgdir}/usr/lib/libmfx.so"* "${srcdir}"/libmfx/lib
+    mv "${pkgdir}"/usr/lib/pkgconfig/mfx.pc "${srcdir}"/libmfx/lib/pkgconfig
+    mv "${pkgdir}"/usr/lib/pkgconfig/libmfx.pc  "${srcdir}"/libmfx/lib/pkgconfig
+    rm -r "${pkgdir}/usr/include"
+}
+
+libmfx() {
+    pkgdesc='Intel Media SDK dispatcher library'
+    depends='gcc'
+    cd "${builddir}"
+    
+    mkdir -p "${subpkgdir}"
+    mv "${srcdir}"/libmfx "${subpkgdir}"/usr
+    install -D -m644 "${builddir}"/LICENSE -t "${subpkgdir}/usr/share/licenses/${pkgname}"
+}
+sha512sums="d840db69da285302c1afdcf305c32ec88029c5951af6d2570404b118a9cc8e02345082f5116da496b1b0fdedfa435bac1c7968fbf8e7c9d12e2e5ef687784eda  intel-mediasdk-21.1.3.tar.gz
+c1d56964982b2fc6b5fbc128080d9b5607dbac4470111b62bcc8b52789a40a23dd8c59ed7757e6e8e238db9b828c9afd68060b539ad7800bde42f6e2fc22d854  f6925886f27a39eed2e43c5b7b6c342d00f7a970.patch
+6049eebb5f1cc2068e50cb3ed672d29f54a53924f435b88e402905f3664bf25d52556547ff68163c67892bc56e60c793bd18092b21a19f1fb0f27b80f18d4dfd  0001-Fixed-build-for-musl.patch"

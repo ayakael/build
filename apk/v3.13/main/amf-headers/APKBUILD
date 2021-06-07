@@ -1,0 +1,55 @@
+# Maintainer: Maxime Gauduin <alucryd@archlinux.org>
+# Contributor: Daniel Bermond <dbermond@archlinux.org>
+
+pkgname=amf-headers
+pkgver=1.4.18
+pkgrel=0
+pkgdesc='Header files for AMD Advanced Media Framework'
+arch='noarch'
+url=https://github.com/GPUOpen-LibrariesAndSDKs/AMF/
+license='MIT'
+makedepends='git'
+_gittag=7a83513f8a0c9f2b2b6270dbb294cd942d27a499
+_giturl=https://github.com/GPUOpen-LibrariesAndSDKs/AMF
+source="${pkgname}-${pkgver}.tar.gz"
+options="!check"
+
+builddir="$srcdir/$pkgname"
+
+snapshot() {
+        mkdir -p "$srcdir"
+        cd "${srcdir}"
+        if ! [ -d $pkgname.git ]; then
+                git clone $_giturl $pkgname.git || return 1
+                cd $pkgname.git
+        else
+                cd $pkgname.git
+                git fetch || return 1
+        fi
+
+        echo "Checking out"
+        git checkout $_gittag
+        echo "Repo archive"
+        git archive --prefix="$pkgname/" -o $pkgname.tar --format "tar" $_gittag
+
+        gzip $pkgname.tar -c > "$SRCDEST"/$pkgname-$pkgver.tar.gz
+        ln -s "$SRCDEST"/$pkgname-$pkgver.tar.gz "$startdir"/$pkgname-$pkgver.tar.gz 
+}
+
+
+pkgver() {
+  cd "$builddir"
+
+  git describe --tags | sed 's/^v//'
+}
+
+package() {
+  cd "${builddir}"
+  install -dm 755 "${pkgdir}"/usr/include
+  mkdir "${pkgdir}/usr/include/AMF"
+  cp -r amf/public/include/* "${pkgdir}"/usr/include/AMF/.
+  install -Dm 644 LICENSE.txt -t "${pkgdir}"/usr/share/licenses/amf-headers/
+}
+
+# vim: ts=2 sw=2 et:
+sha512sums="2133612498444877f4aefeadd8d1aa0aa960999f0cb093b1a67bbc7d5c2633424fe6ca4ef4c967c1fa03033de3c926bcbad3915693339be4d08d21df4a4c2b77  amf-headers-1.4.18.tar.gz"

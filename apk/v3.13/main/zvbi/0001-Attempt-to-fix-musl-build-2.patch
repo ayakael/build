@@ -1,0 +1,24 @@
+From cf1a8087d60f24d424712dc3ee26d969dc74f2c1 Mon Sep 17 00:00:00 2001
+From: "build@apk-groulx" <build@apk-groulx.praxis>
+Date: Sun, 6 Jun 2021 22:49:22 +0000
+Subject: [PATCH] Attempt to fix musl build 2
+
+---
+ contrib/atsc-cc.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/contrib/atsc-cc.c b/contrib/atsc-cc.c
+index 50214ef..4d26107 100644
+--- a/contrib/atsc-cc.c
++++ b/contrib/atsc-cc.c
+@@ -65,6 +65,7 @@
+ /* Linux DVB driver interface. */
+ #include "src/dvb/dmx.h"
+ #include "src/dvb/frontend.h"
++#include <stddef.h>
+ 
+ #undef PROGRAM
+ #define PROGRAM "ATSC-CC"
+-- 
+2.30.2
+

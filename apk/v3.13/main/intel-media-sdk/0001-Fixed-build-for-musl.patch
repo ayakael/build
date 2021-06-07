@@ -1,0 +1,40 @@
+From 785d96be2c3be8c96c8dc3f8275bae435cf1cd3b Mon Sep 17 00:00:00 2001
+From: "build@apk-groulx" <build@apk-groulx.praxis>
+Date: Sun, 6 Jun 2021 20:36:23 +0000
+Subject: [PATCH] Fixed build for musl
+
+---
+ tools/tracer/tracer/tracer_linux.cpp | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/tools/tracer/tracer/tracer_linux.cpp b/tools/tracer/tracer/tracer_linux.cpp
+index bea1c070..14d7f07b 100644
+--- a/tools/tracer/tracer/tracer_linux.cpp
++++ b/tools/tracer/tracer/tracer_linux.cpp
+@@ -78,9 +78,9 @@ mfxStatus MFXInit(mfxIMPL impl, mfxVersion *ver, mfxSession *session)
+             Log::WriteLog(context.dump_mfxStatus("status", MFX_ERR_MEMORY_ALLOC));
+             return MFX_ERR_MEMORY_ALLOC;
+         }
+-        loader->dlhandle = dlopen(g_mfxlib, RTLD_NOW|RTLD_LOCAL|RTLD_DEEPBIND);
++        loader->dlhandle = dlopen(g_mfxlib, RTLD_NOW|RTLD_LOCAL);
+         if(!loader->dlhandle)
+-            loader->dlhandle = dlopen(g_mfxlib_in_dir, RTLD_NOW|RTLD_LOCAL|RTLD_DEEPBIND);
++            loader->dlhandle = dlopen(g_mfxlib_in_dir, RTLD_NOW|RTLD_LOCAL);
+         if (!loader->dlhandle){
+             Log::WriteLog(context.dump("ver", ver));
+             Log::WriteLog(context.dump("session", *session));
+@@ -184,9 +184,9 @@ mfxStatus MFXInitEx(mfxInitParam par, mfxSession *session)
+             Log::WriteLog(context.dump_mfxStatus("status", MFX_ERR_MEMORY_ALLOC));
+             return MFX_ERR_MEMORY_ALLOC;
+         }
+-        loader->dlhandle = dlopen(g_mfxlib, RTLD_NOW|RTLD_LOCAL|RTLD_DEEPBIND);
++        loader->dlhandle = dlopen(g_mfxlib, RTLD_NOW|RTLD_LOCAL);
+         if(!loader->dlhandle)
+-            loader->dlhandle = dlopen(g_mfxlib_in_dir, RTLD_NOW|RTLD_LOCAL|RTLD_DEEPBIND);
++            loader->dlhandle = dlopen(g_mfxlib_in_dir, RTLD_NOW|RTLD_LOCAL);
+         if (!loader->dlhandle){
+             Log::WriteLog(context.dump("par", par));
+             Log::WriteLog(context.dump("session", *session));
+-- 
+2.30.2
+
