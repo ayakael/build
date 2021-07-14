@@ -6,8 +6,8 @@ After=local-fs.target network.target multi-user.target
 Type=forking
 ExecStart=/usr/bin/papermc start
 ExecStop=/usr/bin/papermc stop
-User=papermc
-Group=papermc
+User=craftbukkit
+Group=craftbukkit
 
 [Install]
 WantedBy=multi-user.target

@@ -6,7 +6,7 @@
 
 pkgname=yadm
 pkgver=3.1.0
-pkgrel=0
+pkgrel=3
 pkgdesc="Yet Another Dotfiles Manager"
 arch='noarch'
 url="https://github.com/TheLocehiliosan/yadm"
@@ -14,7 +14,8 @@ license='GPL3'
 depends='gnupg py3-envtpl bash'
 source="$pkgname-$pkgver.tar.gz::https://github.com/TheLocehiliosan/${pkgname}/archive/${pkgver}.tar.gz"
 builddir="$srcdir/$pkgname-${pkgver}"
-subpackages="$pkgname-doc"
+subpackages="$pkgname-doc $pkgname-bash-completion $pkgname-zsh-completion"
+options="!check"
 
 
 package(){

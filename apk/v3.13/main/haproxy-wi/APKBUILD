@@ -1,8 +1,8 @@
 # Maintainer: Antoine Martin <dev@ayakael.net>
 
 pkgname=haproxy-wi
-pkgver=4.5.9
-pkgrel=2
+pkgver=5.1.1
+pkgrel=0
 pkgdesc="Web interface for managing HAProxy, Nginx and Keepalived servers"
 arch='noarch'
 url="https://github.com/Aidaho12/haproxy-wi"
@@ -14,7 +14,7 @@ py3-ldap3 python3-dev libpq libxml2-dev libxslt-dev libldap
 libsasl libffi-dev pkgconfig nmap"
 source="$pkgname-$pkgver.tar.gz"
 _giturl="https://github.com/Aidaho12/haproxy-wi"
-_gittag="7c575fe0f8676c47f913bfe47166088ad3740a2b"
+_gittag="0f02f84588bd15c5c923e0e405d8f32a19321b2a"
 builddir="$srcdir/$pkgname"
 options="!check"
 
@@ -47,4 +47,4 @@ package() {
 	install -Dm755 -d "${_instdir}"/app/certs "${_instdir}"/keys "${_instdir}"/log "${pkgdir}"/etc/logrotate.d
 	cp "${_instdir}"/config_other/logrotate/* "${pkgdir}"/etc/logrotate.d/.
 }
-sha512sums="7d8462de5cebe3c9f60378261a2508a5f3cbf99fc55e8ebd38adb4690659a57387614e45f2f29f9c7f486314b0bceea80591d334cf6cef24b8ea56e941a05905  haproxy-wi-4.5.9.tar.gz"
+sha512sums="59405d95aaa3229e6525499b34ad7590d467b361021bc615db9cf13854f386c66b0595d152c313d90ee66d238ff16e709b4432c13b0f33b324d4c22ce1b729de  haproxy-wi-5.1.1.tar.gz"

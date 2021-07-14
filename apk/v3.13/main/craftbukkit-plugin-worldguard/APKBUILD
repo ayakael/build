@@ -1,0 +1,19 @@
+# Maintainer: Antoine Martin (ayakael) <dev@ayakael.net>
+pkgname=craftbukkit-plugin-worldedit
+pkgver=7.0.6
+_pkgver=${pkgver}-beta1
+pkgrel=0
+pkgdesc="WorldGuard lets you and players guard areas of land against griefers and undesirables"
+options=!check
+arch='noarch'
+url="https://dev.bukkit.org/projects/worldguard"
+license="GPL-3.0"
+depends="craftbukkit>=1.17.0 craftbukkit<=1.17.1"
+source="https://media.forgecdn.net/files/3380/93/worldguard-bukkit-${_pkgver}-dist.jar"
+noextract="worldguard-bukkit-${_pkgver}-dist.jar"
+
+package() {
+  install -Dm644 "${srcdir}"/worldguard-bukkit-${_pkgver}-dist.jar "$pkgdir/var/lib/craftbukkit/plugins/WorldGuard.jar"
+  chown craftbukkit:craftbukkit $pkgdir/var/lib/craftbukkit/plugins/WorldGuard.jar
+}
+sha512sums="edef1e4c540fce2b3a7cf6f5e9b8fbb33668ab06e518e1522ac41cd425a6ba4a1cd67bd673624924a585ec61a556ac649ecc50557046af814e9ee1028f5fc4a2  worldguard-bukkit-7.0.6-beta1-dist.jar"

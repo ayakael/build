@@ -1,15 +1,16 @@
 # Maintainer: Antoine Martin <antoine@ayakael.net>
 
 pkgname=freshrss 
-pkgver=1.18.0
-pkgrel=1
+pkgver=1.18.1
+pkgrel=0
 pkgdesc="FreshRSS is a self-hosted RSS feed aggregator"
 arch='noarch'
 url="http://freshrss.org"
 license='AGPL'
-depends='nginx php7 php7-fileinfo php7-curl php7-dom php7-xml php7-session php7-ctype php7-pdo_mysql php7-json php7-gmp php7-intl php7-mbstring php7-iconv php7-zip php7-zlib php7-idn'
+depends='nginx php7 php7-fileinfo php7-curl php7-dom php7-xml php7-session php7-ctype php7-pdo_mysql php7-json php7-gmp php7-intl php7-mbstring php7-iconv php7-zip php7-zlib'
 source="https://github.com/FreshRSS/FreshRSS/archive/${pkgver}.zip"
 builddir="${srcdir}/FreshRSS-${pkgver}"
+options='!check'
 
 build() {
    return 0
@@ -27,4 +28,4 @@ package() {
 }
 
 
-sha512sums="b5ac5b92e9cc4608ff6018a962e16e26bd3c2bf97c00aab992283939a3331927bea922090bc2d2e848dfa4f43a783017679d176bc708156e9d4a2b62acc5cc55  1.18.0.zip"
+sha512sums="d18bca33c6c4626806bc027111aa1da126e4198dcba27e276c1c1c17a9cc27bfac83a3b4d2bc0644721a3b905b6b239cbac734ec2c052974785258103cabd741  1.18.1.zip"

@@ -1,0 +1,32 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+pkgname=firefly-iii-plaid-connector
+pkgver=0.3.1
+pkgrel=3
+pkgdesc='The Free Software Media System'
+arch='i686 x86_64'
+url='https://gitlab.com/GeorgeHahn/firefly-plaid-connector'
+license='MIT'
+options="!strip !check"
+depends='firefly-iii'
+makedepends='dotnet-sdk'
+source="firefly-plaid-connector-$pkgver.tar.gz::https://gitlab.com/GeorgeHahn/firefly-plaid-connector/-/archive/v${pkgver}/firefly-plaid-connector-v${pkgver}.tar.gz"
+builddir="${srcdir}/firefly-plaid-connector-v${pkgver}"
+
+build(){
+  cd "${builddir}"
+
+  # Disable dotnet telemetry
+  export DOTNET_CLI_TELEMETRY_OPTOUT=1
+
+  # publish app and libraries
+  dotnet publish --configuration Release --output "$PWD"/publish
+}
+
+package() {
+  mkdir -p "${pkgdir}"/usr/lib
+  cp -r "${builddir}"/publish "$pkgdir"/var/lib/firefly-plaid-connector
+
+}
+sha512sums="57a64673bf2e8cae00cb215e1dc90eb02bddf50010835a9318f55f83313c00f19d6c8d8af65e2739b0fb6fd4522a2327941bdc7d11cbe59c9537ff6c1575765e  firefly-plaid-connector-0.3.1.tar.gz"
+

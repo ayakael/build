@@ -1,0 +1,18 @@
+# Maintainer: Antoine Martin (ayakael) <dev@ayakael.net>
+pkgname=craftbukkit-plugin-customtime
+pkgver=2.0
+pkgrel=0
+pkgdesc="CustomTime is a simple plugin used to control the day/night cycle. You can speed up or slow down time any way you like."
+options=!check
+arch='noarch'
+url="https://dev.bukkit.org/projects/customtime"
+license="CC-BY-NC-4.0"
+depends="craftbukkit>=1.16.1 craftbukkit<=1.17.1"
+source="${pkgname}-${pkgver}.jar::https://media.forgecdn.net/files/3002/701/CustomTime-${pkgver}.jar"
+noextract="${pkgname}-${pkgver}.jar"
+
+package() {
+  install -Dm644 "${srcdir}"/${pkgname}-${pkgver}.jar "$pkgdir/var/lib/craftbukkit/plugins/CustomTime.jar"
+  chown craftbukkit:craftbukkit "$pkgdir"/var/lib/craftbukkit/plugins/CustomTime.jar
+}
+sha512sums="f8e2202b3cff635223d90a783d655fc04b468bf1c5e351a132dd39182322bf12381b158646d0f264237e6a33a9cb0c81e1fc8bffe01a21dc51f9edb7546f53ea  craftbukkit-plugin-customtime-2.0.jar"

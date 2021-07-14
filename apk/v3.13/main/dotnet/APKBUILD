@@ -1,13 +1,15 @@
- 
-# Maintainer: Maxime Gauduin <alucryd@archlinux.org>
-# Contributor: Kristian Mosegaard <kristian@mosen.me>
-# Contributor: Max Liebkies <mail@maxliebkies.de>
-# Contributor: Krzysztof Bogacki <krzysztof.bogacki@leancode.pl>
+# Maintainer: Antoine Martin (ayakael) <dev@ayakael.net>
+
+# Based on Archlinux PKGBUILD by:
+# Maxime Gauduin <alucryd@archlinux.org>
+# Kristian Mosegaard <kristian@mosen.me>
+# Max Liebkies <mail@maxliebkies.de>
+# Krzysztof Bogacki <krzysztof.bogacki@leancode.pl>
 
 pkgname=dotnet
 pkgdesc='The .NET Core SDK'
-pkgver=5.0.6
-pkgrel=1
+pkgver=5.0.7
+pkgrel=0
 arch='x86_64'
 url=https://www.microsoft.com/net/core
 license='MIT'
@@ -19,6 +21,8 @@ makedepends='
   icu-dev
   inetutils-syslogd
   krb5-dev
+  dotnet-sdk
+  dotnet-runtime
   libgit2-dev
   libunwind-dev
   libxml2-dev
@@ -40,75 +44,89 @@ makedepends='
 #  libstdc++zlib
 #'
 subpackages="$pkgname-sdk:sdk $pkgname-host:host $pkgname-runtime:runtime aspnet-runtime:aspnet_runtime:noarch netstandard-targeting-pack:netstandard_targeting_pack:noarch $pkgname-targeting-pack:targeting_pack aspnet-targeting-pack:aspnet_targeting_pack:noarch" 
-_gittag=a8f12771179965da9f48646ded87068d379563b9
+_gittag=v${pkgver}-runtime
 _giturl=https://github.com/dotnet/source-build
 source="
-  $pkgname-$pkgver.tar.gz
-  dotnet.sh
-  9999-runtime-link-order.patch
-  9999-sdk-telemetry-optout.patch
-  9999-Fix-build-on-Alpine-edge-45352.patch
-  9999-Fix-last-version-digit-present-on-alpine-non-portable.patch
-  9999-Fixed-problematic-version-of-ApplicationInsights-dot.patch
-  9999-fixed-net40-location.patch
+  $pkgname-$pkgver.git.zip
   https://dotnet.microsoft.com/download/dotnet/scripts/v1/dotnet-install.sh
+  dotnet.sh
+  runtime_link-order.patch
+  runtime_alpine-non-portable-rid-fix.patch
+  sdk_telemetry-optout.patch
+  applications-insights_fix-net40-location.patch
+  build_applicationinsights-alternative-source.patch
 "
+
 builddir="$srcdir/$pkgname"
 
 snapshot() {
-	mkdir -p "$srcdir"
-	cd "${srcdir}"
-	if ! [ -d $pkgname.git ]; then
-		git clone $_giturl $pkgname.git || return 1
-		cd $pkgname.git
-	else
-		cd $pkgname.git
-		git fetch || return 1
-	fi
+        mkdir -p "$srcdir"
+        cd "${srcdir}"
+        if ! [ -d $pkgname.git ]; then
+                git clone $_giturl $pkgname.git || return 1
+                cd $pkgname.git
+        else
+                cd $pkgname.git
+                git fetch || return 1
+        fi
 
-	echo "Checking out"
-	git checkout $_gittag
-	echo "Repo archive"
-	git archive --prefix="$pkgname/" -o $pkgname.tar --format "tar" $_gittag
+        echo "Repo archive"
+        mkfifo $pkgname-$pkgver.git
+        git bundle create - $_gittag > $pkgname-$pkgver.git &
+        zip --fifo "${SRCDEST}"/$pkgname-$pkgver.git.zip $pkgname-$pkgver.git
+        rm $pkgname-$pkgver.git
 
-	gzip $pkgname.tar -c > "$SRCDEST"/$pkgname-$pkgver.tar.gz
-	ln -s "$SRCDEST"/$pkgname-$pkgver.tar.gz "$startdir"/$pkgname-$pkgver.tar.gz 
+        ln -s "$SRCDEST"/$pkgname-$pkgver.git.zip "$startdir"/$pkgname-$pkgver.git.zip
+}
+
+unpack() {
+  default_unpack
+  cd "${srcdir}"
+  git clone $pkgname-$pkgver.git $pkgname --branch $_gittag 1>/dev/null 2>&1
 }
 
 
 prepare() {
-  cd "${builddir}"
-  msg "Settings up dotnet bootstrap"
-  mkdir runtime
-  mkdir bootstrap
+  local i failed=                                        
+  [ -n "$builddir" -a -d "$builddir" ] && cd "$builddir"
 
-  bash $srcdir/dotnet-install.sh -c Current --install-dir ./
-  bash $srcdir/dotnet-install.sh -c 3.1 --install-dir . --runtime dotnet
-
-  patch -p1 < "${srcdir}"/9999-Fixed-problematic-version-of-ApplicationInsights-dot.patch
-
-  [ -d patches/runtime ] || mkdir patches/runtime
-  cp "$srcdir"/9999-runtime-link-order.patch patches/runtime/.
-  cp "$srcdir"/9999-Fix-build-on-Alpine-edge-45352.patch patches/runtime/.
-  cp "$srcdir"/9999-Fix-last-version-digit-present-on-alpine-non-portable.patch patches/runtime/.
-  [ -d patches/sdk ] || mkdir patches/sdk
-  cp "$srcdir"/9999-sdk-telemetry-optout.patch patches/sdk/.
-  [ -d patches/application-insights ] || mkdir patches/application-insights
-  cp "$srcdir"/9999-fixed-net40-location.patch patches/application-insights/.
+  msg "Settings up bootstrap SDK"
+  eng/common/dotnet-install.sh -runtime dotnet -version 3.1.1
+  bash .dotnet/dotnet-install.sh -c Current --install-dir ./
+  bash .dotnet/dotnet-install.sh -c 3.1 --install-dir . --runtime dotnet
 
   # disable warnings
   sed -i 's|skiptests|skiptests ignorewarnings|' repos/runtime.common.props
+  export SOURCE_BUILD_SKIP_SUBMODULE_CHECK=1
 
-  # To simulate git directory for DARC
-  mkdir -p .git/objects .git/refs
-  echo "${_gittag}" > .git/HEAD
-  touch .git/patched-refs .git/index
+  if ! have_patches; then
+    return 0
+  fi
+  [ -d "$builddir" ] || { error "Is \$builddir set correctly?"; return 1; }
 
-# TODO Why does /var/build/build/apk/v3.13/main/dotnet-sdk/src/dotnet/artifacts/src/sdk.b8025906f7463b6e477893c81238dc7003b353a3/artifacts/bin/redist/Release/dotnet/artifacts/src/sdk.b8025906f7463b6e477893c81238dc7003b353a3/artifacts/bin/redist/Release/dotnet/artifacts/src/ApplicationInsights-dotnet.53b80940842204f78708a538628288ff5d741a1d/src/Core/Managed/Net40/Utils.cs not appear? It's in Shared, though.
-#   cp Shared/* net45/. -R 
-# 	cp Shared/* netstandard1.3/. -R
-
-
+  msg "Deploying patches"
+  for i in $source; do
+    case ${i%::*} in
+      build_*.patch) 
+        patch ${patch_args:--p1} -i "$srcdir/$(filename_from_uri $i)" || failed="$failed $i"
+      ;;           
+      *.patch)              
+        local _package=$(echo ${i} | sed 's|_.*||')
+        local _patch=$(echo ${i} | sed "s|${_package}_||")
+        echo "cp $_patch -> $_package"
+        [ -d patches/$_package ] || mkdir patches/$_package	
+        cp "$srcdir"/"$i" patches/${_package}/${_patch}
+      ;;
+    esac                                          
+  done                                               
+  if [ -z "$failed" ]; then                             
+    return 0                                                
+  fi                                                        
+  error "The following patches failed to apply:"
+  for i in $failed; do                                                                                                                                                       
+    printf "  %s\n" "$i"
+  done
+  return 1
 }
 
 pkgver() {
@@ -121,10 +139,8 @@ pkgver() {
 }
 
 build() {
-  cd "$builddir"
-
-  export SOURCE_BUILD_SKIP_SUBMODULE_CHECK=1
-
+  cd "${builddir}"
+  msg "Building $pkgname-$pkgver"
   ./build.sh \
     --with-sdk ../dotnet \
     /p:ArchiveDownloadedPackages=true \
@@ -255,12 +271,11 @@ aspnet_targeting_pack() {
 }
 
 # vim: ts=2 sw=2 et:
-sha512sums="c53a173cdd48d2e25905cd1f15c930965df8edff311ad267144b1fcc5a9cc06e2e42c7e630f12c5c75cfff19488a9217d9fabb88ac112a0f6feed5c62ea65024  dotnet-5.0.6.tar.gz
-e61b9e3e5a2305646a616d598378230c9755c5dd5363692cc363f8f4add3807563c324dd86f3a7ae9d358c82d730608e7b293935a2b6c81c0c0f62d752a0a1cf  dotnet.sh
-ad57d02371d351106e043fa104e31afbb0d6799e7ce0ea1a26f585abbfbab7bcba734c7e70491c4af5bfbed965a9ed3235cf4bc1019f504baf482518193b10a7  9999-runtime-link-order.patch
-c96700138ea919c169c3a394f1bf9548c7f86b1ba42b193d6e7bb0a1e2bd6f7f202befbc61246a8720181cd40e1f7fa36a6c208eb19b03a23e21994136fb2507  9999-sdk-telemetry-optout.patch
-025b297e81130e6f46dfa755cfd35c3756ef148a48adcc99511d95b1ec8eeede3561f31bbdf6b16cb294da3642298c9353ba07e9728c9c60fe9c3e0f2e2b4ed4  9999-Fix-build-on-Alpine-edge-45352.patch
-944461da9ed50d536195ab3572b15fdfa74713344a4ca5e31bed627f09fbf328dd0d1f66599553d474e766cacdba7146c701180810383245fcdce1aba39bfef3  9999-Fix-last-version-digit-present-on-alpine-non-portable.patch
-58a3e93e5fb6247569c291f86db127cbbc6cc6842eaf0973c2a211d4806f08dcabd9781b7da567088d820a337d58d6375230ade991dcc77e170266675c4a97e5  9999-Fixed-problematic-version-of-ApplicationInsights-dot.patch
-0469d571d0f7634d3794761f04e1cbff9d27d642d134a11a13560574280e5cab6f366eb8820e61a449eca99470fdea8d9f6a7d97b633059b2fe25257ed1579e6  9999-fixed-net40-location.patch
-ecab4809e617e9cd30940b1c1a700e16b37b5974c850a60da7f1a25bf81516850e4533ef39d2d8786381e0e4e325d3b53fbb2377ecaa6c0813bb00fc1c92b784  dotnet-install.sh"
+sha512sums="a9603309bb2dcdab89177f19e488c6ae268ae6d1d79ac8db5fd84508f4917e24aa388a658afaec53e2a4aee2520d6d4c1fff8e1f61aa8ef7f3465305d9a760ae  dotnet-5.0.7.git.zip
+ecab4809e617e9cd30940b1c1a700e16b37b5974c850a60da7f1a25bf81516850e4533ef39d2d8786381e0e4e325d3b53fbb2377ecaa6c0813bb00fc1c92b784  dotnet-install.sh
+f58bd83b709dcb4b0b67830756069c34258a167b33cb290cbf30f21d69d75402d38e013fd7bbf00640fe19e397f78df6ff787cf8484ee8967d5b8809f033eafb  dotnet.sh
+ad57d02371d351106e043fa104e31afbb0d6799e7ce0ea1a26f585abbfbab7bcba734c7e70491c4af5bfbed965a9ed3235cf4bc1019f504baf482518193b10a7  runtime_link-order.patch
+944461da9ed50d536195ab3572b15fdfa74713344a4ca5e31bed627f09fbf328dd0d1f66599553d474e766cacdba7146c701180810383245fcdce1aba39bfef3  runtime_alpine-non-portable-rid-fix.patch
+c96700138ea919c169c3a394f1bf9548c7f86b1ba42b193d6e7bb0a1e2bd6f7f202befbc61246a8720181cd40e1f7fa36a6c208eb19b03a23e21994136fb2507  sdk_telemetry-optout.patch
+0469d571d0f7634d3794761f04e1cbff9d27d642d134a11a13560574280e5cab6f366eb8820e61a449eca99470fdea8d9f6a7d97b633059b2fe25257ed1579e6  applications-insights_fix-net40-location.patch
+58a3e93e5fb6247569c291f86db127cbbc6cc6842eaf0973c2a211d4806f08dcabd9781b7da567088d820a337d58d6375230ade991dcc77e170266675c4a97e5  build_applicationinsights-alternative-source.patch"

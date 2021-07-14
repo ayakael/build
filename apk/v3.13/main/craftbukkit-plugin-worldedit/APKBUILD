@@ -1,0 +1,19 @@
+# Maintainer: Antoine Martin (ayakael) <dev@ayakael.net>
+pkgname=craftbukkit-plugin-worldedit
+pkgver=7.2.6
+_pkgver=${pkgver}-beta-01
+pkgrel=0
+pkgdesc="WorldEdit is an easy-to-use in-game Minecraft map editor" 
+options=!check
+arch='noarch'
+url="https://media.forgecdn.net/files/3379/705/worldedit-bukkit-7.2.6-beta-01.jar"
+license="GPL-3.0"
+depends="craftbukkit>=1.13.2 craftbukkit<=1.17.1"
+source="https://media.forgecdn.net/files/3379/705/worldedit-bukkit-${_pkgver}.jar"
+noextract="worldedit-bukkit-${_pkgver}.jar"
+
+package() {
+  install -Dm644 "${srcdir}"/worldedit-bukkit-${_pkgver}.jar "$pkgdir/var/lib/craftbukkit/plugins/WorldEdit.jar"
+  chown craftbukkit:craftbukkit $pkgdir/var/lib/craftbukkit/plugins/WorldEdit.jar
+}
+sha512sums="6c6fae144b672a578fde5bcf8e950a6b2dec70b559a44a4389d4847e54f5a1a9e6b9abe66318262df1766b5e53a622377a23310c40aaa9594f135d01e36cc708  worldedit-bukkit-7.2.6-beta-01.jar"

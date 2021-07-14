@@ -1,0 +1,50 @@
+# Maintainer: Antoine Martin <antoine@ayakael.net>
+pkgname=freshrss-mobilescrollmenu
+pkgver=0.2
+pkgrel=1
+pkgdesc="utomatically hides the header menu on mobile phones, when scrolling down and shows it when scrolling up"
+url="https://github.com/FreshRSS/Extensions"
+arch="noarch"
+license="MIT"
+depends="freshrss"
+makedepends="git"
+source="$pkgname-$pkgver.tar.gz"
+_giturl="https://github.com/langfeld/FreshRSS-extensions"
+_gittag="d02b2cb89f5ad16a9ee10c8eac578ead21c8c91d"
+builddir="$srcdir"
+options="!check"
+
+snapshot() {
+	mkdir -p "$srcdir"
+	cd "${SRCDEST:-$srcdir}"
+	if ! [ -d $pkgname.git ]; then
+		git clone $_giturl $pkgname.git || return 1
+		cd $pkgname.git
+	else
+		cd $pkgname.git
+		git fetch || return 1
+	fi
+
+	echo "Checking out"
+	git checkout $_gittag
+	echo "Repo archive"
+	git archive --prefix="$pkgname/" -o ${pkgname}-${pkgver}.tar --format "tar" $_gittag
+    
+   
+	gzip ${pkgname}-${pkgver}.tar -c > "$SRCDEST"/$pkgname-$pkgver.tar.gz
+	ln -s "$SRCDEST"/$pkgname-$pkgver.tar.gz "$startdir"/$pkgname-$pkgver.tar.gz 
+}
+
+build() {
+    return 0
+}
+
+package() {
+	cd "$builddir"
+	mkdir -p "${pkgdir}/usr/share/webapps/freshrss/extensions"
+	cp -R "${pkgname}/xExtension-MobileScrollMenu" "${pkgdir}/usr/share/webapps/freshrss/extensions/"
+}
+
+
+
+sha512sums="02dd7eb7e2bd9442e359d00b28ff84add2af13396bc27e2a0cdc4d12677ef60012db16a70826a8003efc1ac644947b6129e3a65632924a2bfde650cf1b9b6047  freshrss-mobilescrollmenu-0.2.tar.gz"

@@ -5,12 +5,12 @@
 
 pkgname=wallabag
 pkgver=2.4.2
-pkgrel=0
+pkgrel=1
 pkgdesc='Self hostable application for saving web pages'
 arch='noarch'
 url='http://www.wallabag.org/'
 license='MIT'
-depends='php7 php7-gd php7-tidy pcre php7-tokenizer php7-bcmath php7-dom php7-curl php7-session php7-ctype php7-simplexml php7-xml php7-sockets php7-xmlreader composer'
+depends='php7 php7-gd php7-tidy pcre php7-tokenizer php7-bcmath php7-dom php7-curl php7-session php7-ctype php7-simplexml php7-xml php7-sockets php7-xmlreader composer php7-intl'
 options='!strip'
 source="https://static.wallabag.org/releases/wallabag-release-${pkgver}.tar.gz"
 builddir="${srcdir}/${pkgver}"

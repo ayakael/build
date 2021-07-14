@@ -1,16 +1,16 @@
 # Maintainer: Antoine Martin <antoine@ayakael.net>
 pkgname=freshrss-redditimage
-pkgver=0.10.0
+pkgver=0.12.0
 pkgrel=0
 pkgdesc="Modify reddit entries by displaying known medias and easing access to the linked resource"
-url="https://github.com/aledeg/FreshRSS-extensions"
+url="https://github.com/aledeg/xExtension-RedditImage"
 arch="noarch"
 license="MIT"
 depends="freshrss"
 makedepends="git"
 source="$pkgname-$pkgver.tar.gz"
-_giturl="https://github.com/aledeg/FreshRSS-extensions"
-_gittag="2ad7def"
+_giturl="https://github.com/aledeg/xExtension-RedditImage"
+_gittag="ae1c643445c7e9a0f326bdff4d432bdada6e589d"
 builddir="$srcdir"
 options="!check"
 
@@ -41,8 +41,8 @@ build() {
 
 package() {
 	cd "$builddir"
-	mkdir -p "${pkgdir}/usr/share/webapps/freshrss/extensions"
-	cp -R "${pkgname}/xExtension-RedditImage" "${pkgdir}/usr/share/webapps/freshrss/extensions/"
+	mkdir -p "${pkgdir}/usr/share/webapps/freshrss/extensions/xExtension-RedditImage"
+	cp -R "${pkgname}/"* "${pkgdir}/usr/share/webapps/freshrss/extensions/xExtension-RedditImage"
 }
 
-sha512sums="c37f90702ba8b6e70483b8f11df7b3913d4c05f396e0e312f065a55f68521c7fac1ba4bb85f3eff09d9f0e5ea1b06616a199612fee37b0fcb1846e4b0a18877a  freshrss-redditimage-0.10.0.tar.gz"
+sha512sums="870b4fdade6ce5af8b9368e06d934ba8127d9c531a04c2b9f99718460476eaddaa86b3d426b7d5cdec3d65c5573cfd70451886f5f322efd053c828bb845d6b7b  freshrss-redditimage-0.12.0.tar.gz"

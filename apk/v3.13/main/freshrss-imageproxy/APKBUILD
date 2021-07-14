@@ -1,8 +1,8 @@
 # Maintainer: Antoine Martin <antoine@ayakael.net>
 pkgname=freshrss-imageproxy
 pkgver=0.5.1
-pkgrel=0
-pkgdesc="https://github.com/FreshRSS/Extensions/tree/master/xExtension-ImageProxy"
+pkgrel=1
+pkgdesc="No insecure content warnings or disappearing images"
 url="https://github.com/FreshRSS/Extensions"
 arch="noarch"
 license="GPL-3.0-only"
