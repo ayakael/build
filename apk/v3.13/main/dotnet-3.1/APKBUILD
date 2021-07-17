@@ -1,0 +1,335 @@
+# Maintainer: Antoine Martin (ayakael) <dev@ayakael.net>       
+                                                                     
+# Based on Archlinux PKGBUILD by:
+# Maxime Gauduin <alucryd@archlinux.org>
+# Kristian Mosegaard <kristian@mosen.me>                                                           
+# Max Liebkies <mail@maxliebkies.de>
+# Krzysztof Bogacki <krzysztof.bogacki@leancode.pl>
+
+# Build vars
+_bootstrap=false
+_bootstrap_sdk='3.1.115'
+_bootstrap_runtime='3.1.1'
+_targetrid=linux-musl-x64
+_coreclrver=3.1.16-servicing
+_coreclrbld=21262.5
+_llvmver=10
+
+pkgname=dotnet-3.1
+pkgdesc='The .NET Core SDK'
+pkgver=3.1.17
+pkgrel=0
+arch='x86_64'
+url=https://www.microsoft.com/net/core
+license='MIT'
+makedepends="
+  bash
+  clang
+  cmake
+  git
+  icu-dev
+  inetutils-syslogd
+  krb5-dev
+  libgit2-dev
+  libunwind-dev
+  libxml2-dev
+  libxml2-utils
+  lldb-dev
+  llvm$_llvmver-dev
+  lttng-ust-dev
+  nodejs
+  openssl-dev
+  zlib-dev
+"
+
+if [ ${_bootstrap} != 'true' ]; then
+  makedepends=" 
+    ${makedepends}
+    dotnet-bootstrap-sdk-3.1
+    dotnet-bootstrap-runtime-3.1
+  "
+fi
+
+#depends='
+#  icu-libs
+#  krb5-libs
+#  libgcc
+#  #libgdiplus
+#  libintl
+#  libssl1.1
+#  libstdc++zlib
+#
+subpackages="dotnet-sdk-3.1:sdk dotnet-host-3.1:host dotnet-runtime-3.1:runtime aspnet-runtime-3.1:aspnet_runtime:noarch dotnet-targeting-pack-3.1:targeting_pack aspnet-targeting-pack-3.1:aspnet_targeting_pack:noarch" 
+_gittag=v${pkgver}-runtime
+_giturl=https://github.com/dotnet/source-build
+options="!check !archcheck"
+source="
+  $pkgname-$pkgver.git.zip
+  dotnet.sh
+"
+
+# patches
+source="
+  ${source}
+  coreclr_fix-build-on-Alpine-edge-45352.patch
+  corefx_fix-build-clang10.patch
+  xliff-tasks_use-netcoreapp21.patch
+  build_coreclr-tools-path.patch
+"
+#  core-setup_attempt-fix-transport-runtime.patch
+
+
+builddir="$srcdir/$pkgname"
+
+snapshot() {         
+        mkdir -p "$srcdir"                                                                  
+        cd "${srcdir}"
+        if ! [ -d $pkgname.git ]; then
+                git clone $_giturl $pkgname.git || return 1
+                cd $pkgname.git                           
+        else                          
+                cd $pkgname.git                                 
+                git fetch || return 1                  
+        fi
+        
+        echo "Repo archive"                          
+        mkfifo $pkgname-$pkgver.git                     
+        git bundle create - $_gittag > $pkgname-$pkgver.git &
+        zip --fifo "${SRCDEST}"/$pkgname-$pkgver.git.zip $pkgname-$pkgver.git
+        rm $pkgname-$pkgver.git                 
+                                                                                                                                                                             
+        ln -s "$SRCDEST"/$pkgname-$pkgver.git.zip "$startdir"/$pkgname-$pkgver.git.zip
+}     
+          
+unpack() {
+  default_unpack
+  cd "${srcdir}"
+  git clone $pkgname-$pkgver.git $pkgname --branch $_gittag 1>/dev/null 2>&1
+}
+ 
+prepare() {
+  local i failed=                                        
+  [ -n "$builddir" -a -d "$builddir" ] && cd "$builddir"
+
+  msg "Settings up bootstrap SDK"
+  if [ "${_bootstrap}" == 'true' ]; then
+    eng/common/dotnet-install.sh -runtime dotnet -version $_bootstrap_runtime
+    bash .dotnet/dotnet-install.sh --version $_bootstrap_sdk --install-dir ./
+    bash .dotnet/dotnet-install.sh --version $_bootstrap_runtime --install-dir ./ --runtime dotnet
+  else
+    cp -r /usr/share/dotnet .
+  fi
+     
+
+  # disable warnings
+  sed -i 's|skiptests|skiptests ignorewarnings|' repos/coreclr.common.props
+
+  # TODO: core-setup src/pkg/packaging-tools/framework.dependency.targets ignored trailing version number for MicrosoftNETCoreRuntimeCoreCLRPackageVersion set by 
+  # artifacts/obj/x64/Release/PackageVersions.props thus can't find transport.runtime.linux-x64.Microsoft.NETCore.Jit and transport.runtime.linux-x64.microsoft.netcore.runtime.coreclr 
+  #
+  # Ideal solution: Make sure transport.runtime.$_targetrid.microsoft.netcore.runtime.coreclr is restored w/o buildid  (like it is expected)
+  # No data
+  #
+  # Possible mitigation: Adjust PackageVersions.props to include build id
+  # Need to find where PackageVersions.props gets it versions. Probable artifacts/sources/coreclr/eng/Versions.props
+  #
+  # Possible hack: ln expected path to actual path (implemented)
+  # See below
+  #
+  for i in runtime.coreclr jit; do                                                   
+    [ -d "packages/restored/transport.runtime.$_targetrid.microsoft.netcore.$i" ] || mkdir -p "packages/restored/transport.runtime.$_targetrid.microsoft.netcore.$i"
+   ln -s ../transport.runtime.linux-musl-x64.microsoft.netcore.${i}/$_coreclrver.$_coreclrbld packages/restored/transport.runtime.$_targetrid.microsoft.netcore.$i/$_coreclrver
+  done
+  #
+  
+  # TODO: Figure out the whole ilasm / ildasm business. For now:
+  for i in ildasm ilasm; do
+     [ -f "Tools/source-built/coreclr-tools/x64/$i" ] || { mkdir -p "Tools/source-built/coreclr-tools/x64"; ln -s ../${i} Tools/source-built/coreclr-tools/x64/${i}; }
+  done
+  #
+
+ export SOURCE_BUILD_SKIP_SUBMODULE_CHECK=1
+
+  if ! have_patches; then
+    return 0
+  fi
+  [ -d "$builddir" ] || { error "Is \$builddir set correctly?"; return 1; }
+
+  msg "Deploying patches"
+  for i in $source; do
+    case ${i%::*} in
+      build_*.patch) 
+        patch ${patch_args:--p1} -i "$srcdir/$(filename_from_uri $i)" || failed="$failed $i"
+      ;;           
+      *.patch)              
+        local _package=$(echo ${i} | sed 's|_.*||')
+        local _patch=$(echo ${i} | sed "s|${_package}_||")
+        echo "cp $_patch -> $_package"
+        [ -d patches/$_package ] || mkdir patches/$_package     
+        cp "$srcdir"/"$i" patches/${_package}/${_patch}
+      ;;
+    esac                                          
+  done                                               
+  if [ -z "$failed" ]; then                             
+    return 0                                                
+  fi                                                        
+  error "The following patches failed to apply:"
+  for i in $failed; do                                                                                                                                                       
+    printf "  %s\n" "$i"
+  done
+  return 1
+}
+
+pkgver() {
+  cd "$builddir"
+
+  local _runtimever=$(xmllint --xpath "//Dependency[@Name='Microsoft.NETCore.App.Runtime.win-x64']/@Version" eng/Version.Details.xml | cut -d '=' -f 2 | sed 's/^"//; s/"$//')
+  local _sdkver=$(xmllint --xpath "//Dependency[@Name='Microsoft.NET.Sdk']/@Version" eng/Version.Details.xml | cut -d '=' -f 2 | sed 's/^"//; s/"$//; s/-rtm.*//; s/-servicing.*//')
+
+  echo "${_runtimever}.sdk${_sdkver##*.}"
+}
+
+build() {
+  cd "$builddir"
+
+  export SOURCE_BUILD_SKIP_SUBMODULE_CHECK=1
+
+  ./build.sh \
+    --with-sdk ./ \
+    /p:ArchiveDownloadedPackages=true \
+    /p:ContinueOnPrebuiltBaselineError=true \
+    /p:SkipPortableRuntimeBuild=true \
+    /p:TargetRid=$_targetrid \
+    /p:SkipPrebuiltEnforcement=true \
+    /p:UseSystemLibraries=true \
+    /p:UseSystemLibunwind=true
+}
+
+package() {
+  depends='
+	dotnet-sdk-3.1
+	dotnet-host-3.1
+	dotnet-runtime-3.1
+	dotnet-targetting-pack-3.1
+	aspnet-runtime-3.1
+	aspnet-targeting-pack-3.1
+	netstandard-targeting-pack-5.0
+  '
+  mkdir -p "${pkgdir}"
+}
+
+sdk() {
+  depends='
+    dotnet-runtime-3.1
+    dotnet-targeting-pack-3.1
+    musl
+    libgcc
+    netstandard-targeting-pack-5.0
+    aspnet-targeting-pack-3.1
+  '
+
+  # XXX: This is a hack to allow this abuild to depend on itself. Adding "dotnet" 
+  # to makedepends would not work, because abuild implicitly removes $pkgname   
+  # and $subpackages from the abuild's dependencies.                        
+  #                                                             
+  provides="dotnet-bootstrap-sdk-3.1=$pkgver-r$pkgrel"
+  
+  cd "$builddir"/artifacts/x64/Release
+
+  install -dm 755 "$subpkgdir"/usr/share/dotnet "$subpkgdir"/usr/share/licenses
+  bsdtar -xf dotnet-sdk-${pkgver%.*}.*-$_targetrid.tar.gz -C "${subpkgdir}"/usr/share/dotnet/ --no-same-owner sdk templates
+  ln -s dotnet-host "${subpkgdir}"/usr/share/licenses/dotnet-sdk-3.1
+}
+
+
+host() {
+  pkgdesc='A generic driver for the .NET Core Command Line Interface'
+  depends='
+    gcc
+    musl
+  '
+
+  cd $builddir/artifacts/x64/Release
+
+  install -dm 755 "$subpkgdir"/etc/profile.d "$subpkgdir"/usr/bin "$subpkgdir"/usr/lib "$subpkgdir"/usr/share/dotnet "$subpkgdir"/usr/share/licenses/dotnet-host 
+
+  bsdtar -xf dotnet-sdk-${pkgver%.*}.*-$_targetrid.tar.gz -C "${subpkgdir}"/usr/share/dotnet/ --no-same-owner dotnet host
+  bsdtar -xf dotnet-sdk-${pkgver%.*}.*-$_targetrid.tar.gz -C "${subpkgdir}"/usr/share/licenses/dotnet-host/ --no-same-owner LICENSE.txt ThirdPartyNotices.txt
+  ln -s /usr/share/dotnet/dotnet "${subpkgdir}"/usr/bin/dotnet
+  ln -s /usr/share/dotnet/host/fxr/${pkgver}/libhostfxr.so "${subpkgdir}"/usr/lib/libhostfxr.so
+  install -Dm 644 "${srcdir}"/dotnet.sh -t "${subpkgdir}"/etc/profile.d/
+}
+
+runtime() {
+  pkgdesc='The .NET Core runtime'
+  makedepends='
+    icu-dev
+    krb5-dev
+    libunwind-dev
+    zlib-dev
+    openssl-dev
+    '
+  depends='
+    dotnet-host
+    libgcc
+    musl
+    icu
+    krb5-libs
+    libunwind
+    zlib
+    openssl
+    '
+
+  # XXX: This is a hack to allow this abuild to depend on itself. Adding "dotnet" 
+  # to makedepends would not work, because abuild implicitly removes $pkgname   
+  # and $subpackages from the abuild's dependencies.                        
+  #                                                             
+  provides="dotnet-bootstrap-runtime-3.1=$pkgver-r$pkgrel"
+
+  cd "$builddir"/artifacts/x64/Release
+
+  install -dm 755 "$subpkgdir"/usr/share/dotnet "$subpkgdir"/usr/share/licenses
+  bsdtar -xf dotnet-sdk-${pkgver%.*}.*-$_targetrid.tar.gz -C "${subpkgdir}"/usr/share/dotnet/ --no-same-owner shared/Microsoft.NETCore.App
+  ln -s dotnet-host "${subpkgdir}"/usr/share/licenses/dotnet-runtime-3.1
+}
+
+aspnet_runtime() {
+  pkgdesc='The ASP.NET Core runtime'
+  depends='dotnet-runtime-3.1'
+
+  cd "$builddir"/artifacts/x64/Release
+
+  install -dm 755 "$subpkgdir"/usr/share/dotnet "$subpkgdir"/usr/share/licenses
+  bsdtar -xf dotnet-sdk-${pkgver%.*}.*-$_targetrid.tar.gz -C "${subpkgdir}"/usr/share/dotnet/ --no-same-owner shared/Microsoft.AspNetCore.App
+  ln -s dotnet-host "${subpkgdir}"/usr/share/licenses/aspnet-runtime-3.1
+}
+
+targeting_pack() {
+  pkgdesc='The .NET Core targeting pack'
+  depends='netstandard-targeting-pack-5.0'
+
+  cd "$builddir"/artifacts/x64/Release
+
+  install -dm 755 "$subpkgdir"/usr/share/dotnet "$subpkgdir"/usr/share/licenses
+  bsdtar -xf dotnet-sdk-${pkgver%.*}.*-$_targetrid.tar.gz -C "${subpkgdir}"/usr/share/dotnet/ --no-same-owner packs/Microsoft.NETCore.App.Host.$_targetrid packs/Microsoft.NETCore.App.Ref
+  ln -s dotnet-host "${subpkgdir}"/usr/share/licenses/dotnet-targeting-pack-3.1
+}
+
+aspnet_targeting_pack() {
+  pkgdesc='The ASP.NET Core targeting pack'
+  depends='dotnet-targeting-pack-3.1'
+
+  cd "$builddir"/artifacts/x64/Release
+
+  install -dm 755 "$subpkgdir"/usr/share/dotnet "$subpkgdir"/usr/share/licenses
+  bsdtar -xf dotnet-sdk-${pkgver%.*}.*-$_targetrid.tar.gz -C "${subpkgdir}"/usr/share/dotnet/ --no-same-owner packs/Microsoft.AspNetCore.App.Ref
+  ln -s dotnet-host "${subpkgdir}"/usr/share/licenses/aspnet-targeting-pack-3.1
+}
+
+# vim: ts=2 sw=2 et:
+sha512sums="f75e6c1fe0a3c1934ca018669f174716dd17b71af03a85bd48d3559f2069b1b2fffe00549fdad07ed787e330828e5672e6ac6802d1402802d2f1908c282287dd  dotnet-3.1-3.1.16.git.zip
+e61b9e3e5a2305646a616d598378230c9755c5dd5363692cc363f8f4add3807563c324dd86f3a7ae9d358c82d730608e7b293935a2b6c81c0c0f62d752a0a1cf  dotnet.sh
+b3475c0b727c5258c7bc6f4c53305f9ced991e57f9f46a2ad323bed40627662eb8bf57286bf6a22d9a22bfdea9282da4630dd094166f0805c783aece5df5dff3  coreclr_fix-build-on-Alpine-edge-45352.patch
+9f56cf85f0b4dd3d4def525296f2d67ce3bc1e5180fb3598c6e26461d099644408502e9c8c0d866925be7792ac2af82c5cfea48a95858f96b87f93c3799744e9  corefx_fix-build-clang10.patch
+8cdde0fee68e867aa859facfbb809099a317b371593e55f6c20a53c976b48b18a39a3c527ab13d534f6d7505813fdc47ebdf507c1e05c4dcd26c58c9f9e5cad1  xliff-tasks_use-netcoreapp21.patch
+eda3e6453d2137d3b62635068583e7c91010cdaebf55da25f43081ecc135fae00aff41d65d99f15783ecc9087c8be4653687451e56a63ab98e09df0bec2b3b5c  build_coreclr-tools-path.patch"
