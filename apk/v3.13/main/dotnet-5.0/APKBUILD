@@ -57,7 +57,7 @@ fi
 #  libssl1.1
 #  libstdc++zlib
 #'
-subpackages="dotnet-sdk-5.0:sdk dotnet-host-5.0:host dotnet-runtime-5.0:runtime aspnet-runtime-5.0:aspnet_runtime:noarch netstandard-targeting-pack-5.0:netstandard_targeting_pack-5.0:noarch $pkgname-targeting-pack-5.0:targeting_pack aspnet-targeting-pack-5.0:aspnet_targeting_pack:noarch" 
+subpackages="dotnet-sdk-5.0:sdk dotnet-host-5.0:host dotnet-runtime-5.0:runtime aspnet-runtime-5.0:aspnet_runtime:noarch netstandard-targeting-pack-5.0:netstandard_targeting_pack:noarch dotnet-targeting-pack-5.0:targeting_pack aspnet-targeting-pack-5.0:aspnet_targeting_pack:noarch" 
 _gittag=v${pkgver}-runtime
 _giturl=https://github.com/dotnet/source-build
 options="!check !archcheck"
