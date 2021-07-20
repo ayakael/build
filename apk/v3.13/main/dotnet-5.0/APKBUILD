@@ -9,13 +9,13 @@
 # Build vars
 _bootstrap=true
 _bootstrap_sdk=5.0.205
-_bootstrap_runtime=3.1.1
+_bootstrap_runtime=3.1.17
 _targetrid=alpine.3.13-x64
 _llvmver=10
 
 pkgname=dotnet-5.0
 pkgdesc='The .NET Core SDK'
-pkgver=5.0.7
+pkgver=5.0.6
 pkgrel=0
 arch='x86_64'
 url=https://www.microsoft.com/net/core
@@ -63,24 +63,20 @@ _giturl=https://github.com/dotnet/source-build
 options="!check !archcheck"
 source="
   $pkgname-$pkgver.git.zip
-  https://dotnet.microsoft.com/download/dotnet/scripts/v1/dotnet-install.sh
   dotnet.sh
+  https://dot.net/v1/dotnet-install.sh
+"
+# Patches
+source="
+  ${source}
   runtime_link-order.patch
+  runtime_fix-build-on-alpine-linux-45352.patch
+  runtime_fix-last-version-digit-present-on-alpine-non-portable.patch
+  application-insights_fix-net40-location.patch
   sdk_telemetry-optout.patch
   build_darc-fix-alpine.patch
-
+  build_applicationinsights-alternative-source.patch
 "
-#  runtime_illink-target-fix.patch
-#  build_applicationinsights-alternative-source.patch
-#  applications-insights_fix-net40-location.patch
-#  runtime_alpine-non-portable-rid-fix.patch
-
-# TODO: Code 139 when trying to exec "/var/build/build/apk/v3.13/main/dotnet-5.0/src/dotnet-5.0/dotnet" "/var/build/build/apk/v3.13/main/dotnet-5.0/src/dotnet-5.0/artifacts/src/roslyn.59eedc33d35754759994155ea2f4e1012a9951e3/artifacts/bin/CodeStyleConfigFileGenerator/Release/netcoreapp3.1/CodeStyleConfigFileGenerator.dll" "CSharp" "/var/build/build/apk/v3.13/main/dotnet-5.0/src/dotnet-5.0/artifacts/src/roslyn.59eedc33d35754759994155ea2f4e1012a9951e3/artifacts/bin/Microsoft.CodeAnalysis.CSharp.CodeStyle.Fixes/Release/netstandard2.0" "Microsoft.CodeAnalysis.CSharp.CodeStyle.targets" "/var/build/build/apk/v3.13/main/dotnet-5.0/src/dotnet-5.0/artifacts/src/roslyn.59eedc33d35754759994155ea2f4e1012a9951e3/artifacts/bin/Microsoft.CodeAnalysis.CodeStyle/Release/netstandard2.0/Microsoft.CodeAnalysis.CodeStyle.dll;/var/build/build/apk/v3.13/main/dotnet-5.0/src/dotnet-5.0/artifacts/src/roslyn.59eedc33d35754759994155ea2f4e1012a9951e3/artifacts/bin/Microsoft.CodeAnalysis.CSharp.CodeStyle/Release/netstandard2.0/Microsoft.CodeAnalysis.CSharp.CodeStyle.dll from within build
-# Have to do it via shell when roslyn crashes. 
-# Associated with line 34 of src/CodeStyle/CSharp/CodeFixes/Microsoft.CodeAnalysis.CSharp.CodeStyle.Fixes.csproj
-#
-# TODO: Illink fails to find dotnet
-# 
 
 builddir="$srcdir/$pkgname"
 
@@ -117,17 +113,15 @@ prepare() {
 
   msg "Settings up bootstrap SDK"
   if [ "${_bootstrap}" == 'true' ]; then
-    eng/common/dotnet-install.sh -runtime dotnet -version $_bootstrap_runtime
-    bash .dotnet/dotnet-install.sh --version $_bootstrap_sdk --install-dir ./
-    bash .dotnet/dotnet-install.sh --version $_bootstrap_runtime --install-dir ./ --runtime dotnet
+    chmod +x "${srcdir}"/dotnet-install.sh
+    "$srcdir"/dotnet-install.sh --version ${_bootstrap_sdk} --install-dir ./
+    "$srcdir"/dotnet-install.sh --version ${_bootstrap_runtime} --install-dir ./ --runtime dotnet
   else
-    cp -r /usr/share/dotnet .
+    cp -r /usr/share/dotnet "${builddir}"/bootstrap
   fi
      
-
   # disable warnings
   sed -i 's|skiptests|skiptests ignorewarnings|' repos/runtime.common.props
-  export SOURCE_BUILD_SKIP_SUBMODULE_CHECK=1
 
   if ! have_patches; then
     return 0
@@ -171,6 +165,9 @@ pkgver() {
 build() {
   cd "${builddir}"
   msg "Building $pkgname-$pkgver"
+
+   export SOURCE_BUILD_SKIP_SUBMODULE_CHECK=1
+
   ./build.sh \
     --with-sdk ../$pkgname \
     /p:ArchiveDownloadedPackages=true \
@@ -312,9 +309,13 @@ aspnet_targeting_pack() {
 }
 
 # vim: ts=2 sw=2 et:
-sha512sums="d4ef91c590b2a0f696ca0a49dd3d09505b0445b3252ebcd093f8cfec3defb988fe546afa9e493c2d48b3d05ad56c9f604b125402f117e18946768c1124c93ff5  dotnet-5.0-5.0.7.git.zip
-ecab4809e617e9cd30940b1c1a700e16b37b5974c850a60da7f1a25bf81516850e4533ef39d2d8786381e0e4e325d3b53fbb2377ecaa6c0813bb00fc1c92b784  dotnet-install.sh
+sha512sums="e44f9029a13d50ee014519ced0a78a71d01e6d68bdf87a2b966183614d76c4338a8417ec2f94d9116e2f84b6a0ef4eaeda7316f755ce946a44a45b435aaf627a  dotnet-5.0-5.0.6.git.zip
 f58bd83b709dcb4b0b67830756069c34258a167b33cb290cbf30f21d69d75402d38e013fd7bbf00640fe19e397f78df6ff787cf8484ee8967d5b8809f033eafb  dotnet.sh
+ecab4809e617e9cd30940b1c1a700e16b37b5974c850a60da7f1a25bf81516850e4533ef39d2d8786381e0e4e325d3b53fbb2377ecaa6c0813bb00fc1c92b784  dotnet-install.sh
 ad57d02371d351106e043fa104e31afbb0d6799e7ce0ea1a26f585abbfbab7bcba734c7e70491c4af5bfbed965a9ed3235cf4bc1019f504baf482518193b10a7  runtime_link-order.patch
+025b297e81130e6f46dfa755cfd35c3756ef148a48adcc99511d95b1ec8eeede3561f31bbdf6b16cb294da3642298c9353ba07e9728c9c60fe9c3e0f2e2b4ed4  runtime_fix-build-on-alpine-linux-45352.patch
+944461da9ed50d536195ab3572b15fdfa74713344a4ca5e31bed627f09fbf328dd0d1f66599553d474e766cacdba7146c701180810383245fcdce1aba39bfef3  runtime_fix-last-version-digit-present-on-alpine-non-portable.patch
+0469d571d0f7634d3794761f04e1cbff9d27d642d134a11a13560574280e5cab6f366eb8820e61a449eca99470fdea8d9f6a7d97b633059b2fe25257ed1579e6  applications-insights_fix-net40-location.patch
 c96700138ea919c169c3a394f1bf9548c7f86b1ba42b193d6e7bb0a1e2bd6f7f202befbc61246a8720181cd40e1f7fa36a6c208eb19b03a23e21994136fb2507  sdk_telemetry-optout.patch
-74767c34f15e0eaee3682516e093296621efaeeb6d84e62d826587db9b559fb7c00c42aafbf4fdfd34460d1cf16edad3fd5f720f2b37f8bf52b26d7f73f79d5e  build_darc-fix-alpine.patch"
+74767c34f15e0eaee3682516e093296621efaeeb6d84e62d826587db9b559fb7c00c42aafbf4fdfd34460d1cf16edad3fd5f720f2b37f8bf52b26d7f73f79d5e  build_darc-fix-alpine.patch
+58a3e93e5fb6247569c291f86db127cbbc6cc6842eaf0973c2a211d4806f08dcabd9781b7da567088d820a337d58d6375230ade991dcc77e170266675c4a97e5  build_applicationinsights-alternative-source.patch"

@@ -8,8 +8,8 @@ arch='i686 x86_64'
 url='https://gitlab.com/GeorgeHahn/firefly-plaid-connector'
 license='MIT'
 options="!strip !check"
-depends='firefly-iii'
-makedepends='dotnet-sdk'
+depends='firefly-iii dotnet-runtime-3.1'
+makedepends='dotnet-sdk-3.1'
 source="firefly-plaid-connector-$pkgver.tar.gz::https://gitlab.com/GeorgeHahn/firefly-plaid-connector/-/archive/v${pkgver}/firefly-plaid-connector-v${pkgver}.tar.gz"
 builddir="${srcdir}/firefly-plaid-connector-v${pkgver}"
 
