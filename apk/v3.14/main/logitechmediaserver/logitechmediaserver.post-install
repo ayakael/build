@@ -1,0 +1,9 @@
+#!/bin/sh
+
+getent group logitechmediaserver &>/dev/null || groupadd -r logitechmediaserver >/dev/null
+getent passwd logitechmediaserver &>/dev/null || useradd -r -g logitechmediaserver -d /usr/share/webapps/logitechmediaserver -c 'Logitech Media Server' -s /bin/false logitechmediaserver >/dev/null
+mkdir -p /var/lib/logitechmediaserver/cache /var/lib/logitechmediaserver/Logs /var/lib/logitechmediaserver/prefs /var/lib/logitechmediaserver/prefs/plugin /var/lib/logitechmediaserver/Plugins
+touch /var/lib/logitechmediaserver/Logs/slimserver.log
+chown -R logitechmediaserver:logitechmediaserver /var/lib/logitechmediaserver
+
+exit 0

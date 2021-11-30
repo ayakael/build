@@ -1,0 +1,22 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+pkgname=phppgadmin
+pkgver=7.13.0
+pkgrel=2
+pkgdesc="A web-based administration tool for PostgreSQL"
+arch='noarch'
+url="https://github.com/phppgadmin/phppgadmin/"
+license='GPL'
+depends='php7 php7-common php7-iconv php7-json php7-gd php7-curl php7-xml php7-mysqli php7-imap php7-cgi fcgi php7-pdo php7-pdo_mysql php7-soap php7-xmlrpc php7-posix php7-mcrypt php7-gettext php7-ldap php7-ctype php7-dom php7-session php7-pdo_pgsql php7-pgsql php7-mbstring'
+source="https://github.com/phppgadmin/phppgadmin/releases/download/REL_${pkgver//./-}/phpPgAdmin-$pkgver.tar.bz2"
+
+package() {
+  _instdir="$pkgdir"/usr/share/webapps/phppgadmin
+  mkdir -p ${_instdir} "$pkgdir"/etc/webapps/phppgadmin
+  cd ${_instdir}
+  cp -ra "$srcdir"/phpPgAdmin-$pkgver/* .
+  cp ./conf/config.inc.php-dist "$pkgdir"/etc/webapps/phppgadmin/config.inc.php
+  rm -f ${_instdir}/conf/config.inc.php
+  ln -s /etc/webapps/phppgadmin/config.inc.php ${_instdir}/conf/config.inc.php
+}
+sha512sums="1a3d51d0f3b5a3857664c37e5df21070b81dfc0db8844d0af784ff09f644e6a61a9607f4a87f865c5c40bb55445db187b73b9ccceff4a0293c26a6bfeb5953ac  phpPgAdmin-7.13.0.tar.bz2"

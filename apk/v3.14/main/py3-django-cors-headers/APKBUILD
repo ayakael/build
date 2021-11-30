@@ -1,0 +1,32 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+_pyname=django-cors-headers
+pkgname="py3-$_pyname"
+pkgver=3.7.0
+pkgrel=1
+arch='noarch'
+pkgdesc="Django application for handling the server headers required for Cross-Origin Resource Sharing (CORS)"
+url="https://pypi.python.org/project/$_pyname"
+license="MIT"
+depends='python3 py3-django'
+makedepends='py3-setuptools'
+options="!check"
+source="${pkgname}-${pkgver}.tar.gz::https://pypi.io/packages/source/${_pyname:0:1}/$_pyname/$_pyname-${pkgver}.tar.gz"
+builddir="$srcdir"/$_pyname-$pkgver
+
+build() {
+  cd "$builddir"
+
+  python3 setup.py build
+}
+
+package() {
+  cd "$builddir"
+
+  python3 setup.py install --root="$pkgdir"/ --optimize=1 --skip-build
+
+  install -Dm644 LICENSE $pkgdir/usr/share/licenses/$pkgname/LICENSE
+}
+sha512sums="
+e1dc9695f99108f0908d8d348d284f1fd4a8ccbb84b3c748c9ae8d81d6f32ac8ef3417b612710e64ea4c63d464d97ac31a199292ebcdaaec3f3e37ad025ed0de  py3-django-cors-headers-3.7.0.tar.gz
+"

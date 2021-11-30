@@ -1,0 +1,29 @@
+#!/sbin/openrc-run
+
+name="Remarkable cloud"
+root="/var/lib/rmfakecloud"
+logfile="/var/log/rmfakecloud/rmfakecloud.log"
+pidfile="/run/rmfakecloud.pid"
+
+depend() {
+    use net
+}
+
+start() {
+    ebegin "Starting rmfakecloud"
+    cd $root
+    start-stop-daemon --start --background \
+        --chdir "${root}" \
+        --user="rm" \
+        --make-pidfile --pidfile="${pidfile}" \
+	--stdout "${logfile}" --stderr "${logfile}" \
+	--exec /usr/bin/env -- STORAGE_URL="${STORAGE_URL}" PORT="${PORT}" DATADIR="${DATADIR}" RM_SMTP_SERVER="${RM_SMTP_SERVER}" RM_SMTP_USERNAME="${RM_SMTP_USERNAME}" RM_SMTP_PASSWORD="${RM_SMTP_PASSWORD}" RM_SMTP_FROM="${RM_SMTP_FROM}" RMAPI_HWR_APPLICATIONKEY="${RMAPI_HWR_APPLICATIONKEY}" RMAPI_HWR_HMAC=RMAPI_HWR_HMAC="${RMAPI_HWR_HMAC}" /usr/bin/rmfakecloud
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping rmfakecloud"
+    start-stop-daemon --stop \
+        --pidfile=${pidfile} \
+    eend $?
+}

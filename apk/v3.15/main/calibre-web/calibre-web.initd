@@ -1,0 +1,36 @@
+#!/sbin/openrc-run
+# Distributed under the terms of the GNU General Public License, v2 or later
+
+CALIBREWEB_HOME=${CALIBREWEB_HOME:-/var/lib/${SVCNAME}}
+CALIBREWEB_USER=${CALIBREWEB_USER:-${SVCNAME}}
+NICELEVEL=1
+PIDFILE=/run/calibre-web/calibre-web.pid
+
+depend() {
+	after net
+}
+
+start() {
+	checkpath -dq -o ${CALIBREWEB_USER}:${CALIBREWEB_USER}	 -m 755 /run/calibre-web/
+	ebegin "Starting ${SVCNAME}"
+	start-stop-daemon \
+		--start --user "${CALIBREWEB_USER}" --name calibre-web \
+		--env CALIBRE_DBPATH="${CALIBREWEB_HOME}" \
+		--env CALIBRE_PORT=443 \
+		--exec /usr/share/webapps/calibre-web/cps.py \
+		--pidfile="${PIDFILE}" \
+		--nicelevel "${NICELEVEL}" \
+		-- \
+		-p /var/lib/calibre-web/app.db &
+	eend $?
+}
+
+stop() {
+	ebegin "Stopping ${SVCNAME}"
+	start-stop-daemon --stop --user "${CALIBREWEB_USER}" \
+		--pidfile "${PIDFILE}" \
+		--wait 15000 \
+		--progress
+	eend $?
+}
+

@@ -1,0 +1,32 @@
+diff --git a/cpp/src/Ice/Network.h b/cpp/src/Ice/Network.h
+index 247b2331a8..961345a1e6 100644
+--- a/cpp/src/Ice/Network.h
++++ b/cpp/src/Ice/Network.h
+@@ -34,7 +34,7 @@ typedef int ssize_t;
+ #   include <unistd.h>
+ #   include <fcntl.h>
+ #   include <sys/socket.h>
+-#   include <sys/poll.h>
++#   include <poll.h>
+ #   include <netinet/in.h>
+ #   include <netinet/tcp.h>
+ #   include <arpa/inet.h>
+diff --git a/cpp/src/Ice/Selector.h b/cpp/src/Ice/Selector.h
+index e53357a006..1d6f96c4f8 100644
+--- a/cpp/src/Ice/Selector.h
++++ b/cpp/src/Ice/Selector.h
+@@ -1,4 +1,4 @@
+-// **********************************************************************
++/// **********************************************************************
+ //
+ // Copyright (c) 2003-2013 ZeroC, Inc. All rights reserved.
+ //
+@@ -25,7 +25,7 @@
+ #elif defined(ICE_USE_IOCP)
+ // Nothing to include
+ #elif defined(ICE_USE_POLL)
+-#   include <sys/poll.h>
++#   include <poll.h>
+ #endif
+ 
+ #if defined(ICE_OS_WINRT)

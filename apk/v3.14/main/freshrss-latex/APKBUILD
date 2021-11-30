@@ -1,0 +1,48 @@
+# Maintainer: Antoine Martin <antoine@ayakael.net>
+pkgname=freshrss-latexsupport
+pkgver=0.1.4
+pkgrel=0
+pkgdesc="A FreshRSS extension which add LaTeX support"
+url="https://github.com/aledeg/xExtension-LatexSupport"
+arch="noarch"
+license="AGPL3"
+depends="freshrss"
+makedepends="git"
+source="$pkgname-$pkgver.tar.gz"
+_giturl="https://github.com/aledeg/xExtension-LatexSupport"
+_gittag="2767caec86437e92b748cd770ddc51e79b113a7c"
+builddir="$srcdir"
+options="!check"
+
+snapshot() {
+	mkdir -p "$srcdir"
+	cd "${SRCDEST:-$srcdir}"
+	if ! [ -d $pkgname.git ]; then
+		git clone $_giturl $pkgname.git || return 1
+		cd $pkgname.git
+	else
+		cd $pkgname.git
+		git fetch || return 1
+	fi
+
+	echo "Checking out"
+	git checkout $_gittag
+	echo "Repo archive"
+	git archive --prefix="$pkgname/" -o ${pkgname}-${pkgver}.tar --format "tar" $_gittag
+    
+   
+	gzip ${pkgname}-${pkgver}.tar -c > "$SRCDEST"/$pkgname-$pkgver.tar.gz
+	ln -s "$SRCDEST"/$pkgname-$pkgver.tar.gz "$startdir"/$pkgname-$pkgver.tar.gz 
+}
+
+build() {
+    return 0
+}
+
+package() {
+	cd "$builddir"
+	mkdir -p "${pkgdir}/usr/share/webapps/freshrss/extensions/xExtension-LatexSupport"
+	cp -R "${pkgname}/"* "${pkgdir}/usr/share/webapps/freshrss/extensions/xExtension-LatexSupport"
+}
+
+sha512sums="db3f90146f6b1f18338c187b1bb9363e7c25b9e84483c9835968ad79ad9edcf570088674f114d1f5e6de8913f9d096109e493e726622fd75923d896f91ce0512  freshrss-latexsupport-0.1.4.tar.gz"

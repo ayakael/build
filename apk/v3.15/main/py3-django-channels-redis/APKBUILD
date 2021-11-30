@@ -1,0 +1,32 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+_pyname=channels_redis
+pkgname="py3-django-channels-redis"
+pkgver=3.2.0
+pkgrel=0
+arch='noarch'
+pkgdesc="Redis-backed ASGI channel layer implementation"
+url="https://pypi.python.org/project/$_pyname"
+license="BSD"
+depends='python3 py3-django-channels py3-asgiref py3-aioredis py3-msgpack py3-async-timeout'
+makedepends='py3-setuptools'
+options="!check"
+source="${pkgname}-${pkgver}.tar.gz::https://pypi.io/packages/source/${_pyname:0:1}/$_pyname/$_pyname-${pkgver}.tar.gz"
+builddir="$srcdir"/$_pyname-$pkgver
+
+build() {
+  cd "$builddir"
+
+  python3 setup.py build
+}
+
+package() {
+  cd "$builddir"
+
+  python3 setup.py install --root="$pkgdir"/ --optimize=1 --skip-build
+
+  install -Dm644 LICENSE $pkgdir/usr/share/licenses/$pkgname/LICENSE
+}
+sha512sums="
+2548b379da9a596283e02ead39d140cc52862ea1eaed61e3dd35239b7ac3726866afe0d6db5050351c7c4d6b4d92fdeec5b48489e611e3698401660486ba2481  py3-django-channels-redis-3.2.0.tar.gz
+"

@@ -1,0 +1,21 @@
+# Maintainer: Antoine Martin (ayakael) <dev@ayakael.net>
+pkgname=craftbukkit-plugin-dynmap
+pkgver=3.2.1
+_pkgver=${pkgver}
+pkgrel=0
+pkgdesc="A Google Maps-like map for your Minecraft server that can be viewed in a browser"
+options=!check
+arch='noarch'
+url="https://github.com/webbukkit/dynmap"
+license="AGPL-2.0"
+depends="craftbukkit>=1.16.1 craftbukkit<=1.17.1"
+source="${pkgname}-${_pkgver}.jar::https://dynmap.us/releases/Dynmap-${_pkgver}-spigot.jar"
+noextract="${pkgname}-${_pkgver}.jar"
+
+package() {
+  install -Dm644 "${srcdir}"/${pkgname}-${_pkgver}.jar "$pkgdir/var/lib/craftbukkit/plugins/dynmap.jar"
+  chown craftbukkit:craftbukkit "$pkgdir"/var/lib/craftbukkit/plugins/dynmap.jar
+}
+sha512sums="
+e2e15ad809a4674e35bca74685592080258b098ebe8f5572017bd27c8f7bc76cf4952dce9c6ff81466d5764483b188a9b84ed1bc5fbf087e3440486cd47cb94c  craftbukkit-plugin-dynmap-3.2.1.jar
+"

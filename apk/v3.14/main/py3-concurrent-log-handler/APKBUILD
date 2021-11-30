@@ -1,0 +1,32 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+_pyname='concurrent-log-handler'
+pkgname="py3-$_pyname"
+pkgver=0.9.19
+pkgrel=0
+arch='noarch'
+pkgdesc="The lightning-fast ASGI server"
+url="https://pypi.python.org/project/${_pyname}"
+license="Apache"
+depends='python3 py3-portalocker'
+makedepends='py3-setuptools'
+options="!check"
+source="${pkgname}-${pkgver}.tar.gz::https://pypi.io/packages/source/${_pyname:0:1}/$_pyname/$_pyname-${pkgver}.tar.gz"
+builddir="$srcdir"/$_pyname-$pkgver
+
+build() {
+  cd "$builddir"
+
+  python3 setup.py build
+}
+
+package() {
+  cd "$builddir"
+
+  python3 setup.py install --root="$pkgdir"/ --optimize=1 --skip-build --prefix=/usr
+
+  install -Dm644 LICENSE $pkgdir/usr/share/licenses/$pkgname/LICENSE
+}
+sha512sums="
+6ffb968c2a5caa05b07ce3e2329274d9b391f905b168b6b13afd334ccadd2f0c7357d091e8675bf0cf345e06e4788b5878ba11ee0eb60f0328a998544395ea1b  py3-concurrent-log-handler-0.9.19.tar.gz
+"

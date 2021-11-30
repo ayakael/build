@@ -1,0 +1,49 @@
+# Maintainer: Antoine Martin <antoine@ayakael.net>
+pkgname=freshrss-readingtime
+pkgver=1.2
+pkgrel=0
+pkgdesc="Add a reading time estimation next to each article."
+url="https://framagit.org/Lapineige/FreshRSS_Extension-ReadingTime"
+arch="noarch"
+license="MIT"
+depends="freshrss"
+makedepends="git"
+source="$pkgname-$pkgver.tar.gz"
+_giturl="https://framagit.org/Lapineige/FreshRSS_Extension-ReadingTime"
+_gittag="29a744a8"
+builddir="$srcdir"
+options="!check"
+
+snapshot() {
+	mkdir -p "$srcdir"
+	cd "${SRCDEST:-$srcdir}"
+	if ! [ -d $pkgname.git ]; then
+		git clone $_giturl $pkgname.git || return 1
+		cd $pkgname.git
+	else
+		cd $pkgname.git
+		git fetch || return 1
+	fi
+
+	echo "Checking out"
+	git checkout $_gittag
+	echo "Repo archive"
+	git archive --prefix="$pkgname/" -o ${pkgname}-${pkgver}.tar --format "tar" $_gittag
+    
+   
+	gzip ${pkgname}-${pkgver}.tar -c > "$SRCDEST"/$pkgname-$pkgver.tar.gz
+	ln -s "$SRCDEST"/$pkgname-$pkgver.tar.gz "$startdir"/$pkgname-$pkgver.tar.gz 
+}
+
+build() {
+    return 0
+}
+
+package() {
+	cd "$builddir"
+	mkdir -p "${pkgdir}/usr/share/webapps/freshrss/extensions"
+	cp -R "${pkgname}" "${pkgdir}/usr/share/webapps/freshrss/extensions/"
+}
+sha512sums="
+3553ccb978164faeda623864ca890815fb8276f3b4610941bf82c6a3abe4b86be76a5e33b99d708cccfa78e898604fe6e145b5e0166dc1a804601660200a02ce  freshrss-readingtime-1.2.tar.gz
+"

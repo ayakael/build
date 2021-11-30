@@ -1,0 +1,47 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+pkgname=firefly-iii
+pkgver=5.5.13
+pkgrel=0
+pkgdesc='PHP personal finances manager'
+pkgusers='firefly'
+arch='noarch'
+url="https://github.com/${pkgname}/${pkgname}"
+license='custom'
+options=!check
+depends='php7-intl'
+makedepends='composer'
+source="$pkgname-$pkgver.tar.gz::https://github.com/${pkgname}/${pkgname}/archive/${pkgver}.tar.gz"
+
+package() {
+    cd "$srcdir/$pkgname-$pkgver"
+    composer install --no-scripts --no-dev --ignore-platform-reqs
+
+    install -d "$pkgdir/usr/share/webapps/$pkgname" "$pkgdir/usr/share/licenses/$pkgname" "$pkgdir/etc/webapps/$pkgname"
+    cp -rv * "$pkgdir/usr/share/webapps/$pkgname"
+    install -D "$srcdir/$pkgname-$pkgver/LICENSE" "$pkgdir/usr/share/licenses/$pkgname"
+
+    cp -v .env.example "$pkgdir/etc/webapps/$pkgname/.env"
+    cp -v .deploy/*/.env* "$pkgdir/etc/webapps/$pkgname"
+
+    for i in '' '.heroku' ; do
+        mv -v "$pkgdir/etc/webapps/$pkgname/.env$i" "$pkgdir/etc/webapps/$pkgname/config.env$i"
+    done
+
+    ln -s "/etc/webapps/$pkgname/config.env" "$pkgdir/usr/share/webapps/$pkgname/.env"
+    rm -rf "$pkgdir/usr/share/webapps/$pkgname/bootstrap/cache"
+
+    mkdir -p "$pkgdir/var/cache/$pkgname"
+    chown firefly:www-data "$pkgdir/var/cache/$pkgname"
+    ln -s "/var/cache/$pkgname" "$pkgdir/usr/share/webapps/$pkgname/bootstrap/cache"
+
+    mkdir -p "$pkgdir/var/lib"
+    mv "$pkgdir/usr/share/webapps/$pkgname/storage" "$pkgdir/var/lib/firefly-iii"
+    chown -R firefly:www-data "$pkgdir/var/lib/firefly-iii"
+    chmod 775 "$pkgdir/var/lib/firefly-iii"
+    ln -s "/var/lib/firefly-iii" "$pkgdir/usr/share/webapps/$pkgname/storage"
+}
+
+# vim:ts=4:sw=4:expandtab
+sha512sums="
+f1c93ccfadabdb03c700e890664f82e24deb69cb354406bdf7d4e4ca40b7aa72f36b9cf9803e4a308e055d23201260e369807f5459165d0a9b57aeba2287b50e  firefly-iii-5.5.13.tar.gz
+"

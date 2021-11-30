@@ -1,0 +1,32 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+_pyname='imap-tools'
+pkgname="py3-$_pyname"
+pkgver=0.41.0
+pkgrel=0
+arch='noarch'
+pkgdesc="Work with email and mailbox by IMAP"
+url="https://pypi.python.org/project/${_pyname}"
+license="Apache"
+depends='python3'
+makedepends='py3-setuptools'
+options="!check"
+source="${pkgname}-${pkgver}.tar.gz::https://pypi.io/packages/source/${_pyname:0:1}/$_pyname/$_pyname-${pkgver}.tar.gz"
+builddir="$srcdir"/$_pyname-$pkgver
+
+build() {
+  cd "$builddir"
+
+  python3 setup.py build
+}
+
+package() {
+  cd "$builddir"
+
+  python3 setup.py install --root="$pkgdir"/ --optimize=1 --skip-build --prefix=/usr
+
+  install -Dm644 LICENSE $pkgdir/usr/share/licenses/$pkgname/LICENSE
+}
+sha512sums="
+6174c5a689d7f0a0f1741f83f7451d4f969dd7388ff2b41f43f480b2474129fca614800b3db2106a9ae94a73230f072d0c13d4ee3c66d5130be595adbc4636e2  py3-imap-tools-0.41.0.tar.gz
+"

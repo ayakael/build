@@ -1,0 +1,47 @@
+# Maintainer: Antoine Martin <antoine@ayakael.net>
+pkgname=freshrss-youtube
+pkgver=0.10.2
+pkgrel=0
+pkgdesc="Embed YouTube/PeerTube feeds inside article content."
+url="https://github.com/kevinpapst/freshrss-youtube"
+arch="noarch"
+license="MIT"
+depends="freshrss"
+makedepends="git"
+source="$pkgname-$pkgver.tar.gz"
+_giturl="https://github.com/kevinpapst/freshrss-youtube"
+_gittag="0.10.2"
+builddir="$srcdir"
+options="!check"
+
+snapshot() {
+	mkdir -p "$srcdir"
+	cd "${SRCDEST:-$srcdir}"
+	if ! [ -d $pkgname.git ]; then
+		git clone $_giturl $pkgname.git || return 1
+		cd $pkgname.git
+	else
+		cd $pkgname.git
+		git fetch || return 1
+	fi
+
+	echo "Checking out"
+	git checkout $_gittag
+	echo "Repo archive"
+	git archive --prefix="$pkgname/" -o ${pkgname}-${pkgver}.tar --format "tar" $_gittag
+    
+   
+	gzip ${pkgname}-${pkgver}.tar -c > "$SRCDEST"/$pkgname-$pkgver.tar.gz
+	ln -s "$SRCDEST"/$pkgname-$pkgver.tar.gz "$startdir"/$pkgname-$pkgver.tar.gz 
+}
+
+build() {
+    return 0
+}
+
+package() {
+	cd "$builddir"
+	mkdir -p "${pkgdir}/usr/share/webapps/freshrss/extensions"
+	cp -R "${pkgname}/xExtension-YouTube" "${pkgdir}/usr/share/webapps/freshrss/extensions/"
+}
+sha512sums="cb6330dee43f4c7494484ed8b49047d5ea619e2eee48dc8430b8f316b1642c5f05f65e900b86a9b4d228c223b805c7d8fc1147c3cc3006ad0196834a1340cff2  freshrss-youtube-0.10.2.tar.gz"

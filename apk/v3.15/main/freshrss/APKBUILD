@@ -1,0 +1,31 @@
+# Maintainer: Antoine Martin <antoine@ayakael.net>
+
+pkgname=freshrss 
+pkgver=1.18.1
+pkgrel=0
+pkgdesc="FreshRSS is a self-hosted RSS feed aggregator"
+arch='noarch'
+url="http://freshrss.org"
+license='AGPL'
+depends='nginx php7 php7-fileinfo php7-curl php7-dom php7-xml php7-session php7-ctype php7-pdo_mysql php7-json php7-gmp php7-intl php7-mbstring php7-iconv php7-zip php7-zlib'
+source="https://github.com/FreshRSS/FreshRSS/archive/${pkgver}.zip"
+builddir="${srcdir}/FreshRSS-${pkgver}"
+options='!check'
+
+build() {
+   return 0
+}
+
+package() {
+    cd ${builddir}
+    install -d "${pkgdir}/usr/share/webapps/${pkgname}"
+    mkdir -p "${pkgdir}/var/lib/freshrss"
+    cp -r ./data/. "${pkgdir}/var/lib/${pkgname}/"
+    cp -r . "${pkgdir}/usr/share/webapps/${pkgname}/"
+    rm -R "${pkgdir}/usr/share/webapps/${pkgname}/data"
+    ln -s "/var/lib/freshrss" "${pkgdir}/usr/share/webapps/${pkgname}/data"
+    chown 100:101 -R "${pkgdir}/usr/share/webapps/${pkgname}/data"
+}
+
+
+sha512sums="d18bca33c6c4626806bc027111aa1da126e4198dcba27e276c1c1c17a9cc27bfac83a3b4d2bc0644721a3b905b6b239cbac734ec2c052974785258103cabd741  1.18.1.zip"

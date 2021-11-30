@@ -1,0 +1,32 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+_pyname=channels
+pkgname="py3-django-$_pyname"
+pkgver=3.0.3
+pkgrel=0
+arch='noarch'
+pkgdesc="Developer-friendly asynchrony for Django"
+url="https://pypi.python.org/project/$_pyname"
+license="BSD"
+depends='python3 py3-django py3-asgiref py3-daphne'
+makedepends='py3-setuptools'
+options="!check"
+source="${pkgname}-${pkgver}.tar.gz::https://pypi.io/packages/source/${_pyname:0:1}/$_pyname/$_pyname-${pkgver}.tar.gz"
+builddir="$srcdir"/$_pyname-$pkgver
+
+build() {
+  cd "$builddir"
+
+  python3 setup.py build
+}
+
+package() {
+  cd "$builddir"
+
+  python3 setup.py install --root="$pkgdir"/ --optimize=1 --skip-build
+
+  install -Dm644 LICENSE $pkgdir/usr/share/licenses/$pkgname/LICENSE
+}
+sha512sums="
+cf65140d85b85261d372ff155fcc3fdb0caefa2143b33db30b709527de7104874c29cb573a25c404ea74539abe91059e3ca10d1854e0ef6ce572eef7158cdb72  py3-django-channels-3.0.3.tar.gz
+"

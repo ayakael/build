@@ -1,0 +1,26 @@
+# Maintainer: Eli Schwartz <eschwartz@archlinux.org>
+
+_pkgname=css-parser
+pkgname='py2-css-parser'
+pkgver=1.0.4
+pkgrel=0
+pkgdesc="A CSS Cascading Style Sheets library for Python"
+arch='noarch'
+url="https://github.com/ebook-utils/${_pkgname}"
+license='LGPL'
+makedepends='py2-setuptools'
+source="$pkgname-$pkgver.tar.gz::${url}/archive/v${pkgver}.tar.gz"
+options="!check"
+
+build() {
+    cd "${srcdir}"/${_pkgname}-${pkgver}
+
+    python2 setup.py build
+}
+
+package() {
+    cd "${srcdir}"/${_pkgname}-${pkgver}
+    python2 setup.py install --root="${pkgdir}" --optimize=1 --skip-build
+}
+
+sha512sums="b4a2ce4e37cdd30e07f439b9be59f7660d4952e2bccfc6751f87319675fc83f4489d8c12a852b9355a43d5c37f7bf06262642205efaa0062582092af868397de  py2-css-parser-1.0.4.tar.gz"

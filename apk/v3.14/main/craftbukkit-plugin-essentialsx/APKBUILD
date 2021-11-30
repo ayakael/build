@@ -1,0 +1,105 @@
+# Maintainer: Antoine Martin (ayakael) <dev@ayakael.net>
+pkgname=craftbukkit-plugin-essentialx
+_pkgver=2.19.1
+_buildver=34
+_buildcommit=5723dac
+pkgver=$_pkgver.$_buildver
+pkgrel=0
+pkgdesc="EssentialsX is the essential plugin suite for Minecraft servers, with over 130 commands for servers of all size and scale."
+options=!check
+arch='noarch'
+url="https://essentialsx.net/"
+license="GPL-3.0"
+depends="craftbukkit>=1.8.8 craftbukkit<=1.17.1"
+source="
+	https://ci.ender.zone/job/EssentialsX/lastSuccessfulBuild/artifact/jars/EssentialsX-${_pkgver}-dev+${_buildver}-${_buildcommit}.jar
+	https://ci.ender.zone/job/EssentialsX/lastSuccessfulBuild/artifact/jars/EssentialsXChat-${_pkgver}-dev+${_buildver}-${_buildcommit}.jar
+	https://ci.ender.zone/job/EssentialsX/lastSuccessfulBuild/artifact/jars/EssentialsXSpawn-${_pkgver}-dev+${_buildver}-${_buildcommit}.jar
+	https://ci.ender.zone/job/EssentialsX/lastSuccessfulBuild/artifact/jars/EssentialsXAntiBuild-${_pkgver}-dev+${_buildver}-${_buildcommit}.jar
+	https://ci.ender.zone/job/EssentialsX/lastSuccessfulBuild/artifact/jars/EssentialsXDiscord-${_pkgver}-dev+${_buildver}-${_buildcommit}.jar
+	https://ci.ender.zone/job/EssentialsX/lastSuccessfulBuild/artifact/jars/EssentialsXGeoIP-${_pkgver}-dev+${_buildver}-${_buildcommit}.jar
+	https://ci.ender.zone/job/EssentialsX/lastSuccessfulBuild/artifact/jars/EssentialsXProtect-${_pkgver}-dev+${_buildver}-${_buildcommit}.jar
+	https://ci.ender.zone/job/EssentialsX/lastSuccessfulBuild/artifact/jars/EssentialsXXMPP-${_pkgver}-dev+${_buildver}-${_buildcommit}.jar
+	"
+
+noextract="
+	EssentialsXChat-${_pkgver}-dev+${_buildver}-${_buildcommit}.jar
+	EssentialsXSpawn-${_pkgver}-dev+${_buildver}-${_buildcommit}.jar
+	EssentialsXAntiBuild-${_pkgver}-dev+${_buildver}-${_buildcommit}.jar
+	EssentialsXDiscord-${_pkgver}-dev+${_buildver}-${_buildcommit}.jar
+	EssentialsXGeoIP-${_pkgver}-dev+${_buildver}-${_buildcommit}.jar
+	EssentialsXProtect-${_pkgver}-dev+${_buildver}-${_buildcommit}.jar
+	EssentialsXMPP-${_pkgver}-dev+${_buildver}-${_buildcommit}.jar
+	"
+subpackages="${pkgname}-core ${pkgname}-chat ${pkgname}-spawn ${pkgname}-antibuild ${pkgname}-discord ${pkgname}-geo ${pkgname}-protect ${pkgname}-xmpp"
+
+
+package() {
+	mkdir -p "${pkgdir}"
+}
+
+core() {
+	pkgdesc="Core functionality: teleports, private messages, homes, warps and more"
+	install -Dm644 "${srcdir}"/EssentialsX-${_pkgver}-dev+${_buildver}-${_buildcommit}.jar "$subpkgdir/var/lib/craftbukkit/plugins/Essentials.jar"
+	chown craftbukkit:craftbukkit "$subpkgdir"/var/lib/craftbukkit/plugins/Essentials.jar
+}
+
+chat() {
+	pkgdesc="Chat formatting, local chat"
+	depends="${pkgname}-core"
+	install -Dm644 "${srcdir}"/EssentialsXChat-${_pkgver}-dev+${_buildver}-${_buildcommit}.jar "$subpkgdir/var/lib/craftbukkit/plugins/EssentialsChat.jar"
+	chown craftbukkit:craftbukkit "$subpkgdir"/var/lib/craftbukkit/plugins/EssentialsChat.jar
+}
+
+spawn() {
+	pkgdesc="Spawnpoint control, per-player spawns"
+	depends="${pkgname}-core"
+	install -Dm644 "${srcdir}"/EssentialsXSpawn-${_pkgver}-dev+${_buildver}-${_buildcommit}.jar "$subpkgdir/var/lib/craftbukkit/plugins/EssentialsSpawn.jar"
+	chown craftbukkit:craftbukkit "$subpkgdir"/var/lib/craftbukkit/plugins/EssentialsSpawn.jar
+}
+
+antibuild() {
+	pkgdesc="Simple permissions-based building control"
+	depends="${pkgname}-core"
+	install -Dm644 "${srcdir}"/EssentialsXAntiBuild-${_pkgver}-dev+${_buildver}-${_buildcommit}.jar "$subpkgdir/var/lib/craftbukkit/plugins/EssentialsAntiBuild.jar"
+	chown craftbukkit:craftbukkit "$subpkgdir"/var/lib/craftbukkit/plugins/EssentialsAntiBuild.jar
+}
+
+discord() {
+	pkgdesc="Lightweight chat, messaging and command integration with Discord"
+	depends="${pkgname}-core"
+	install -Dm644 "${srcdir}"/EssentialsXDiscord-${_pkgver}-dev+${_buildver}-${_buildcommit}.jar "$subpkgdir/var/lib/craftbukkit/plugins/EssentialsDiscord.jar"	
+	chown craftbukkit:craftbukkit "$subpkgdir"/var/lib/craftbukkit/plugins/EssentialsDiscord.jar
+}
+
+geo() {
+	pkgdesc="Geographical player lookup (formerly EssentialsX GeoIP)"
+	depends="${pkgname}-core"
+	install -Dm644 "${srcdir}"/EssentialsXGeoIP-${_pkgver}-dev+${_buildver}-${_buildcommit}.jar "$subpkgdir/var/lib/craftbukkit/plugins/EssentialsGeo.jar"
+	chown craftbukkit:craftbukkit "$subpkgdir"/var/lib/craftbukkit/plugins/EssentialsGeo.jar
+}
+
+protect() {
+	pkgdesc="Configurable world protection and control"
+	depends="${pkgname}-core"
+	install -Dm644 "${srcdir}"/EssentialsXProtect-${_pkgver}-dev+${_buildver}-${_buildcommit}.jar "$subpkgdir/var/lib/craftbukkit/plugins/EssentialsProtect.jar"
+	chown craftbukkit:craftbukkit "$subpkgdir"/var/lib/craftbukkit/plugins/EssentialsProtect.jar
+}
+
+xmpp() {
+	pkgdesc="Lightweight chat, messaging and server log integration with Jabber/XMPP services"
+	depends="${pkgname}-core"
+	install -Dm644 "${srcdir}"/EssentialsXXMPP-${_pkgver}-dev+${_buildver}-${_buildcommit}.jar "$subpkgdir/var/lib/craftbukkit/plugins/EssentialsXMPP.jar"
+	chown craftbukkit:craftbukkit "$subpkgdir"/var/lib/craftbukkit/plugins/EssentialsXMPP.jar
+}
+
+sha512sums="
+195dfd11ee959fc66acda6f43dd81b17516a92e12a0e7cb30bf4b674321b11141776e59321997372df509e4f3143b982c8eaafe1ee67d49dfb0dc66e5d1da3a2  EssentialsX-2.19.1-dev+34-5723dac.jar
+c63d0c41b5ee2963c5d21e2ea5b08fe320a297afecd6a936a8c62143904a8496ce4c5401b3deaab5536d3bfefaacbe1b77a876c530d04d1e17a72dc8ca89cf03  EssentialsXChat-2.19.1-dev+34-5723dac.jar
+2de2bd5f1156ed2cb70f05b7118f5832082807989b232ce3e1dbcd0967ddc2c0bbe41d807e61fea57f39d675da61ed620627daa7f59395cf704e8e6c9e50a5fa  EssentialsXSpawn-2.19.1-dev+34-5723dac.jar
+a33bf1ca55aa7ef6494540d106fb003d6c21ecf5739fae4ad4cf0c3cf03a2e0b932c6196e00c71c9a3ad2c0439d2062669406099dcff436eb27c68772546a378  EssentialsXAntiBuild-2.19.1-dev+34-5723dac.jar
+152332e1cbd84bfc823855cabfcdcca163e5639265a8642881b16945099930295f57027e9da9ea593ad628eea8c0afeb8d67a1ca6320b4e675734881a1517373  EssentialsXDiscord-2.19.1-dev+34-5723dac.jar
+963ddfe510115fdc689870f6339d0f983c00e55bd7839a3cc8d4e27cfd9a62d9473a8602bc73ebdbd0633a962c03b5c0bbebb81f20bb05b3a1614ba9b86619f9  EssentialsXGeoIP-2.19.1-dev+34-5723dac.jar
+636f33a0d2e88cdcd435b1abc5e0435649fafd46596fb8df0225e87b01a54324bfbec3977b01f88f03cd907b99f0206c9b37ddb832ca3f0980670126b68b7723  EssentialsXProtect-2.19.1-dev+34-5723dac.jar
+b46e2863d4f6a98b2a01e945b4b3959e2710490dc67cc17a9f6252f05f27f076e7f65dba69b516d00e2d6835a8eab009cd3670741ecdae698d9a87f02d5b261e  EssentialsXXMPP-2.19.1-dev+34-5723dac.jar
+"

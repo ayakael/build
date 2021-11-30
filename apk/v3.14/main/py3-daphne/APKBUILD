@@ -1,0 +1,32 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+_pyname=daphne
+pkgname="py3-$_pyname"
+pkgver=3.0.2
+pkgrel=0
+arch='noarch'
+pkgdesc="HTTP, HTTP2 and WebSocket protocol server for ASGI, and developed to power Django Channels"
+url="https://pypi.python.org/project/$_pyname"
+license="BSD"
+depends='python3 py3-asgiref py3-twisted py3-autobahn'
+makedepends='py3-setuptools py3-pytest-runner'
+options="!check"
+source="${pkgname}-${pkgver}.tar.gz::https://pypi.io/packages/source/${_pyname:0:1}/$_pyname/$_pyname-${pkgver}.tar.gz"
+builddir="$srcdir"/$_pyname-$pkgver
+
+build() {
+  cd "$builddir"
+
+  python3 setup.py build
+}
+
+package() {
+  cd "$builddir"
+
+  python3 setup.py install --root="$pkgdir"/ --optimize=1 --skip-build
+
+  install -Dm644 LICENSE $pkgdir/usr/share/licenses/$pkgname/LICENSE
+}
+sha512sums="
+d21afa16aeed70194f281bc6b9192342cd2af47a966a53f922c81dbce5333e6a8824f197c7ca03fecd020d3449a67ccd2381b2d8f0604e77fbbe0b512e7ca2e8  py3-daphne-3.0.2.tar.gz
+"

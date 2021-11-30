@@ -1,0 +1,5 @@
+  echo "To upgrade the database schema, run:
+# su - mastodon -s /bin/sh -c \"RAILS_ENV=production bundle exec rails db:migrate\"
+To pre-compile assets, run:
+# su - mastodon -s /bin/sh -c \"RAILS_ENV=production bundle exec rails assets:precompile\""
+

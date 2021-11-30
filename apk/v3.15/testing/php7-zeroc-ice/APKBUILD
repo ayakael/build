@@ -1,0 +1,35 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+pkgname=php7-zeroc-ice
+pkgver=3.5.1
+pkgrel=0
+pkgdesc="PHP bindings for Ice RPC framework"
+arch="i686 x86_64"
+url="https://zeroc.com"
+license="GPL custom:Ice license"
+makedepends="zeroc-ice=$pkgver php7"
+depends="zeroc-ice=$pkgver php7"
+source="ice-${pkgver}.tar.gz::https://github.com/zeroc-ice/ice/archive/v${pkgver}.tar.gz"
+
+make_args=(
+    "OPTIMIZE=yes"
+    "ICE_HOME=/usr/" 
+    "ICE_BIN_DIST=cpp"
+)
+
+build() {
+    cd ${srcdir}/ice-${pkgver}/php
+    msg "Building Ice for PHP"
+    msg2 "Compiling..."
+    make "${make_args[@]}" -j$(nproc) srcs
+}
+
+package() {
+    cd ${srcdir}/ice-${pkgver}/php
+    make install ${make_args[@]} DESTDIR="${pkgdir}" "install_phpdir=/usr/share/ice/php" "install_phplibdir=/usr/share/ice/php"
+
+    msg "Installing Ice for PHP7"
+    install -dm755 ${pkgdir}/etc/php/conf.d/
+    echo "extension = ice.so" > ${pkgdir}/etc/php/conf.d/zeroc-ice.ini
+    echo "include_path=${include_path}:/usr/share/ice/php/" >> ${pkgdir}/etc/php/conf.d/zeroc-ice.ini
+}

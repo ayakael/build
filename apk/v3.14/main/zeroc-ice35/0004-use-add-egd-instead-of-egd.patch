@@ -1,0 +1,13 @@
+diff --git a/cpp/src/IceSSL/Instance.cpp b/cpp/src/IceSSL/Instance.cpp
+index eb2ae99f78..7ec30f32a0 100644
+--- a/cpp/src/IceSSL/Instance.cpp
++++ b/cpp/src/IceSSL/Instance.cpp
+@@ -274,7 +274,7 @@ IceSSL::Instance::Instance(const CommunicatorPtr& communicator) :
+             string entropyDaemon = properties->getProperty("IceSSL.EntropyDaemon");
+             if(!entropyDaemon.empty())
+             {
+-                if(RAND_egd(entropyDaemon.c_str()) <= 0)
++                if(RAND_add_egd(entropyDaemon.c_str()) <= 0)
+                 {
+                     PluginInitializationException ex(__FILE__, __LINE__);
+                     ex.reason = "IceSSL: EGD failure using file " + entropyDaemon;

@@ -1,0 +1,18 @@
+# Maintainer: Antoine Martin (ayakael) <dev@ayakael.net>
+pkgname=craftbukkit-plugin-vault
+pkgver=1.7.3
+pkgrel=0
+pkgdesc="Vault is a Permissions, Chat, & Economy API to give plugins easy hooks into these systems"
+options=!check
+arch='noarch'
+url="https://github.com/MilkBowl/Vault"
+license="GPL-3.0"
+depends="craftbukkit>=1.13.2 craftbukkit<=1.17.1"
+source="${pkgname}-${pkgver}.jar::https://github.com/MilkBowl/Vault/releases/download/${pkgver}/Vault.jar"
+noextract="${pkgname}-${pkgver}.jar"
+
+package() {
+  install -Dm644 "${srcdir}"/${pkgname}-${pkgver}.jar "$pkgdir/var/lib/craftbukkit/plugins/Vault.jar"
+  chown craftbukkit:craftbukkit "$pkgdir"/var/lib/craftbukkit/plugins/Vault.jar
+}
+sha512sums="aa02af3c9770249bda77b91058ce97240d4fd4cba3f07918534127acace297feb05445122b499c2623123dfde49670e9a763221e0f41ef03f51e6880ea8f6647  craftbukkit-plugin-vault-1.7.3.jar"

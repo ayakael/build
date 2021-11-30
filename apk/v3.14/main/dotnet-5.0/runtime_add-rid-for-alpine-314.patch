@@ -1,0 +1,193 @@
+From 34bd8c2e4078129d5bf57af7f89ab5a112f7da2e Mon Sep 17 00:00:00 2001
+From: "build@apk-groulx" <build@apk-groulx.praxis>
+Date: Tue, 20 Jul 2021 23:22:54 +0000
+Subject: [PATCH 1/1] add RID for Alpine 3.14
+
+---
+ .../runtime.compatibility.json                | 109 +++++++++++++++++-
+ .../Microsoft.NETCore.Platforms/runtime.json  |  25 +++-
+ .../runtimeGroups.props                       |   2 +-
+ 3 files changed, 133 insertions(+), 3 deletions(-)
+
+diff --git a/src/libraries/pkg/Microsoft.NETCore.Platforms/runtime.compatibility.json b/src/libraries/pkg/Microsoft.NETCore.Platforms/runtime.compatibility.json
+index f56d7461e90..37d104e8ee7 100644
+--- a/src/libraries/pkg/Microsoft.NETCore.Platforms/runtime.compatibility.json
++++ b/src/libraries/pkg/Microsoft.NETCore.Platforms/runtime.compatibility.json
+@@ -401,6 +401,113 @@
+     "any",
+     "base"
+   ],
++  "alpine.3.14": [
++    "alpine.3.14",
++    "alpine.3.13",
++    "alpine.3.12",
++    "alpine.3.11",
++    "alpine.3.10",
++    "alpine.3.9",
++    "alpine.3.8",
++    "alpine.3.7",
++    "alpine.3.6",
++    "alpine",
++    "linux-musl",
++    "linux",
++    "unix",
++    "any",
++    "base"
++  ],
++  "alpine.3.14-arm": [
++    "alpine.3.14-arm",
++    "alpine.3.14",
++    "alpine.3.13-arm",
++    "alpine.3.13",
++    "alpine.3.12-arm",
++    "alpine.3.12",
++    "alpine.3.11-arm",
++    "alpine.3.11",
++    "alpine.3.10-arm",
++    "alpine.3.10",
++    "alpine.3.9-arm",
++    "alpine.3.9",
++    "alpine.3.8-arm",
++    "alpine.3.8",
++    "alpine.3.7-arm",
++    "alpine.3.7",
++    "alpine.3.6-arm",
++    "alpine.3.6",
++    "alpine-arm",
++    "alpine",
++    "linux-musl-arm",
++    "linux-musl",
++    "linux-arm",
++    "linux",
++    "unix-arm",
++    "unix",
++    "any",
++    "base"
++  ],
++  "alpine.3.14-arm64": [
++    "alpine.3.14-arm64",
++    "alpine.3.14",
++    "alpine.3.13-arm64",
++    "alpine.3.13",
++    "alpine.3.12-arm64",
++    "alpine.3.12",
++    "alpine.3.11-arm64",
++    "alpine.3.11",
++    "alpine.3.10-arm64",
++    "alpine.3.10",
++    "alpine.3.9-arm64",
++    "alpine.3.9",
++    "alpine.3.8-arm64",
++    "alpine.3.8",
++    "alpine.3.7-arm64",
++    "alpine.3.7",
++    "alpine.3.6-arm64",
++    "alpine.3.6",
++    "alpine-arm64",
++    "alpine",
++    "linux-musl-arm64",
++    "linux-musl",
++    "linux-arm64",
++    "linux",
++    "unix-arm64",
++    "unix",
++    "any",
++    "base"
++  ],
++  "alpine.3.14-x64": [
++    "alpine.3.14-x64",
++    "alpine.3.14",
++    "alpine.3.13-x64",
++    "alpine.3.13",
++    "alpine.3.12-x64",
++    "alpine.3.12",
++    "alpine.3.11-x64",
++    "alpine.3.11",
++    "alpine.3.10-x64",
++    "alpine.3.10",
++    "alpine.3.9-x64",
++    "alpine.3.9",
++    "alpine.3.8-x64",
++    "alpine.3.8",
++    "alpine.3.7-x64",
++    "alpine.3.7",
++    "alpine.3.6-x64",
++    "alpine.3.6",
++    "alpine-x64",
++    "alpine",
++    "linux-musl-x64",
++    "linux-musl",
++    "linux-x64",
++    "linux",
++    "unix-x64",
++    "unix",
++    "any",
++    "base"
++  ],
+   "alpine.3.6": [
+     "alpine.3.6",
+     "alpine",
+@@ -7032,4 +7139,4 @@
+     "any",
+     "base"
+   ]
+-}
+\ No newline at end of file
++}
+diff --git a/src/libraries/pkg/Microsoft.NETCore.Platforms/runtime.json b/src/libraries/pkg/Microsoft.NETCore.Platforms/runtime.json
+index 3e8b2e74e85..21080c54167 100644
+--- a/src/libraries/pkg/Microsoft.NETCore.Platforms/runtime.json
++++ b/src/libraries/pkg/Microsoft.NETCore.Platforms/runtime.json
+@@ -115,6 +115,29 @@
+         "alpine.3.12-x64"
+       ]
+     },
++    "alpine.3.14": {
++      "#import": [
++        "alpine.3.13"
++      ]
++    },
++    "alpine.3.14-arm": {
++      "#import": [
++        "alpine.3.14",
++        "alpine.3.13-arm"
++      ]
++    },
++    "alpine.3.14-arm64": {
++      "#import": [
++        "alpine.3.14",
++        "alpine.3.13-arm64"
++      ]
++    },
++    "alpine.3.14-x64": {
++      "#import": [
++        "alpine.3.14",
++        "alpine.3.13-x64"
++      ]
++    },
+     "alpine.3.6": {
+       "#import": [
+         "alpine"
+@@ -3121,4 +3144,4 @@
+       ]
+     }
+   }
+-}
+\ No newline at end of file
++}
+diff --git a/src/libraries/pkg/Microsoft.NETCore.Platforms/runtimeGroups.props b/src/libraries/pkg/Microsoft.NETCore.Platforms/runtimeGroups.props
+index e78268c077f..a5f37b373a4 100644
+--- a/src/libraries/pkg/Microsoft.NETCore.Platforms/runtimeGroups.props
++++ b/src/libraries/pkg/Microsoft.NETCore.Platforms/runtimeGroups.props
+@@ -16,7 +16,7 @@
+     <RuntimeGroup Include="alpine">
+       <Parent>linux-musl</Parent>
+       <Architectures>x64;arm;arm64</Architectures>
+-      <Versions>3.6;3.7;3.8;3.9;3.10;3.11;3.12;3.13</Versions>
++      <Versions>3.6;3.7;3.8;3.9;3.10;3.11;3.12;3.13;3.14</Versions>
+     </RuntimeGroup>
+ 
+     <RuntimeGroup Include="android">
+-- 
+2.32.0
+

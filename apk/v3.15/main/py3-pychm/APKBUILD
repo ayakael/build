@@ -1,0 +1,28 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+_pkgname=pychm
+pkgname=py3-pychm
+pkgver=0.8.6
+pkgrel=0
+pkgdesc="Python bindings for chmlib"
+arch='x86_64'
+url="https://github.com/dottedmag/${_pkgname}"
+license='GPL'
+depends='chmlib python3'
+makedepends='py3-setuptools python3-dev'
+checkdepends='py3-pytest'
+source=$pkgname-$pkgver.tar.gz::${url}/archive/v$pkgver.tar.gz
+options=!check
+
+build() {
+  cd "$srcdir/pychm-$pkgver"
+
+  python3 setup.py build
+}
+
+package() {
+
+  cd "$srcdir/pychm-$pkgver"
+  python3 setup.py install --root="$pkgdir" --optimize=1 --skip-build
+}
+sha512sums="cc1b254b6c58aba038171ad9db1eea3212094d7fb9386b22ada67381d702b388e6a1dde0317b5724587ee135d2695c546a7c2d65af7091dafeb394647597b0ae  py3-pychm-0.8.6.tar.gz"

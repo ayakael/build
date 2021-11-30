@@ -1,0 +1,30 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+_pyname='inotifyrecursive'
+pkgname="py3-$_pyname"
+pkgver=0.3.5
+pkgrel=0
+arch='noarch'
+pkgdesc="Simple recursive inotify watches for Python"
+url="https://pypi.python.org/project/${_pyname}"
+license="LGPL3"
+depends='py3-inotify-simple'
+makedepends='py3-setuptools'
+options="!check"
+source="${pkgname}-${pkgver}.tar.gz::https://pypi.io/packages/source/${_pyname:0:1}/$_pyname/$_pyname-${pkgver}.tar.gz"
+builddir="$srcdir"/$_pyname-$pkgver
+
+build() {
+  cd "$builddir"
+
+  python3 setup.py build
+}
+
+package() {
+  cd "$builddir"
+
+  PYTHONHASHSEED=0 python3 setup.py install --root="$pkgdir"/ --optimize=1 --skip-build --prefix=/usr
+}
+sha512sums="
+23d37d1574dd8228d1905bb02ff9ae2ad56e7905482c004029c3d9f79f94da10a1255395df638dd356b69da787f4dc05d1f90eeb65d0abfedec71054c3fdc0ca  py3-inotifyrecursive-0.3.5.tar.gz
+"

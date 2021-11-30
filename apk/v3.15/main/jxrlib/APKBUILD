@@ -1,0 +1,53 @@
+# Maintainer: Filipe Laíns (FFY00) <lains@archlinux.org>
+# Contributor: Antonio Rojas <arojas@archlinux.org>
+
+pkgname=jxrlib
+pkgver=0.2.1
+pkgrel=1
+pkgdesc="Open source implementation of jpegxr"
+arch='x86_64'
+url="https://archive.codeplex.com/?p=jxrlib"
+license='GPL'
+depends='musl openjdk9-jre'
+makedepends='cmake swig maven openjdk9-jdk'
+source="$pkgname-$pkgver.tar.gz::https://github.com/glencoesoftware/jxrlib/archive/v$pkgver.tar.gz
+	CMakeLists.txt"
+options=!check
+
+prepare() {
+  cp $srcdir/CMakeLists.txt $srcdir/$pkgname-$pkgver/
+}
+
+build() {
+  # Generate jni files
+  cd $srcdir/$pkgname-$pkgver/java
+
+  mkdir -p target/swig/ome/jxrlib
+  swig -java -c++ -package ome.jxrlib -outdir target/swig/ome/jxrlib -o target/swig/JXR_wrap.cxx JXR.i
+
+  # Build source
+  mkdir -p ../build
+  cd ../build
+
+  cmake .. \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_BUILD_TYPE=Release
+
+  make
+
+  # Compile java library
+  cd ../java
+  mvn install -DskipTests
+}
+
+package() {
+  cd $srcdir/$pkgname-$pkgver/build
+
+  make DESTDIR="$pkgdir" install
+
+  cd ../java/target
+
+  install -Dm 644 $pkgname-$pkgver.jar "$pkgdir"/usr/share/java/$pkgname-$pkgver.jar
+}
+sha512sums="bcf69c9bec32829c266e60540fdc2e8d16d9bf7e0d3930327db5bfce6d1fc2c8b67c7a2b236d128ff3ce89b1c2a14b27a69cdf5bda365c4fcaac98d76b8bd406  jxrlib-0.2.1.tar.gz
+afa858b149283c63dbde69463b04297cd25c747839687e5b19d8ab0003eaf86effb5fca08e0e6cbe3cafd29d4bf5d8287240ca9216f29feb3cfdf4a994597dbb  CMakeLists.txt"

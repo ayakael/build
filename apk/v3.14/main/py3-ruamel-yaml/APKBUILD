@@ -1,0 +1,32 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+_pyname='ruamel.yaml'
+pkgname="py3-ruamel-yaml"
+pkgver=0.17.10
+pkgrel=0
+arch='noarch'
+pkgdesc="AML parser/emitter that supports roundtrip preservation of comments, seq/map flow style, and map key order"
+url="https://pypi.python.org/project/${_pyname}"
+license="MIT"
+depends='python3 py3-ruamel-yaml-clib'
+makedepends='py3-setuptools'
+options="!check"
+source="${pkgname}-${pkgver}.tar.gz::https://pypi.io/packages/source/${_pyname:0:1}/$_pyname/$_pyname-${pkgver}.tar.gz"
+builddir="$srcdir"/$_pyname-$pkgver
+
+build() {
+  cd "$builddir"
+
+  python3 setup.py build
+}
+
+package() {
+  cd "$builddir"
+
+  RUAMEL_NO_PIP_INSTALL_CHECK=1 python3 setup.py install --root="$pkgdir"/ --optimize=1 --skip-build
+
+  install -Dm644 LICENSE $pkgdir/usr/share/licenses/$pkgname/LICENSE
+}
+sha512sums="
+afc0d2a9d900bd2205127d8ca3fa25e36a9f9c5d99af2c030a71dc1f45112a8da100fbea3869747f3236254a92cd945e28de7f60e2e5a845ac326fe35d071269  py3-ruamel-yaml-0.17.10.tar.gz
+"

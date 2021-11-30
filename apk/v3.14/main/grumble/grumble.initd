@@ -1,0 +1,26 @@
+#!/sbin/openrc-run
+
+name="Grumble"
+logfile="/var/log/grumble/grumble.log"
+pidfile="/run/grumble.pid"
+
+depend() {
+    use net
+}
+
+start() {
+    ebegin "Starting grumble"
+    start-stop-daemon --start --background \
+        --user="grumble" \
+        --make-pidfile --pidfile="${pidfile}" \
+	--stdout "${logfile}" --stderr "${logfile}" \
+	--exec /usr/bin/env -- /usr/bin/grumble
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping grumble"
+    start-stop-daemon --stop \
+        --pidfile=${pidfile} \
+    eend $?
+}

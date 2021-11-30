@@ -1,0 +1,27 @@
+# Maintainer: Lukas Fleischer <lfleischer@archlinux.org>
+# Contributor: Simon Zimmermann <simon@insmo.com>
+
+pkgname='pass'
+pkgver=1.7.3
+pkgrel=0
+pkgdesc='Stores, retrieves, generates, and synchronizes passwords securely'
+arch='noarch'
+url='https://www.passwordstore.org/'
+license='GPL2'
+depends='xclip bash gnupg tree git grep'
+subpackages='pass-doc'
+source="https://git.zx2c4.com/password-store/snapshot/password-store-${pkgver}.tar.xz"
+
+check() {
+  cd "${srcdir}/password-store-$pkgver/"
+  make test
+}
+
+package() {
+  cd "${srcdir}/password-store-$pkgver/"
+  make DESTDIR="${pkgdir}" WITH_ALLCOMP=yes install
+
+  cd contrib/dmenu
+  install -Dm0755 passmenu "${pkgdir}/usr/bin/passmenu"
+}
+sha512sums="89755a7b02f05d75055a9fc14fd3f456c0a49ec31bdffd097a027f91228c64a98b18c1e80017aeda811773ae3287ff1b9737532da8ded06799d8fe3979ca06f7  password-store-1.7.3.tar.xz"

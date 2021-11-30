@@ -1,0 +1,50 @@
+# Maintainer: Antoine Martin <antoine@ayakael.net>
+pkgname=freshrss-touchcontrol
+pkgver=0.2
+pkgrel=1
+pkgdesc="Add touch gestures to FreshRSS."
+url="https://github.com/langfeld/FreshRSS-extensions"
+arch="noarch"
+license="MIT"
+depends="freshrss"
+makedepends="git"
+source="$pkgname-$pkgver.tar.gz"
+_giturl="https://github.com/langfeld/FreshRSS-extensions"
+_gittag="d02b2cb89f5ad16a9ee10c8eac578ead21c8c91d"
+builddir="$srcdir"
+options="!check"
+
+snapshot() {
+	mkdir -p "$srcdir"
+	cd "${SRCDEST:-$srcdir}"
+	if ! [ -d $pkgname.git ]; then
+		git clone $_giturl $pkgname.git || return 1
+		cd $pkgname.git
+	else
+		cd $pkgname.git
+		git fetch || return 1
+	fi
+
+	echo "Checking out"
+	git checkout $_gittag
+	echo "Repo archive"
+	git archive --prefix="$pkgname/" -o ${pkgname}-${pkgver}.tar --format "tar" $_gittag
+    
+   
+	gzip ${pkgname}-${pkgver}.tar -c > "$SRCDEST"/$pkgname-$pkgver.tar.gz
+	ln -s "$SRCDEST"/$pkgname-$pkgver.tar.gz "$startdir"/$pkgname-$pkgver.tar.gz 
+}
+
+build() {
+    return 0
+}
+
+package() {
+	cd "$builddir"
+	mkdir -p "${pkgdir}/usr/share/webapps/freshrss/extensions"
+	cp -R "${pkgname}/xExtension-TouchControl" "${pkgdir}/usr/share/webapps/freshrss/extensions/"
+}
+
+
+
+sha512sums="e471c2fe77ce9533eca6133a9fec1210e4c243daa7b624882b233643a31130e1507ed1465a95bea09a7ffd1e5aa23cf267090aab8656ae92841529077a501c14  freshrss-touchcontrol-0.2.tar.gz"

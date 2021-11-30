@@ -1,0 +1,7 @@
+#!/bin/sh
+
+mkdir -p /var/lib/logitechmediaserver/cache /var/lib/logitechmediaserver/Logs /var/lib/logitechmediaserver/prefs /var/lib/logitechmediaserver/prefs/plugin /var/lib/logitechmediaserver/Plugins
+touch /var/lib/logitechmediaserver/Logs/slimserver.log
+chown -R logitechmediaserver:logitechmediaserver /var/lib/logitechmediaserver
+
+exit 0

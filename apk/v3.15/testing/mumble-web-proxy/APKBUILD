@@ -1,0 +1,51 @@
+# Maintainer: Edouard Lafon <dev+arch@elafon.98.wf>
+
+pkgname=mumble-web-proxy	
+pkgver=0.1.1
+pkgrel=1
+pkgdesc="mumble-web-proxy is a Mumble to WebSocket+WebRTC proxy"
+arch='x86_64'
+url="https://github.com/johni0702/mumble-web-proxy"
+license='AGLP-3.0'
+makedepends='rustup libnice-dev openssl-dev clang cargo'
+source="$pkgname-$pkgver.tar.gz mumble-web-proxy.initd mumble-web-proxy.conf"
+_giturl="https://github.com/johni0702/mumble-web-proxy"
+_gittag="cfae6178c70c1436186f16723b18a2cbb0f06138"
+builddir="$srcdir/$pkgname"
+options="!check"
+subpackages="${pkgname}-openrc"
+
+snapshot() {
+	mkdir -p "$srcdir"
+	cd "${srcdir}"
+	if ! [ -d $pkgname.git ]; then
+		git clone $_giturl $pkgname.git || return 1
+		cd $pkgname.git
+	else
+		cd $pkgname.git
+		git fetch || return 1
+	fi
+
+	echo "Checking out"
+	git checkout $_gittag
+	echo "Repo archive"
+	git archive --prefix="$pkgname/" -o $pkgname.tar --format "tar" $_gittag
+
+	gzip $pkgname.tar -c > "$SRCDEST"/$pkgname-$pkgver.tar.gz
+	ln -s "$SRCDEST"/$pkgname-$pkgver.tar.gz "$startdir"/$pkgname-$pkgver.tar.gz 
+}
+
+build() {
+	cd $builddir
+	export CARGO_HOME="$builddir"/cargo
+	cargo build --release
+}
+
+package() {
+	install -Dm755 "${builddir}"/target/release/mumble-web-proxy "${pkgdir}"/usr/bin/mumble-web-proxy
+	install -Dm755 "${srcdir}"/mumble-web-proxy.initd "${pkgdir}"/etc/init.d/mumble-web-proxy
+	install -Dm644 "${srcdir}"/mumble-web-proxy.conf "${pkgdir}"/etc/mumble-web-proxy.conf
+}
+sha512sums="08d522fdc625c231b7f931bdb3c788f4c5dabf0ed14a3d76b9bd0e0cb56f8fce0fb72f531670b3004f9105650c36ed15386c2677753c355bbe76e7a56a3ce8b5  mumble-web-proxy-0.1.1.tar.gz
+ab470bd12df5a3c9b5d2526c27f8a7e2dc437fc2bfb943b9e98c975d87b2bfa5e7e906001cb66c6c26e505df17a5d335a556b52f534e973ef6b49b14b26468a5  mumble-web-proxy.initd
+bbb197930295448c4cbb59b0ba9fbae75d5d2bd0868c96327840b00a69c7755831080a771d487348fe204d09636a95947aaea5d83714126032a38f8a5fce8bd3  mumble-web-proxy.conf"

@@ -1,0 +1,20 @@
+diff --git a/cpp/config/Make.rules.Linux b/cpp/config/Make.rules.Linux
+index 5d5717c9f8..5f061da009 100644
+--- a/cpp/config/Make.rules.Linux
++++ b/cpp/config/Make.rules.Linux
+@@ -79,7 +79,7 @@ ifeq ($(CXX),g++)
+       endif
+    endif
+ 
+-   CXXFLAGS		= $(CXXARCHFLAGS) -Wall -Werror -pthread
++   CXXFLAGS		= $(CXXARCHFLAGS) -Wall -pthread
+ 
+    ifneq ($(GENPIC),no)
+       CXXFLAGS		+= -fPIC
+@@ -165,4 +165,4 @@ ifneq ($(QT_HOME),)
+    QT_FLAGS             = -I$(QT_HOME)/include
+    QT_LIBS              = -L$(QT_HOME)/$(libsubdir) -lQtCore -lQtSql
+    QT_RPATH_LINK        = $(call rpathlink,$(QT_HOME)/$(libsubdir))
+-endif
+\ No newline at end of file
++endif

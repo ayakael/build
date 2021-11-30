@@ -1,0 +1,90 @@
+make[3]: Entering directory '/var/build/build/apk/v3.15/main/zeroc-ice35/src/ice-3.5.1/php/src/IcePHP'
+g++ -c -I.  -I../../../cpp/include -I/usr/include/php -I/usr/include/php/main -I/usr/include/php/Zend -I/usr/include/php/TSRM -DPHP_DEBUG -m64 -Wall -pthread -fPIC -g  Communicator.cpp
+g++ -c -I.  -I../../../cpp/include -I/usr/include/php -I/usr/include/php/main -I/usr/include/php/Zend -I/usr/include/php/TSRM -DPHP_DEBUG -m64 -Wall -pthread -fPIC -g  Connection.cpp
+g++ -c -I.  -I../../../cpp/include -I/usr/include/php -I/usr/include/php/main -I/usr/include/php/Zend -I/usr/include/php/TSRM -DPHP_DEBUG -m64 -Wall -pthread -fPIC -g  Endpoint.cpp
+g++ -c -I.  -I../../../cpp/include -I/usr/include/php -I/usr/include/php/main -I/usr/include/php/Zend -I/usr/include/php/TSRM -DPHP_DEBUG -m64 -Wall -pthread -fPIC -g  Init.cpp
+g++ -c -I.  -I../../../cpp/include -I/usr/include/php -I/usr/include/php/main -I/usr/include/php/Zend -I/usr/include/php/TSRM -DPHP_DEBUG -m64 -Wall -pthread -fPIC -g  Logger.cpp
+g++ -c -I.  -I../../../cpp/include -I/usr/include/php -I/usr/include/php/main -I/usr/include/php/Zend -I/usr/include/php/TSRM -DPHP_DEBUG -m64 -Wall -pthread -fPIC -g  Operation.cpp
+g++ -c -I.  -I../../../cpp/include -I/usr/include/php -I/usr/include/php/main -I/usr/include/php/Zend -I/usr/include/php/TSRM -DPHP_DEBUG -m64 -Wall -pthread -fPIC -g  Properties.cpp
+g++ -c -I.  -I../../../cpp/include -I/usr/include/php -I/usr/include/php/main -I/usr/include/php/Zend -I/usr/include/php/TSRM -DPHP_DEBUG -m64 -Wall -pthread -fPIC -g  Proxy.cpp
+g++ -c -I.  -I../../../cpp/include -I/usr/include/php -I/usr/include/php/main -I/usr/include/php/Zend -I/usr/include/php/TSRM -DPHP_DEBUG -m64 -Wall -pthread -fPIC -g  Types.cpp
+g++ -c -I.  -I../../../cpp/include -I/usr/include/php -I/usr/include/php/main -I/usr/include/php/Zend -I/usr/include/php/TSRM -DPHP_DEBUG -m64 -Wall -pthread -fPIC -g  Util.cpp
+In file included from ./Connection.h:13,
+                 from Connection.cpp:10:
+./Config.h:45:10: fatal error: php.h: No such file or directory
+   45 | #include "php.h"
+      |          ^~~~~~~
+In file included from ./Operation.h:13,
+                 from Operation.cpp:10:
+./Config.h:45:10: fatal error: php.h: No such file or directory
+   45 | #include "php.h"
+      |          ^~~~~~~
+In file included from ./Communicator.h:13,
+                 from Communicator.cpp:10:
+./Config.h:45:10: fatal error: php.h: No such file or directory
+   45 | #include "php.h"
+      |          ^~~~~~~
+In file included from ./Endpoint.h:13,
+                 from Endpoint.cpp:10:
+./Config.h:45:10: fatal error: php.h: No such file or directory
+   45 | #include "php.h"
+      |          ^~~~~~~
+compilation terminated.
+compilation terminated.
+compilation terminated.
+compilation terminated.
+In file included from ./Properties.h:13,
+                 from Properties.cpp:10:
+./Config.h:45:10: fatal error: php.h: No such file or directory
+   45 | #include "php.h"
+      |          ^~~~~~~
+compilation terminated.
+make[3]: *** [../../config/Make.rules.php:184: Operation.o] Error 1
+make[3]: *** Waiting for unfinished jobs....
+make[3]: *** [../../config/Make.rules.php:184: Communicator.o] Error 1
+make[3]: *** [../../config/Make.rules.php:184: Connection.o] Error 1
+make[3]: *** [../../config/Make.rules.php:184: Endpoint.o] Error 1
+make[3]: *** [../../config/Make.rules.php:184: Properties.o] Error 1
+In file included from ./Logger.h:13,
+                 from Logger.cpp:10:
+./Config.h:45:10: fatal error: php.h: No such file or directory
+   45 | #include "php.h"
+      |          ^~~~~~~
+compilation terminated.
+make[3]: *** [../../config/Make.rules.php:184: Logger.o] Error 1
+In file included from ./Util.h:13,
+                 from Util.cpp:10:
+./Config.h:45:10: fatal error: php.h: No such file or directory
+   45 | #include "php.h"
+      |          ^~~~~~~
+compilation terminated.
+In file included from ./Types.h:13,
+                 from Types.cpp:10:
+./Config.h:45:10: fatal error: php.h: No such file or directory
+   45 | #include "php.h"
+      |          ^~~~~~~
+compilation terminated.
+make[3]: *** [../../config/Make.rules.php:184: Util.o] Error 1
+make[3]: *** [../../config/Make.rules.php:184: Types.o] Error 1
+In file included from ./Communicator.h:13,
+                 from Init.cpp:10:
+./Config.h:45:10: fatal error: php.h: No such file or directory
+   45 | #include "php.h"
+      |          ^~~~~~~
+compilation terminated.
+make[3]: *** [../../config/Make.rules.php:184: Init.o] Error 1
+In file included from ./Proxy.h:13,
+                 from Proxy.cpp:10:
+./Config.h:45:10: fatal error: php.h: No such file or directory
+   45 | #include "php.h"
+      |          ^~~~~~~
+compilation terminated.
+make[3]: *** [../../config/Make.rules.php:184: Proxy.o] Error 1
+make[3]: Leaving directory '/var/build/build/apk/v3.15/main/zeroc-ice35/src/ice-3.5.1/php/src/IcePHP'
+make[2]: *** [Makefile:17: all] Error 1
+make[2]: Leaving directory '/var/build/build/apk/v3.15/main/zeroc-ice35/src/ice-3.5.1/php/src'
+make[1]: *** [Makefile:29: all] Error 1
+make[1]: Leaving directory '/var/build/build/apk/v3.15/main/zeroc-ice35/src/ice-3.5.1/php'
+make: *** [Makefile:72: php] Error 1
+>>> ERROR: zeroc-ice35: build failed
+

@@ -1,0 +1,32 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+_pyname=httptools
+pkgname="py3-$_pyname"
+pkgver=0.2.0
+pkgrel=0
+arch='x86_64'
+pkgdesc="Fast HTTP praser"
+url="https://pypi.python.org/project/$_pyname"
+license="MIT"
+depends='python3 http-parser'
+makedepends='py3-setuptools python3-dev py3-wheel http-parser-dev cython'
+options="!check"
+source="${pkgname}-${pkgver}.tar.gz::https://pypi.io/packages/source/${_pyname:0:1}/$_pyname/$_pyname-${pkgver}.tar.gz"
+builddir="$srcdir"/$_pyname-$pkgver
+
+build() {
+  cd "$builddir"
+
+  python3 setup.py build build_ext --use-system-http-parser
+}
+
+package() {
+  cd "$builddir"
+
+  python3 setup.py install --root="$pkgdir"/ --optimize=1 --skip-build
+
+  install -Dm644 LICENSE $pkgdir/usr/share/licenses/$pkgname/LICENSE
+}
+sha512sums="
+a8d271d96165504c3ed0fb518f459baf1d4f4fb642188e0b6a7219a93ec1f5ce0d2129c331d222abf51385e97989f92e42ff6fa5a0383d3c7d9072c292b9e21b  py3-httptools-0.2.0.tar.gz
+"

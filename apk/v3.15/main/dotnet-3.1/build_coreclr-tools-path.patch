@@ -1,0 +1,44 @@
+From b2148eeb23bd54513a11682c025976ee1798d682 Mon Sep 17 00:00:00 2001
+From: "build@apk-groulx" <build@apk-groulx.praxis>
+Date: Wed, 14 Jul 2021 04:15:54 +0000
+Subject: [PATCH 1/1] dotnet-source-build-coreclr-tools-path.patch
+
+---
+ repos/coreclr-portable.proj | 2 +-
+ repos/coreclr.proj          | 4 ++--
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/repos/coreclr-portable.proj b/repos/coreclr-portable.proj
+index 78adc146..378547ea 100644
+--- a/repos/coreclr-portable.proj
++++ b/repos/coreclr-portable.proj
+@@ -19,7 +19,7 @@
+           Inputs="$(MSBuildProjectFullPath)"
+           Outputs="$(RepoCompletedSemaphorePath)CopyTools.complete">
+     <PropertyGroup>
+-      <CoreClrDestinationDir>$(ToolPackageExtractDir)coreclr-tools/$(BuildArchitecture)</CoreClrDestinationDir>
++      <CoreClrDestinationDir>$(ToolPackageExtractDir)coreclr-tools</CoreClrDestinationDir>
+       <AssemblyExtension Condition="'$(TargetOS)' == 'Linux'">so</AssemblyExtension>
+       <AssemblyExtension Condition="'$(TargetOS)' == 'FreeBSD'">so</AssemblyExtension>
+       <AssemblyExtension Condition="'$(TargetOS)' == 'OSX'">dylib</AssemblyExtension>
+diff --git a/repos/coreclr.proj b/repos/coreclr.proj
+index 7e67b283..6f7851b1 100644
+--- a/repos/coreclr.proj
++++ b/repos/coreclr.proj
+@@ -15,11 +15,11 @@
+   <!-- OSX and portable only build this and not coreclr-portable, so we need to copy its tools here -->
+   <Target Name="CopyTools"
+           AfterTargets="Package"
+-          Condition="'$(TargetOS)' == 'OSX' or '$(PortableBuild)' == 'true'"
++          Condition="'$(TargetOS)' == 'OSX' or '$(PortableBuild)' == 'true' or '$(TargetRid)' == 'linux-musl-x64'"
+           Inputs="$(MSBuildProjectFullPath)"
+           Outputs="$(RepoCompletedSemaphorePath)CopyTools.complete">
+     <PropertyGroup>
+-      <CoreClrDestinationDir>$(ToolPackageExtractDir)coreclr-tools/$(BuildArchitecture)</CoreClrDestinationDir>
++      <CoreClrDestinationDir>$(ToolPackageExtractDir)coreclr-tools</CoreClrDestinationDir>
+       <AssemblyExtension Condition="'$(TargetOS)' == 'Linux'">so</AssemblyExtension>
+       <AssemblyExtension Condition="'$(TargetOS)' == 'FreeBSD'">so</AssemblyExtension>
+       <AssemblyExtension Condition="'$(TargetOS)' == 'OSX'">dylib</AssemblyExtension>
+-- 
+2.30.2
+

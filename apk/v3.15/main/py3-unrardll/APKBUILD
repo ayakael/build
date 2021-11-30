@@ -1,0 +1,33 @@
+# Maintainer: Jelle van der Waa <jelle@archlinux.org>
+# Contributor: Eli Schwartz <eschwartz93@gmail.com>
+
+_pkgname=unrardll
+pkgname='py3-unrardll'
+pkgver=0.1.4
+pkgrel=0
+pkgdesc="Python wrapper for UnRAR DLL"
+arch='x86_64'
+url="https://github.com/kovidgoyal/${_pkgname}"
+license='BSD'
+depends='unrar'
+makedepends='py3-setuptools python3-dev unrar-dev'
+source="${pkgname}-${pkgver}.tar.gz::${url}/archive/v${pkgver}.tar.gz"
+
+build() {
+  cd "${srcdir}/${_pkgname}-${pkgver}"
+
+  python3 setup.py build
+}
+
+check() {
+  cd "${srcdir}/${_pkgname}-${pkgver}"
+
+  python3 setup.py test
+}
+package() {
+  cd "${srcdir}/${_pkgname}-${pkgver}"
+  python3 setup.py install --root="${pkgdir}" --optimize=1 --skip-build
+
+  install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
+sha512sums="1bb62ae74aa48de7bde544481688b3a5dadac158bb187280d4d495c945280468d6423da03aba9f4a1e6ea7fa7402b4c9bd7c5fe8a74a60b99380b68a86be2fc2  py3-unrardll-0.1.4.tar.gz"

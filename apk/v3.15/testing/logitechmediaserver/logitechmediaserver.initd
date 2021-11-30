@@ -1,0 +1,36 @@
+#!/sbin/openrc-run
+# Distributed under the terms of the GNU General Public License, v2 or later
+
+LOGITECHMS_HOME=${LOGITECHMS_HOME:-/var/lib/${SVCNAME}}
+LOGITECHMS_USER=${LOGITECHMS_USER:-${SVCNAME}}
+PIDFILE=/run/logitechmediaserver/logitechmediaserver.pid
+
+depend() {
+	after net
+}
+
+start() {
+	checkpath -dq -o ${LOGITECHMS_USER}:${LOGITECHMS_USER}	 -m 755 /run/logitechmediaserver/
+	ebegin "Starting ${SVCNAME}"
+	start-stop-daemon \
+		--start --user "${LOGITECHMS_USER}" --name logitechmediaserver \
+		--env HOME="${LOGITECHMS_HOME}" --exec /usr/bin/logitechmediaserver \
+		--pidfile="${PIDFILE}" \
+		--nicelevel "${NICELEVEL}" \
+		-- \
+		--prefsdir=${LOGITECHMS_HOME}/prefs \
+		--cachedir=${LOGITECHMS_HOME}/cache \
+		--logdir=${LOGITECHMS_HOME}/Logs \
+		--noimage --novideo
+	eend $?
+}
+
+stop() {
+	ebegin "Stopping ${SVCNAME}"
+	start-stop-daemon --stop --user "${LOGITECHMS_USER}" \
+		--pidfile "${PIDFILE}" \
+		--wait 15000 \
+		--progress
+	eend $?
+}
+

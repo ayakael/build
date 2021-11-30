@@ -1,0 +1,32 @@
+# Maintainer:
+# Contributor: Tom Gundersen <teg@jklm.no>
+# Contributor: Travis Willard <travis@archlinux.org>
+
+pkgname=nss-mdns
+pkgver=0.14.1
+pkgrel=0
+pkgdesc="glibc plugin providing host name resolution via mDNS"
+arch='x86_64'
+url="http://0pointer.de/lennart/projects/nss-mdns/"
+license='LGPL'
+depends='musl'
+makedepends='nss-dev nspr-dev' 
+source="https://github.com/lathiat/nss-mdns/releases/download/v$pkgver/$pkgname-$pkgver.tar.gz"
+builddir="${srcdir}/nss-mdns-${pkgver}"
+
+build() {
+  cd ${builddir}
+  CFLAGS='-I/usr/include/nss -I/usr/include/nspr'
+  ./configure \
+    --prefix=/usr \
+    --sysconfdir=/etc \
+    --localstatedir=/var
+  make
+}
+
+package() {
+  cd ${builddir}
+  make DESTDIR="${pkgdir}" install
+}
+
+sha512sums="7c06b984443881a6c0a1f850ee33f14780562cc6168fe1cda176303eb799ece510d51d3830928616723bb95250ad6462978cd8b857f2b79d87116da2c1aeaa5e  nss-mdns-0.14.1.tar.gz"

@@ -1,0 +1,39 @@
+# Maintainer: Maxime Gauduin <alucryd@archlinux.org>
+# Contributor: Alexander Baldeck <alexander@archlinux.org>
+# Contributor: dorphell <dorphell@archlinux.org>
+
+pkgname=zvbi
+pkgver=0.2.35
+pkgrel=1
+pkgdesc='VBI capture and decoding library'
+url='http://zapping.sourceforge.net/cgi-bin/view/ZVBI/WebHome'
+arch='x86_64'
+makedepends='libpng-dev libx11-dev'
+license='GPL'
+source="
+  https://downloads.sourceforge.net/sourceforge/zapping/${pkgname}-${pkgver}.tar.bz2
+  fix-musl-build.patch
+  zvbi-va_copy.patch"
+builddir="${srcdir}/${pkgname}-${pkgver}"
+subpackages="${pkgname}-doc ${pkgname}-dev"
+options='!check'
+
+build() {
+  cd "${builddir}"
+
+  ./configure \
+    --prefix='/usr' \
+    --sbindir='/usr/bin'
+  make
+}
+
+package() {
+  cd "${builddir}"
+
+  make DESTDIR="${pkgdir}" install
+}
+
+# vim: ts=2 sw=2 et:
+sha512sums="3d73eb0a7d05fdf1e3f8a74cc9d4fcb2a0287285904d59230c832f42b91afb072e96bda7e396ef07f268348061a51242925746db124bbb713cf56bdfabdada5d  zvbi-0.2.35.tar.bz2
+d7397c7ffd2de236add035a021fa8285f3c1baf7bd02ceb19de4cea8a2f46d9e2cf6d8a22317d2d712fc355adc258ec784500e57e454c8873bbc25f5051de4f1  fix-musl-build.patch
+ec59b6888106db7fbd7ed83615ebc92571f10242cbfab86eae7b70a0e619e09cd187ca19ed5a1ae2a66f4b2e54cb4bd3e8f8d938d43ab4a72e16cf55a9bf7b0a  zvbi-va_copy.patch"

@@ -1,0 +1,41 @@
+From 7ea56c0db14d4be2dbcf95a9156bde1f5852dec8 Mon Sep 17 00:00:00 2001
+From: "build@apk-groulx" <build@apk-groulx.praxis>
+Date: Sun, 6 Jun 2021 22:47:05 +0000
+Subject: [PATCH] Fix musle build
+
+---
+diff --git a/contrib/atsc-cc.c b/contrib/atsc-cc.c
+index 50214ef..4d26107 100644
+--- a/contrib/atsc-cc.c
++++ b/contrib/atsc-cc.c
+@@ -65,6 +65,7 @@
+ /* Linux DVB driver interface. */
+ #include "src/dvb/dmx.h"
+ #include "src/dvb/frontend.h"
++#include <stddef.h>
+ 
+ #undef PROGRAM
+ #define PROGRAM "ATSC-CC"
+ src/chains.c | 4 ++++
+ 1 file changed, 1 insertion(+)
+ 2 file changed, 5 insertions(+)
+
+diff --git a/src/chains.c b/src/chains.c
+index c54bfff..57b84d5 100644
+--- a/src/chains.c
++++ b/src/chains.c
+@@ -284,7 +284,11 @@ int open(const char *pathname, int flags, ...)
+    }
+ }
+ 
++#ifdef __GLIBC__i
+ int ioctl(int fd, ioctl_request_t request, ...)
++#else
++int ioctl(int fd, int request, ...)
++#endif
+ {
+    /*
+     * FreeBSD needs ioctl with varargs. However I have no idea how to "forward"
+-- 
+2.30.2
+

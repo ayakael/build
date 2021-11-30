@@ -1,0 +1,30 @@
+# Maintainer: Antoine Martin <antoine@ayakael.net>
+
+# Based on PKGBUILD by the following:
+# Contributor: Stefan Tatschner <stefan@rumpelsepp.org>
+# Contributor: Franek Madej <franek.madej@gmail.com>
+
+pkgname=yadm
+pkgver=3.1.0
+pkgrel=3
+pkgdesc="Yet Another Dotfiles Manager"
+arch='noarch'
+url="https://github.com/TheLocehiliosan/yadm"
+license='GPL3'
+depends='gnupg py3-envtpl bash'
+source="$pkgname-$pkgver.tar.gz::https://github.com/TheLocehiliosan/${pkgname}/archive/${pkgver}.tar.gz"
+builddir="$srcdir/$pkgname-${pkgver}"
+subpackages="$pkgname-doc $pkgname-bash-completion $pkgname-zsh-completion"
+options="!check"
+
+
+package(){
+  cd "${builddir}"
+  install -D -m 755 yadm $pkgdir/usr/bin/yadm
+  install -D -m 644 yadm.1 $pkgdir/usr/share/man/man1/yadm.1
+  install -D -m 644 completion/bash/yadm "${pkgdir}/usr/share/bash-completion/completions/yadm"
+  install -D -m 644 completion/zsh/_yadm "${pkgdir}/usr/share/zsh/site-functions/_yadm"
+  install -D -m 644 completion/fish/yadm.fish "${pkgdir}/usr/share/fish/vendor_completions.d/yadm.fish"
+}
+
+sha512sums="9b01243253a117dfbbe5ff5457e9ed1ba0b8dfae71d27cf39325b87042da362ae019ee27067501705dd127cb0ee4d1e6a009968a4b18eda57b2b34273127bc9e  yadm-3.1.0.tar.gz"

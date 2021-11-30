@@ -1,0 +1,32 @@
+#!/sbin/openrc-run
+# Distributed under the terms of the GNU General Public License, v2 or later
+
+PAPERMC_HOME=${PAPERMC_HOME:-/var/lib/${SVCNAME}}
+PAPERMC_USER=${PAPERMC_USER:-${SVCNAME}}
+PIDFILE=/run/papermc/papermc.pid
+
+depend() {
+	after net
+}
+
+start() {
+	checkpath -dq -o papermc:papermc -m 755 /run/papermc/
+	ebegin "Starting ${SVCNAME}"
+	start-stop-daemon \
+		--start --user "${PAPERMC_USER}" --name papermc \
+		--env HOME="${PAPERMC_HOME}" --exec /usr/bin/papermc \
+		--pidfile="${PIDFILE}" \
+		-- \
+		start
+	eend $?
+}
+
+stop() {
+	ebegin "Stopping ${SVCNAME}"
+	start-stop-daemon --stop --user "${PAPERMC_USER}" \
+		--pidfile "${PIDFILE}" \
+		--wait 15000 \
+		--progress
+	eend $?
+}
+

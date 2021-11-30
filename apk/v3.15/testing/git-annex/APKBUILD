@@ -1,0 +1,173 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+#
+# Core APKBUILD variables
+#
+
+pkgname=git-annex
+pkgver=8.20211123
+pkgrel=0
+pkgdesc="Manage files with git, without checking their contents into git"
+url="http://git-annex.branchable.com"
+arch="i686 x86_64"
+license="GPL3"
+depends="git lsof rsync curl gmp zlib gnupg file gnutls libxml2 openssh util-linux libidn libgsasl"
+makedepends="cabal ghc zlib-dev file-dev gnutls-dev libxml2-dev libgsasl-dev ncurses-dev happy alex libffi-dev"
+source="
+	https://git.joeyh.name/index.cgi/git-annex.git/snapshot/$pkgname-$pkgver.tar.gz
+	0001-Added-dependency-for-ghc-9.0.1-for-cabal.patch
+"
+subpackages="$pkgname-doc"
+builddir="$srcdir/$pkgname-$pkgver"
+
+#
+# Build feature flags
+#
+
+# Enable git-annex assistant and watch command
+_assistant=1
+# Enable git-annex webapp (requires significantly more dependencies)
+_webapp=1
+# Enable pairing
+_pairing=1
+# slower build; faster binary
+_production=0
+# Use haskell torrent library to parse torrent files
+_torrentparser=1
+# Use libmagic to determine file MIME types
+_magicmime=1
+# Enable benchmarking
+_benchmark=1
+# Debug location of MVar/STM deadlocks
+_debuglocks=0
+# Enable dbus support
+_dbus=1
+# Build with network-3.0 which split out network-bsd
+_networkbsd=1
+# Build with git-lfs library (rather than vendored copy)
+_gitlfs=1
+# Build with http-client-restricted library (rather than vendored copy)
+_httpclientrestricted=1
+# The man page is always built but,
+# building the rest of the documentation requires ikiwiki.
+# If you want to build the documentation turns this to 1.
+_build_docs=0
+
+
+#
+# Build config flags
+#
+
+# Cabal flags
+_cabal_flags=" --force-reinstalls "
+
+
+_cabal_makedepends="c2hs cpphs"
+_cabal_libdepends="exceptions hslogger async tasty filepath-bytestring split unix-compat"
+
+#
+# Create features array for build
+#
+_features=""
+gitannexfeature() {
+    case $1 in
+        (0) _features="${_features} -f-$2";;
+
+        (*) _features="${_features} -f$2";;
+    esac
+}
+
+
+gitannexfeature $_assistant  Assistant
+gitannexfeature $_webapp     Webapp
+gitannexfeature $_pairing    Pairing
+gitannexfeature $_production Production
+gitannexfeature $_torrentparser TorrentParser
+gitannexfeature $_magicmime  MagicMime
+gitannexfeature $_benchmark Benchmark
+gitannexfeature $_debuglocks DebugLocks
+gitannexfeature $_dbus       Dbus
+gitannexfeature $_networkbsd NetworkBSD
+gitannexfeature $_gitlfs GitLfs
+gitannexfeature $_httpclientrestricted HttpClientRestricted
+
+
+# 
+# APKBUILD functions
+#
+
+_localize_home(){
+  ORIG_HOME="$HOME"
+  ORIG_TMPDIR="$TMPDIR"
+  export HOME="${srcdir}"/cabal
+  export TMPDIR="${srcdir}"/cabal/tmp
+  export PATH="$HOME/.cabal/bin:$PATH"
+}
+
+_restore_home(){
+  export HOME="$ORIG_HOME"
+  export TMPDIR="$ORIG_TMPDIR"
+}
+
+pkgver() {
+  cd "$srcdir/${pkgname%-git}"
+  git describe --long | sed 's/^v//;s/-/_/g'
+}
+
+asking() {
+  read -p "$@ (Y/n)" answer
+  case "$answer" in
+    n|N|no|NO|No|nO) false;;
+    *) true;;
+  esac
+}
+
+prepare() {
+    default_prepare
+    cd "$builddir"
+    _localize_home
+    mkdir -p "$HOME" "$TMPDIR"
+
+    msg "Features: $_features"
+
+    msg "Installing missing cabal dependencies..."
+    cabal update
+    cabal install ${_cabal_makedepends}
+    cabal install --lib ${_cabal_libdepends}
+    
+    cabal install ${_cabal_flags} --user --only-dependencies ${_features}
+    _restore_home
+}
+
+build() {
+    cd "$builddir"    
+    _localize_home
+
+    msg "Configuring..."
+    cabal configure ${_features}
+
+    msg "Starting build..."
+    make
+    _restore_home
+}
+
+check() {
+    cd "$builddir"
+    _localize_home
+    make test || asking "Tests failed. Continue?"
+    _restore_home
+    
+}
+
+package() {
+	cd "$builddir"
+    _localize_home
+    make DESTDIR="$pkgdir" install
+    _restore_home
+}
+
+
+sha512sums="
+cd5eb30e71bd580867b9a92d33dc2338f239919765a7c03f5caf1b772cf9059d6d4b6899087a62d141968546d1a6187dbac11858fe93ba7fabcaa543be863613  git-annex-8.20211123.tar.gz
+67c231183468503202b064822eaabbf3597e6a8bec8c0f74596187b8ad804cf0bbdf056627d6e78f7d188c34ca099291a592ce640b1362b618fc2473cd464823  0001-Added-dependency-for-ghc-9.0.1-for-cabal.patch
+"

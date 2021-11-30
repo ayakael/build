@@ -1,0 +1,95 @@
+# Maintainer Antoine Martin <dev@ayakael.net>
+
+pkgname=zeroc-ice35
+_pkgname=zeroc-ice
+pkgbase=zeroc-ice
+pkgver=3.5.1
+_pkgingver=3.6.0
+pkgrel=0
+pkgdesc="An object-oriented middleware that provides RPC functionality"
+arch="i686 x86_64"
+url="https://zeroc.com"
+license="GPL custom:ice"
+makedepends="bzip2-dev expat-dev db-dev openssl10-dev gradle openjdk8 php7-dev"
+depends="mcpp lmdb php7"
+source="
+	0001-remove-backtrace-on-musl.patch
+	0002-change-include-sys-poll-to-poll.patch
+	0003-warnings-not-treated-as-errors.patch
+	0004-use-add-egd-instead-of-egd.patch
+	ice-${pkgver}.tar.gz::https://github.com/zeroc-ice/ice/archive/v${pkgver}.tar.gz
+	ice-packaging-${pkgver}.tar.gz::https://github.com/zeroc-ice/ice-packaging/archive/v${_pkgingver}.tar.gz"
+builddir="${srcdir}/ice-${pkgver}"
+subpackages="${pkgname}:_cpp php7-${pkgname}:_php"
+
+_make_args='
+    "OPTIMIZE=yes"
+    "USR_DIR_INSTALL=yes"
+    "prefix=/usr"
+    "CONFIGS=shared cpp11-shared"
+    "SKIP=slice2py"
+'
+
+prepare() {
+    sed -i s/PTHREAD_MUTEX_ERRORCHECK_NP/PTHREAD_MUTEX_ERRORCHECK/ $builddir/cpp/include/IceUtil/Mutex.h  
+    sed -i s/PTHREAD_MUTEX_RECURSIVE_NP/PTHREAD_MUTEX_RECURSIVE/ $builddir/cpp/src/IceUtil/RecMutex.cpp
+    cd ${builddir}
+    patch -p1 -i ${srcdir}/0001-remove-backtrace-on-musl.patch
+    patch -p1 -i ${srcdir}/0002-change-include-sys-poll-to-poll.patch
+    patch -p1 -i ${srcdir}/0003-warnings-not-treated-as-errors.patch
+
+}
+
+build() {
+  cd ${srcdir}/ice-${pkgver}
+  GRADLE=gradle make cpp -j$(nproc) "${_make_args}" 
+  GRADLE=gradle make php -j$(nproc) "${_make_args}" 
+}
+
+package() {
+	mkdir -p "$pkgdir"
+}
+
+_cpp() {
+  cd ${srcdir}/ice-${pkgver}
+
+  make install "${_make_args}" DESTDIR="${pkgdir}" "LANGUAGES=cpp"
+  install -Dm644 ${srcdir}/ice-${pkgver}/ICE_LICENSE ${pkgdir}/usr/share/licenses/${pkgname}/LICENSE
+
+  rm -f ${pkgdir}/usr/share/Ice-${pkgver}/LICENSE
+  rm -f ${pkgdir}/usr/share/Ice-${pkgver}/ICE_LICENSE
+
+  if [ $CARCH = "x86_64" ]; then
+      rm -df ${pkgdir}/usr/lib/
+      mv ${pkgdir}/usr/lib64/ ${pkgdir}/usr/lib/
+  fi
+
+  install -Dm644 ${srcdir}/ice-packaging-${pkgver}/ice/rpm/glacier2router.conf ${pkgdir}/etc/glacier2router.conf
+  install -Dm644 ${srcdir}/ice-packaging-${pkgver}/ice/rpm/icegridnode.conf ${pkgdir}/etc/icegridnode.conf
+  install -Dm644 ${srcdir}/ice-packaging-${pkgver}/ice/rpm/icegridregistry.conf ${pkgdir}/etc/icegridregistry.conf
+
+  install -Dm644 ${srcdir}/ice-packaging-${pkgver}/ice/rpm/glacier2router.service \
+                 ${pkgdir}/usr/lib/systemd/system/glacier2router.service
+  install -Dm644 ${srcdir}/ice-packaging-${pkgver}/ice/rpm/icegridnode.service \
+                 ${pkgdir}/usr/lib/systemd/system/icegridnode.service
+  install -Dm644 ${srcdir}/ice-packaging-${pkgver}/ice/rpm/icegridregistry.service \
+                 ${pkgdir}/usr/lib/systemd/system/icegridregistry.service
+}
+
+_php() {
+    arch='noarch'
+    cd ${builddir}/ice-${pkgver}/php
+    make install ${make_args} DESTDIR="${pkgdir}" "install_phpdir=/usr/share/ice/php" "install_phplibdir=/usr/share/ice/php"
+
+    msg "Installing Ice for PHP7"
+    install -dm755 ${pkgdir}/etc/php7/conf.d/
+    echo "extension = ice.so" > ${pkgdir}/etc/php7/conf.d/zeroc-ice.ini
+    echo "include_path=${include_path}:/usr/share/ice/php/" >> ${pkgdir}/etc/php/conf.d/zeroc-ice.ini
+}
+
+sha512sums="ff5b7da09bbe9e2d6011b411261c39a766d4ed786746c47ba324f565c8c80b42718a1811b27896a62e1b3356cd709a5db56fee9a5503b728d2a958cda97e6484  0001-remove-backtrace-on-musl.patch
+a5c155b05c712731d6e57e8bddd80cbf218051ff6973d39e3985deaee1605212db265953e4ac419a129cc0d3859174f74242b5363471e82661b1b510bb014cc6  0002-change-include-sys-poll-to-poll.patch
+f172366518dad472cca8a1ab1eeab0f2a89925e5f680d2bd527eba9dde601bb9fb8a43ad0c5d89ee65fb5fefeb877edbb3d42a34bc2e8687d8766582dea5d8aa  0003-warnings-not-treated-as-errors.patch
+181b42b6e3ee873355c3a2a53f7c4abc71024b0484dee239847002fadfc18d46bcfd272bba790ca1c0b8aa769c41291f9ca179bedea2ee167df9b900c1b26dba  0004-use-add-egd-instead-of-egd.patch
+34d6b39c655d10af10e8e30eb43ef38af9f6e5b52aa72513214af175ae35343ccd5a9987e95b51c36d3b7344324c477a8c6321a89b5f6e4cd1c0ecb4b823c567  ice-3.5.1.tar.gz
+1061de6ac85f6825c5567de9711ef869784acd58d13b87a82c3df0f14311cf008f7653e0fe8f55458f414ad5efe67695598654bd2d8cec9a1c5811dad4254bff  ice-packaging-3.5.1.tar.gz"

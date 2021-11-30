@@ -1,0 +1,46 @@
+# Contributor: Leo <thinkabit.ukim@gmail.com>
+# Contributor: Michał Polański <michal@polanski.me>
+# Maintainer: Michał Polański <michal@polanski.me>
+pkgname=poetry
+pkgver=1.1.11
+pkgrel=0
+pkgdesc="Python3 dependency management and packaging system"
+url="https://python-poetry.org"
+license="MIT"
+arch="noarch !ppc64le !mips64" # limited by py3-keyring
+options="!check" # TODO: add tests
+depends="
+	python3
+	py3-poetry-core
+	py3-cleo
+	py3-clikit
+	py3-crashtest
+	py3-requests
+	py3-cachy
+	py3-requests-toolbelt
+	py3-cachecontrol
+	py3-pkginfo
+	py3-html5lib
+	py3-shellingham
+	py3-tomlkit
+	py3-pexpect
+	py3-packaging
+	py3-virtualenv
+	py3-keyring
+	"
+makedepends="py3-pip"
+source="$pkgname-$pkgver.tar.gz::https://github.com/sdispater/poetry/archive/$pkgver.tar.gz"
+
+package() {
+	pip install --compile --no-deps --no-warn-script-location --root="$pkgdir" .
+
+	# remove conflicts with files owned by py3-poetry-core (direct dependency of poetry)
+	# see: https://github.com/python-poetry/poetry/issues/2800
+	local sitedir=$(python3 -c "import site; print(site.getsitepackages()[0])")
+	rm "$pkgdir/$sitedir"/poetry/__init__.py \
+		"$pkgdir/$sitedir"/poetry/__pycache__/__init__.cpython-*.pyc
+}
+
+sha512sums="
+7ca4a39a9dcd0087d9e2c4c77a96ebcca1c74ac742a63c04606ac0fad87654f1a590f2d127acc1cac5d181ffb9badaba9780919f94d9b4482221a99a32a5f834  poetry-1.1.11.tar.gz
+"

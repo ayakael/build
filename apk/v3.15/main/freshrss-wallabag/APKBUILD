@@ -1,0 +1,22 @@
+# Maintainer: Antoine Martin <antoine@ayakael.net>
+pkgname=freshrss-wallabag
+pkgver=0.1
+pkgrel=2
+pkgdesc="This FreshRSS extension adds a button to each article which adds the respective article to your Wallabag installation."
+url="https://github.com/youknow0/freshrss-wallabag"
+arch="noarch"
+license="GAGPL-3.0-only"
+depends="freshrss"
+makedepends="git"
+source="https://repo.groulx.xyz/src/${pkgname}-${pkgver}.tar.gz"
+builddir="$srcdir"
+options="!check"
+
+
+package() {
+	cd "$builddir"
+	mkdir -p "${pkgdir}/usr/share/webapps/freshrss/extensions"
+	cp -R "${pkgname}" "${pkgdir}/usr/share/webapps/freshrss/extensions/"
+}
+sha512sums="6f7152f461f379c082357fa17fd4c56dd0129919d8527ffccaaeeb1bc63ec17a2c8d2a4cc9a9dd33bcc285ba3de692d534ad40867d7e0ade83aeeb0713a85d1d  freshrss-wallabag-0.1.tar.gz"
+

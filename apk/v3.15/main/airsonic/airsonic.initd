@@ -1,0 +1,43 @@
+#!/sbin/openrc-run
+# Distributed under the terms of the GNU General Public License, v2 or later
+
+AIRSONIC_HOME=${AIRSONIC_HOME:-/var/lib/${SVCNAME}}
+AIRSONIC_USER=${AIRSONIC_USER:-${SVCNAME}}
+PIDFILE=/run/airsonic/airsonic.pid
+
+depend() {
+	after net
+}
+
+start() {
+	checkpath -dq -o airsonic:airsonic -m 755 /run/airsonic/
+	ebegin "Starting ${SVCNAME}"
+	start-stop-daemon \
+		--start --user "${AIRSONIC_USER}" --name airsonic \
+		--env HOME="${AIRSONIC_HOME}" --exec /usr/bin/airsonic \
+		--pidfile="${PIDFILE}" \
+		--nicelevel "${NICELEVEL}" \
+		-- \
+		--home="${AIRSONIC_HOME}" \
+		--host="${AIRSONIC_HOST}" \
+		--port="${AIRSONIC_PORT}" \
+		--https-port="${AIRSONIC_HTTPS_PORT}" \
+		--context-path="${AIRSONIC_CONTEXT_PATH}" \
+		--max-memory="${AIRSONIC_MAX_MEMORY}" \
+		--pidfile="${PIDFILE}" \
+		--default-music-folder="${AIRSONIC_DEFAULT_MUSIC_FOLDER}" \
+		--default-podcast-folder="${AIRSONIC_DEFAULT_PODCAST_FOLDER}" \
+		--default-playlist-folder="${AIRSONIC_DEFAULT_PLAYLIST_FOLDER}" \
+		--quiet
+	eend $?
+}
+
+stop() {
+	ebegin "Stopping ${SVCNAME}"
+	start-stop-daemon --stop --user "${AIRSONIC_USER}" \
+		--pidfile "${PIDFILE}" \
+		--wait 15000 \
+		--progress
+	eend $?
+}
+

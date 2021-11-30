@@ -1,0 +1,57 @@
+# Maintainer: Antoine Martin <antoine.martin@protonmail.com>
+pkgname=dam
+pkgver=0.3.3
+pkgrel=1
+pkgdesc="A digital audio manager built very specifically for my git-annex backed music collection"
+url="https://github.com/ayakael/dam"
+arch="noarch"
+license="GPL3"
+depends="bash shntool gawk sed grep bc git-annex findutils coreutils git ffmpeg imagemagick flac p7zip sox"
+makedepends="bash coreutils findutils gawk git"
+source="$pkgname-$pkgver.tar.gz"
+_giturl="https://github.com/ayakael/dam"
+_gittag="$pkgver"
+builddir="$srcdir/$pkgname"
+options="!check"
+
+snapshot() {
+	mkdir -p "$srcdir"
+	cd "${srcdir}"
+	if ! [ -d $pkgname.git ]; then
+		git clone $_giturl $pkgname.git || return 1
+		cd $pkgname.git
+	else
+		cd $pkgname.git
+		git fetch || return 1
+	fi
+
+	echo "Checking out"
+	git checkout $_gittag
+	echo "Repo archive"
+	git archive --prefix="$pkgname/" -o dam.tar --format "tar" $_gittag
+
+	echo "Submod update"
+	git submodule update --init
+	cd bunc
+	echo "Submod archive"
+	git archive --prefix="$pkgname/bunc/" --format="tar" -o "../bunc.tar" "master"
+	cd ..
+    
+   
+	tar --concatenate --file dam.tar bunc.tar
+	gzip dam.tar -c > "$SRCDEST"/$pkgname-$pkgver.tar.gz
+	ln -s "$SRCDEST"/$pkgname-$pkgver.tar.gz "$startdir"/$pkgname-$pkgver.tar.gz 
+}
+
+build() {
+	cd "$builddir"
+	./build.sh --version $pkgver
+}
+
+package() {
+	cd "$builddir"
+	install -Dm755 ./dam "$pkgdir"/usr/bin/dam
+}
+sha512sums="
+1e24bd1267a0b2054ebed648f9fa040b2ba1760df6ec97e4c1dcd1a87c9380a9141e7ed80e4e6df4d8a192741a04244572910801a0c3d685037a5d8b19f20e65  dam-0.3.3.tar.gz
+"

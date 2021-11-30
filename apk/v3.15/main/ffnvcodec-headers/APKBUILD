@@ -1,0 +1,58 @@
+# Maintainer: Maxime Gauduin <alucryd@archlinux.org>
+# Contributor: Daniel Bermond <danielbermond@yahoo.com>
+
+pkgname=ffnvcodec-headers
+pkgver=11.0.10.1
+pkgrel=0
+pkgdesc='FFmpeg version of headers required to interface with Nvidias codec APIs'
+arch='noarch'
+url=https://git.videolan.org/?p=ffmpeg/nv-codec-headers.git
+license='MIT'
+makedepends='git sed'
+_gittag=315ad740ac77282c7cea67ba31f2e4b373132919
+_giturl=https://git.videolan.org/git/ffmpeg/nv-codec-headers
+source="$pkgname-$pkgver.tar.gz"
+options='!check'
+
+builddir="$srcdir/$pkgname"
+
+snapshot() {
+        mkdir -p "$srcdir"
+        cd "${srcdir}"
+        if ! [ -d $pkgname.git ]; then
+                git clone $_giturl $pkgname.git || return 1
+                cd $pkgname.git
+        else
+                cd $pkgname.git
+                git fetch || return 1
+        fi
+
+        echo "Checking out"
+        git checkout $_gittag
+        echo "Repo archive"
+        git archive --prefix="$pkgname/" -o $pkgname.tar --format "tar" $_gittag
+
+        gzip $pkgname.tar -c > "$SRCDEST"/$pkgname-$pkgver.tar.gz
+        ln -s "$SRCDEST"/$pkgname-$pkgver.tar.gz "$startdir"/$pkgname-$pkgver.tar.gz 
+}
+
+pkgver() {
+  git describe --tags | sed 's/^n//'
+}
+
+build() {
+  cd "${builddir}"
+  make PREFIX=/usr
+  sed -n '4,25p' include/ffnvcodec/nvEncodeAPI.h > LICENSE # Extract license
+  sed -i '1,22s/^.\{,3\}//' LICENSE # Delete C comments
+}
+
+package() {
+  cd "${builddir}"
+  mkdir -p "${pkgdir}"
+  make PREFIX=/usr DESTDIR="${pkgdir}" install
+  install -Dm 644 LICENSE -t "${pkgdir}"/usr/share/licenses/ffnvcodec-headers/
+}
+
+# vim: ts=2 sw=2 et:
+sha512sums="2f70f981e227bb5eb25e365270bc79cba855975e365d116f434e823c5e00e73eb2d802ccb1f1c143dab9c434546439ca4dba8dd968f538d382ee69b27e3bc932  ffnvcodec-headers-11.0.10.1.tar.gz"

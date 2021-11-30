@@ -1,0 +1,48 @@
+# Maintainer: Antoine Martin <antoine@ayakael.net>
+pkgname=freshrss-redditimage
+pkgver=0.12.0
+pkgrel=0
+pkgdesc="Modify reddit entries by displaying known medias and easing access to the linked resource"
+url="https://github.com/aledeg/xExtension-RedditImage"
+arch="noarch"
+license="MIT"
+depends="freshrss"
+makedepends="git"
+source="$pkgname-$pkgver.tar.gz"
+_giturl="https://github.com/aledeg/xExtension-RedditImage"
+_gittag="ae1c643445c7e9a0f326bdff4d432bdada6e589d"
+builddir="$srcdir"
+options="!check"
+
+snapshot() {
+	mkdir -p "$srcdir"
+	cd "${SRCDEST:-$srcdir}"
+	if ! [ -d $pkgname.git ]; then
+		git clone $_giturl $pkgname.git || return 1
+		cd $pkgname.git
+	else
+		cd $pkgname.git
+		git fetch || return 1
+	fi
+
+	echo "Checking out"
+	git checkout $_gittag
+	echo "Repo archive"
+	git archive --prefix="$pkgname/" -o ${pkgname}-${pkgver}.tar --format "tar" $_gittag
+    
+   
+	gzip ${pkgname}-${pkgver}.tar -c > "$SRCDEST"/$pkgname-$pkgver.tar.gz
+	ln -s "$SRCDEST"/$pkgname-$pkgver.tar.gz "$startdir"/$pkgname-$pkgver.tar.gz 
+}
+
+build() {
+    return 0
+}
+
+package() {
+	cd "$builddir"
+	mkdir -p "${pkgdir}/usr/share/webapps/freshrss/extensions/xExtension-RedditImage"
+	cp -R "${pkgname}/"* "${pkgdir}/usr/share/webapps/freshrss/extensions/xExtension-RedditImage"
+}
+
+sha512sums="870b4fdade6ce5af8b9368e06d934ba8127d9c531a04c2b9f99718460476eaddaa86b3d426b7d5cdec3d65c5573cfd70451886f5f322efd053c828bb845d6b7b  freshrss-redditimage-0.12.0.tar.gz"

@@ -1,0 +1,33 @@
+# Maintainer: Jelle van der Waa <jelle@vdwaa.nl>
+# Maintainer: Eli Schwartz <eschwartz@archlinux.org>
+# Contributor: Alexander Rødseth <rodseth@gmail.com>
+# Contributor: Angel 'angvp' Velasquez <angvp[at]archlinux.com.ve>
+# Contributor: Roman Kyrylych <Roman.Kyrylych@gmail.com>
+# Contributor: iom <pizorn@gmail.com>
+
+_pkgname=pychm
+pkgname=py2-pychm
+pkgver=0.8.6
+pkgrel=0
+pkgdesc="Python bindings for chmlib"
+arch='x86_64'
+url="https://github.com/dottedmag/${_pkgname}"
+license='GPL'
+depends='chmlib python3'
+makedepends='py2-setuptools python2-dev'
+checkdepends='py2-pytest'
+source=$pkgname-$pkgver.tar.gz::${url}/archive/v$pkgver.tar.gz
+options=!check
+
+build() {
+  cd "$srcdir/pychm-$pkgver"
+
+  python2 setup.py build
+}
+
+package() {
+
+  cd "$srcdir/pychm-$pkgver"
+  python2 setup.py install --root="$pkgdir" --optimize=1 --skip-build
+}
+sha512sums="cc1b254b6c58aba038171ad9db1eea3212094d7fb9386b22ada67381d702b388e6a1dde0317b5724587ee135d2695c546a7c2d65af7091dafeb394647597b0ae  py2-pychm-0.8.6.tar.gz"

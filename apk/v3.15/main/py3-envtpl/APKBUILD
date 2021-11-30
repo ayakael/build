@@ -1,0 +1,51 @@
+# Maintainer: Antoine Martin <antoine.martin@protonmail.com>
+pkgname=py3-envtpl
+pkgver=20180204
+pkgrel=4
+pkgdesc="Render jinja2 templates on the command line using shell environment variables"
+url='https://github.com/andreasjansson/envtpl'
+arch="noarch"
+license="GPL"
+depends="python3 py3-argparse py3-jinja2"
+makedepends="git py3-setuptools py3-six"
+source="$pkgname-$pkgver.tar.gz"
+_giturl="https://github.com/andreasjansson/envtpl.git"
+_gittag="72262ff18c20b0a55e1e113528e9d5aea55c5d00"
+builddir="$srcdir/$pkgname"
+options="!check"
+
+snapshot() {
+	mkdir -p "$srcdir"
+	cd "${srcdir}"
+	if ! [ -d $pkgname.git ]; then
+		git clone $_giturl $pkgname.git || return 1
+		cd $pkgname.git
+	else
+		cd $pkgname.git
+		git fetch || return 1
+	fi
+
+	echo "Checking out"
+	git checkout $_gittag
+	echo "Repo archive"
+	git archive --prefix="$pkgname/" -o dam.tar --format "tar" $_gittag
+
+	gzip dam.tar -c > "$SRCDEST"/$pkgname-$pkgver.tar.gz
+	ln -s "$SRCDEST"/$pkgname-$pkgver.tar.gz "$startdir"/$pkgname-$pkgver.tar.gz 
+}
+
+build() {
+	cd "$builddir"
+    python3 setup.py build
+}
+
+check() {
+    cd "$builddir"
+    python3 setup.pytest
+}
+
+package() {
+	cd "$builddir"
+	python3 setup.py install --root="${pkgdir}" --optimize 1 --skip-build
+}
+sha512sums="381c3c2f331206eab6b7e8e6552a5d6e75fe758f167bc13d649c1f622985143e7f1cd1c493436de3584dc75aae619e3d7259167620fd39289c778852a776e96b  py3-envtpl-20180204.tar.gz"

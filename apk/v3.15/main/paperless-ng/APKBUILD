@@ -1,0 +1,163 @@
+# Maintainer: Antoine Martin (ayakael) <dev@ayakael.net>
+#
+# Based on ArchLinux AUR by:
+# Co-Maintainer: AlphaJack <alphajack at tuta dot io>
+# Co-Maintainer: amo <https://aur.archlinux.org/account/amo>
+
+pkgname="paperless-ng"
+pkgver=1.4.5
+pkgrel=0
+pkgdesc="A supercharged version of paperless: scan, index and archive all your physical documents"
+url="https://github.com/jonaswinkler/paperless-ng"
+license="GPL3"
+arch="noarch"
+depends="
+  file
+  gnupg
+  py3-gunicorn
+  imagemagick
+  mailcap
+  ocrmypdf
+  optipng
+  redis
+  sqlite
+  tesseract-ocr
+  tesseract-ocr-data-fra
+  ttf-liberation
+  py3-uvicorn
+  py3-aiohttp
+  py3-arrow
+  py3-asgiref
+  py3-async-timeout
+  py3-attrs
+  py3-autobahn
+  py3-automat
+  py3-blessed
+  py3-certifi
+  py3-django-channels
+  py3-django-channels-redis
+  py3-chardet
+  py3-click
+  py3-concurrent-log-handler
+  py3-constantly
+  py3-cryptography
+  py3-daphne
+  py3-dateparser
+  py3-django
+  py3-django-cors-headers
+  py3-django-extensions
+  py3-django-filter
+  py3-django-picklefield
+  py3-django-q
+  py3-django-rest-framework
+  py3-filelock
+  py3-fuzzywuzzy
+  py3-h11
+  py3-hiredis
+  py3-httptools 
+  py3-humanfriendly
+  py3-hyperlink
+  py3-idna
+  py3-imap-tools
+  py3-incremental
+  py3-inotify-simple
+  py3-inotifyrecursive
+  py3-joblib
+  py3-langdetect
+  py3-lxml
+  py3-msgpack
+  py3-numpy
+  py3-pathvalidate
+  py3-portalocker
+  py3-psycopg2
+  py3-asn1
+  py3-asn1-modules
+  py3-cparser
+  py3-openssl
+  py3-dateutil
+  py3-dotenv
+  py3-gnupg
+  py3-levenshtein
+  py3-magic
+  py3-tz
+  py3-yaml
+  py3-redis
+  py3-regex
+  py3-requests
+  py3-scikit-learn
+  py3-scipy
+  py3-service_identity
+  py3-six
+  py3-sortedcontainers
+  py3-sqlparse
+  py3-threadpoolctl
+  py3-tika
+  py3-twisted
+  py3-txaio
+  py3-urllib3
+  py3-uvloop
+  py3-watchdog
+  py3-watchgod
+  py3-wcwidth
+  py3-websockets
+  py3-whitenoise
+  py3-whoosh
+  py3-zope-interface
+  postgresql
+  jbig2enc"
+builddir="${srcdir}"/${pkgname}
+
+source="$url/releases/download/ng-$pkgver/$pkgname-$pkgver.tar.xz"
+options="!strip !check"
+
+prepare(){ 
+  cd "${builddir}"
+
+ # use alpine linux canonical paths
+ sed -i "paperless.conf" \
+     -e "s|#PAPERLESS_CONSUMPTION_DIR=../consume|PAPERLESS_CONSUMPTION_DIR=/var/lib/paperless/consume|" \
+     -e "s|#PAPERLESS_DATA_DIR=../data|PAPERLESS_DATA_DIR=/var/lib/paperless/data|" \
+     -e "s|#PAPERLESS_MEDIA_ROOT=../media|PAPERLESS_MEDIA_ROOT=/var/lib/paperless/media|" \
+     -e "s|#PAPERLESS_STATICDIR=../static|PAPERLESS_STATICDIR=/usr/share/webapps/paperless/static|" \
+     -e "s|#PAPERLESS_CONVERT_TMPDIR=/var/tmp/paperless|PAPERLESS_CONVERT_TMPDIR=/var/lib/paperless/tmp|"
+
+ # remove hardcoded bind address
+ sed -i "gunicorn.conf.py" \
+     -e "s|bind = '0.0.0.0:8000'||"
+
+ # add custom dir for uploaded files
+ printf "\n# Uploads\n\nPAPERLESS_SCRATCH_DIR=/var/lib/paperless/uploads" >> "paperless.conf"
+
+ # add customizable bind address, will be used by paperless-webserver.service
+ printf "\n\n# Webserver\n\nGUNICORN_CMD_ARGS='--bind=127.0.0.1:8000'" >> "paperless.conf"
+}
+
+package(){
+ cd "${builddir}"
+
+ # program files
+ install -d "$pkgdir/usr/bin" "$pkgdir/usr/share/webapps"
+ cp -R "$builddir" "$pkgdir/usr/share/webapps/paperless"
+
+ # main executable
+ chmod 755 "$pkgdir/usr/share/webapps/paperless/src/manage.py"
+ ln -s "/usr/share/webapps/paperless/src/manage.py" "$pkgdir/usr/bin/paperless-manage"
+
+ # config file
+ install -D -m 640 "paperless.conf" "$pkgdir/etc/paperless.conf"
+ rm "$pkgdir/usr/share/webapps/paperless/paperless.conf"
+ ln -s "/etc/paperless.conf" "$pkgdir/usr/share/webapps/paperless/paperless.conf"
+
+ # user and files to create, ownership and permission to set
+ #install -D -m 644 "$pkgname.sysusers" "$pkgdir/usr/lib/sysusers.d/$pkgname.conf"
+ #install -D -m 644 "$pkgname.tmpfiles" "$pkgdir/usr/lib/tmpfiles.d/$pkgname.conf"
+
+ # service files
+ #install -D -m 644 "paperless.target" "$pkgdir/usr/lib/systemd/system/paperless.target"
+ #install -D -m 644 "paperless-consumer.service" "$pkgdir/usr/lib/systemd/system/paperless-consumer.service"
+ #install -D -m 644 "paperless-scheduler.service" "$pkgdir/usr/lib/systemd/system/paperless-scheduler.service"
+ #install -D -m 644 "paperless-webserver.service" "$pkgdir/usr/lib/systemd/system/paperless-webserver.service"
+}
+sha512sums="
+5ff7282ef9e3628110cffc14e5a968697ae8d600a28a5c7cc77118eec3d3d4f620a39acf09312a77e1e0cb65e858db74d4e5ddb6ad2822f178aaa2b01f1da7cb  paperless-ng-1.4.5.tar.xz
+"

@@ -1,0 +1,32 @@
+#!/sbin/openrc-run
+
+name="Mastodon background workers Service"
+root="/usr/share/webapps/mastodon"
+pidfile="/run/mastodon-sidekiq.pid"
+logfile="/var/log/mastodon/sidekiq.log"
+
+depend() {
+    use net
+    need redis
+}
+
+start() {
+    ebegin "Starting Mastodon background workers"
+
+    cd $root
+
+    start-stop-daemon --start --background \
+        --chdir "${root}" \
+        --user="mastodon" \
+        --make-pidfile --pidfile="${pidfile}" \
+	-1 "${logfile}" -2 "${logfile}" \
+        --exec /usr/bin/env -- RAILS_ENV=production DB_POOL=5 bundle exec sidekiq -c 5 -q default -q mailers -q pull -q push 
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping Mastodon background workers"
+    start-stop-daemon --stop \
+        --pidfile=${pidfile} \
+    eend $?
+}

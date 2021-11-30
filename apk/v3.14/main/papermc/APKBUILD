@@ -1,0 +1,56 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+pkgname=papermc
+_pkgver=1.17.1
+_build=388
+_license_commit=4a7962c
+pkgver="${_pkgver}.${_build}"
+pkgrel=0
+pkgdesc="Next generation of Minecraft server, compatible with Spigot plugins and offering uncompromising performance"
+pkgusers="craftbukkit"
+pkggroups="craftbukkit"
+arch='noarch'
+url="https://papermc.io/"
+license='custom'
+depends='openjdk16-jre-headless screen sudo bash gawk sed netcat-openbsd tar'
+backup='etc/conf.d/papermc'
+options="!check"
+provides="craftbukkit=$_pkgver"
+subpackages="${pkgname}-openrc"
+source="papermc.${pkgver}.jar::https://papermc.io/api/v1/paper/${_pkgver}/${_build}/download
+	papermc.initd
+	papermc.conf
+	papermc.sh
+	LICENSE_${pkgver}.md"::"https://raw.githubusercontent.com/PaperMC/Paper/${_license_commit}/LICENSE.md"
+noextract="papermc.${pkgver}.jar"
+
+_game="papermc"
+_server_root="/var/lib/papermc"
+
+package() {
+	install -Dm644 ${srcdir}/${_game}.conf              "${pkgdir}/etc/conf.d/${_game}"
+	install -Dm755 ${srcdir}/${_game}.sh                "${pkgdir}/usr/bin/${_game}"
+	install -Dm755 ${srcdir}/${_game}.initd           "${pkgdir}/etc/init.d/${_game}"
+	install -Dm644 ${srcdir}/${_game}.${pkgver}.jar     "${pkgdir}/${_server_root}/${_game}.${pkgver}.jar"
+	ln -s "${_game}.${pkgver}.jar" "${pkgdir}${_server_root}/${_game}_server.jar"
+
+	# Link to craftbukkit plugins var
+	ln -s "/var/lib/craftbukkit/plugins" "${pkgdir}/${_server_root}/plugins"
+
+	# Link the log files
+	mkdir -p "${pkgdir}/var/log/"
+	install -dm2755 "${pkgdir}/${_server_root}/logs"
+	ln -s "${_server_root}/logs" "${pkgdir}/var/log/${_game}"
+
+	# Give the group write permissions and set user or group ID on execution
+	chmod g+ws "${pkgdir}${_server_root}"
+
+	install -D ${srcdir}/./LICENSE_${pkgver}.md "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
+sha512sums="
+68d227cddecdd1df549c5ab895b7fdee5a720840d9995f3115ac744f315b1135a97129605ed072cabbd152f21469a190726aad46cac3eaa32662bd2d622b1f45  papermc.1.17.1.388.jar
+c5d1bf85ceb74162aaaf2bcd2d06dc2e3dd2e37c39f0cee2be7c8dbff9970a6aff1e48a43e6d1e83e6a0ac610bd89f62b1279bf27b64afa88d9831a36aebbd3e  papermc.initd
+9b8e267428731ee9255f82a93f1e8674d7e917a0f154bd395cd2280a49aa248a4b8427520b08dbb4b3a74a5471dac0e439eedc8ab94bf2e53bb8d411d2d8a789  papermc.conf
+943ba0d4c10173246bdc6497dcedd54da0788f966841c8d3381398711d79f8d5eb07a24ce28f519b6f24f59d99fa9e74bc6bb882059f343df4eeda5de3660ac7  papermc.sh
+d4c645a58e1a17a0a1e42856a3cc43097711a05bf3d9f18c77c3bc9874417f223552859042ff00b7d3dda0003f49a9ee568540c2eb24e9f8fbb3c055f3b6e0a5  LICENSE_1.17.1.388.md
+"

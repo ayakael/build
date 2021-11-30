@@ -1,0 +1,50 @@
+# Maintainer: Antoine Martin <antoine@ayakael.net>
+pkgname=freshrss-keepfolderstate
+pkgver=0.1
+pkgrel=1
+pkgdesc="Stores the state of the folders locally and expand them automatically if necessary"
+url="https://github.com/langfeld/FreshRSS-extensions"
+arch="noarch"
+license="MIT"
+depends="freshrss"
+makedepends="git"
+source="$pkgname-$pkgver.tar.gz"
+_giturl="https://github.com/langfeld/FreshRSS-extensions"
+_gittag="0b5b158c97601d44829975e03a9321fd797c623c"
+builddir="$srcdir"
+options="!check"
+
+snapshot() {
+	mkdir -p "$srcdir"
+	cd "${SRCDEST:-$srcdir}"
+	if ! [ -d $pkgname.git ]; then
+		git clone $_giturl $pkgname.git || return 1
+		cd $pkgname.git
+	else
+		cd $pkgname.git
+		git fetch || return 1
+	fi
+
+	echo "Checking out"
+	git checkout $_gittag
+	echo "Repo archive"
+	git archive --prefix="$pkgname/" -o ${pkgname}-${pkgver}.tar --format "tar" $_gittag
+    
+   
+	gzip ${pkgname}-${pkgver}.tar -c > "$SRCDEST"/$pkgname-$pkgver.tar.gz
+	ln -s "$SRCDEST"/$pkgname-$pkgver.tar.gz "$startdir"/$pkgname-$pkgver.tar.gz 
+}
+
+build() {
+    return 0
+}
+
+package() {
+	cd "$builddir"
+	mkdir -p "${pkgdir}/usr/share/webapps/freshrss/extensions"
+	cp -R "${pkgname}/xExtension-KeepFolderState" "${pkgdir}/usr/share/webapps/freshrss/extensions/"
+}
+
+
+
+sha512sums="b36e03d5dca7cb0e2e11a0b2505a88e73f657bf03df97c14f603cb492f8e2036b1688c12ffdc029ce38c6d5ff3f5ccf76d297cdd83a66fe0b4c5e06c660aa79f  freshrss-keepfolderstate-0.1.tar.gz"

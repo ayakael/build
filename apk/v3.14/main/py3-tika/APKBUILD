@@ -1,0 +1,30 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+_pyname='tika'
+pkgname="py3-$_pyname"
+pkgver=1.16
+pkgrel=0
+arch='noarch'
+pkgdesc='Apache Tika Python library'
+url="https://pypi.python.org/project/${_pyname}"
+license="Apache"
+depends='python3'
+makedepends='py3-setuptools'
+options="!check"
+source="${pkgname}-${pkgver}.tar.gz::https://pypi.io/packages/source/${_pyname:0:1}/$_pyname/$_pyname-${pkgver}.tar.gz"
+builddir="$srcdir"/$_pyname-$pkgver
+
+build() {
+  cd "$builddir"
+
+  python3 setup.py build
+}
+
+package() {
+  cd "$builddir"
+
+  python3 setup.py install --root="$pkgdir"/ --optimize=1 --skip-build
+}
+sha512sums="
+24cdeadc5da6a87434941fde23d53df9fa020c5594842b53405502fdc04457daa9af3defa7d25a495188c80094da2db9705ca38574d6ff9125c956580b39c5fa  py3-tika-1.16.tar.gz
+"

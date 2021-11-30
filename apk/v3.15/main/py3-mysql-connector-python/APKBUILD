@@ -1,0 +1,24 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+pkgname='py3-mysql-connector-python'
+pkgver=8.0.23
+pkgrel=0
+arch='noarch'
+pkgdesc="Cross platform time zone library for Python"
+url="https://pypi.org/project/mysql-connector-python"
+license="GPL"
+depends=python3
+makedepends="python3 py3-setuptools"
+source="${pkgname}-${pkgver}.tar.gz::https://pypi.io/packages/source/m/mysql-connector-python/mysql-connector-python-${pkgver}.tar.gz"
+builddir="$srcdir"/mysql-connector-python-$pkgver
+options="!check"
+
+package() {
+    cd $builddir
+
+    python3 setup.py install --root=$pkgdir/
+
+    install -Dm644 LICENSE.txt $pkgdir/usr/share/licenses/$pkgname/LICENSE
+}
+
+sha512sums="66ca61c15573555a3f42ad8a9e9b3a4bc612c4d2b4e54928af87adcf609e131e9afd53b76c3a8da30f181e4f2111245cda5995063109526ff72f4f2062c2e528  py3-mysql-connector-python-8.0.23.tar.gz"

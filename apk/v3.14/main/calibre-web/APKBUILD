@@ -1,0 +1,50 @@
+# Maintainer: Spencer Muise <smuise@spencermuise.ca>
+
+pkgname=calibre-web
+pkgver=0.6.12
+pkgrel=0
+pkgdesc="Web app for browsing, reading and downloading eBooks stored in a Calibre database"
+arch='noarch'
+url="https://github.com/janeczku/calibre-web"
+license='GPL3'
+depends='
+  python3
+  py3-babel
+  py3-flask-babel
+  py3-flask-login
+  py3-flask-principal
+  py3-flask
+  py3-pypdf2
+  py3-tz
+  py3-requests
+  py3-sqlalchemy
+  py3-tornado
+  py3-wand
+  py3-unidecode
+  py3-blinker
+  py3-goodreads
+  py3-levenshtein
+  py3-iso639'
+
+source="
+  $pkgname-$pkgver.tar.gz::https://github.com/janeczku/calibre-web/archive/${pkgver}.tar.gz
+  calibre-web.initd"
+
+options=!check
+
+prepare() {
+  cd $srcdir/$pkgname-$pkgver
+  sed -i 's|#!/usr/bin/env python|#!/usr/bin/env python3|' cps.py
+
+}
+
+package() {
+  cd $srcdir/$pkgname-$pkgver
+  install -d -m 755 "${pkgdir}/usr/share/webapps/calibre-web"
+  cp -a "${srcdir}/$pkgname-$pkgver"/* "${pkgdir}/usr/share/webapps/calibre-web/"
+  rm -rf "${pkgdir}/usr/lib/calibre-web/.git"
+
+  install -D -m 644 "${srcdir}/calibre-web.initd" "${pkgdir}/etc/init.d/calibre-web"
+}
+sha512sums="d98ac4e8aa685d358e13fcb5a1726b169046ff5c5e3fe4dcc15ad9fefc33c368e88bd51840f793cc3334fa609414882dc6f9ff4d2282d49ac9b33fa96cb5b406  calibre-web-0.6.12.tar.gz
+3daa5b02e3731ec9d57ab372d31499e4cfd5d91583a4c28a373fc2e9a4d60b5d6a6a0c83bd94e05f6b80cc2419e34f9cc4d452481d3fafb590eb223dff4835ee  calibre-web.initd"

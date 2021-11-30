@@ -1,0 +1,58 @@
+# Maintainer: Antoine Martin <antoine.martin@protonmail.com>
+pkgname=grumble
+pkgver=20200415	
+pkgrel=0
+pkgdesc="Grumble is an implementation of a server for the Mumble voice chat system."
+url="https://github.com/mumble-voip/grumble"
+arch="x86_64"
+license="custom"
+makedepends="go"
+source="$pkgname-$pkgver.tar.gz grumble.initd LICENSE"
+_giturl="https://github.com/mumble-voip/grumble"
+_gittag=6f8c2bf2f51fddc1cb09e3385bc4e9db5dc43ba9
+builddir="$srcdir/$pkgname"
+subpackages="$pkgname-openrc"
+options="chmod-clean"
+
+snapshot() {
+	mkdir -p "$srcdir"
+	cd "${srcdir}"
+	if ! [ -d $pkgname.git ]; then
+		git clone $_giturl $pkgname.git || return 1
+		cd $pkgname.git
+	else
+		cd $pkgname.git
+		git fetch || return 1
+	fi
+
+	echo "Checking out"
+	git checkout $_gittag
+	echo "Repo archive"
+	git archive --prefix="$pkgname/" -o $pkgname.tar --format "tar" $_gittag
+
+	gzip $pkgname.tar -c > "$SRCDEST"/$pkgname-$pkgver.tar.gz
+	ln -s "$SRCDEST"/$pkgname-$pkgver.tar.gz "$startdir"/$pkgname-$pkgver.tar.gz 
+}
+
+build() {
+	cd "$builddir"
+	export GOPATH="$srcdir/go"
+	go get -v -t ./...
+	go build mumble.info/grumble/cmd/grumble
+}
+
+check() {
+	cd "$builddir"
+	export GOPATH="$srcdir/go"
+	go test -v ./...
+
+}
+
+package() {
+	cd "$builddir"
+	install -Dm755 ${srcdir}/go/bin/grumble "$pkgdir"/usr/bin/grumble
+	install -Dm755 ${srcdir}/grumble.initd "$pkgdir"/etc/init.d/grumble
+}
+sha512sums="1b4cbe4aa5a5ff5d24b7954719aa645167602a5951916d6f0e2e34a11ef76e6219f0dbb4d6cb836d4dc594b7555700ddb8fe01d4db548bffcbdf31be05c620d3  grumble-20200415.tar.gz
+e04d5125646f6699354074e78f908749125c3e436507635f54ff6394957ef34b03d52fdbef1bd7e4970729034155080f9da3c4f44ebcabc9f00df6fb92fb0525  grumble.initd
+63f1e396d2ef0f96135432af30d5756030aebd931fe3da143258d3ca3d949091af1e21aec157365802aa21eef2ff05b4a3ba32f42f0cfe753f88688040b8fd11  LICENSE"

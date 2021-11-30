@@ -1,0 +1,33 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+_pyname=uvloop
+pkgname="py3-$_pyname"
+pkgver=0.15.3
+pkgrel=0
+arch='x86_64'
+pkgdesc="Ultra fast asyncio event loop"
+url="https://pypi.python.org/project/$_pyname"
+license="Apache MIT"
+depends='python3 libuv'
+makedepends='py3-setuptools python3-dev cython libuv-dev'
+options="!check"
+source="${pkgname}-${pkgver}.tar.gz::https://pypi.io/packages/source/${_pyname:0:1}/$_pyname/$_pyname-${pkgver}.tar.gz"
+builddir="$srcdir"/$_pyname-$pkgver
+
+build() {
+  cd "$builddir"
+
+  python3 setup.py build build_ext --use-system-libuv
+}
+
+package() {
+  cd "$builddir"
+
+  python3 setup.py install --root="$pkgdir"/ --optimize=1 --skip-build
+
+  install -Dm644 LICENSE-APACHE $pkgdir/usr/share/licenses/$pkgname/LICENSE-APACHE
+  install -Dm644 LICENSE-MIT $pkgdir/usr/share/licenses/$pkgname/LICENSE-MIT
+}
+sha512sums="
+5687371a13509bdac0ef7a5ca0f7c78b54d0d9225cbf68cebc6d4fdf3807c2e3346579f5440eb0ff6578088780cc5efb09fba114da0bc0e60ad3f607d9df652f  py3-uvloop-0.15.3.tar.gz
+"

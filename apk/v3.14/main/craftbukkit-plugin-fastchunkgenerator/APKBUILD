@@ -1,0 +1,27 @@
+# Maintainer: Antoine Martin (ayakael) <dev@ayakael.net>
+pkgname=craftbukkit-plugin-fastchunkpregenerator
+pkgver=2.0.6
+pkgrel=0
+pkgdesc="This plugin can be used to pregenerate as many chunks on as many worlds as you want"
+options=!check
+arch='noarch'
+url="https://www.spigotmc.org/resources/fast-chunk-pregenerator.74429"
+license="custom"
+depends="craftbukkit>=1.16.0 craftbukkit<=1.17.1"
+source="${pkgname}-${pkgver}.jar::https://www.spigotmc.org/resources/fast-chunk-pregenerator.74429/download?version=386817"
+noextract="${pkgname}-${pkgver}.jar"
+
+package() {
+  install -Dm644 "${srcdir}"/${pkgname}-${pkgver}.jar "$pkgdir/var/lib/craftbukkit/plugins/FastChunkPregenerator.jar"
+  chown craftbukkit:craftbukkit "$pkgdir"/var/lib/craftbukkit/plugins/FastChunkPregenerator.jar
+}
+
+uri_fetch() {              
+        local uri="$1"
+        mkdir -p "$SRCDEST"   
+	echo "$SRCDEST/FastChunkPregenerator-2.0.6-SNAPSHOT.jar"
+        msg "Fetching $uri"     
+	local uri=$(echo ${uri} | sed 's|.*::||')
+	curl --header 'Host: www.spigotmc.org' --user-agent 'Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:88.0) Gecko/20100101 Firefox/88.0' --header 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8' --header 'Accept-Language: en-US,en;q=0.5' --referer 'https://www.spigotmc.org/resources/fast-chunk-pregenerator.74429/update?update=390814&__cf_chl_jschl_tk__=d120053760ff17301f05c0e00cd2c75ad98162fa-1625889119-0-AaAmKmdxmwlQfZ2OcV9fpPqfmY33xuAHdWzSJYXcI6IkLa2QHXjU6wAus37F8oOqWtuEnTXqcclJ_p3tVnwopGcoS3yKUuxwJ07xLqB6VzBpbqe8hMtqnaizSZniDwEPmF0QwYn3x_TnPJWTNw6IXX1D6fsB8cv-Krzp6yEN6ff3LS8HmtRJll6QFRX6RKl4uI14FCpqaD39fcZFeAPz01MtlnhMSMZ7b3JTiic0_ETK_5M0mZIzkaSfHMe9d1j4OpkoKnGD4QHdtNFcWQdHtDLdakk9gYzZmP284k591Mqcou9-AyxMS_jbxeGnCOsp9aUnh1L89KBG9Vo_vN-XIgZ-Yn5ialg7YovdhYyMfnhHclWLB7RLNNZQDSBZEEmXNFZGwA857THjbbnQVbJKhVDa-Fe_PQ52AghR8DeRNui64pszyRKccLtM_V3tV7gjjFXDivZibIdDVAQlt-e4AbMlj-i6xI732y1jXafADHot' --cookie 'cf_chl_2=286326ecda2ecfb; cf_chl_prog=x8; cf_clearance=293f1dcd818bbef7fa6ce67fd01248a495f5a17a-1625889123-0-150; xf_session=c37fcf6ee6d64a85390e99fbd3ab0dee' --header 'Upgrade-Insecure-Requests: 1' "$uri" --output "$SRCDEST/${pkgname}-${pkgver}.jar"
+}
+sha512sums="0ff0e4a41058e81786f08f9468bd2018a32d0d047c6bd25842445694766629eb1b6a51433f1525d51a5093972499725b505e0a45820684ab1672a9059afd7aa1  craftbukkit-plugin-fastchunkpregenerator-2.0.6.jar"

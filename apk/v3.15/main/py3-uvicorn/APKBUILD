@@ -1,0 +1,32 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+_pyname='uvicorn'
+pkgname="py3-$_pyname"
+pkgver=0.14.0
+pkgrel=1
+arch='noarch'
+pkgdesc="The lightning-fast ASGI server"
+url="https://pypi.python.org/project/${_pyname}"
+license="BSD"
+depends='python3 py3-asgiref py3-click py3-h11 py3-websockets py3-httptools py3-uvloop py3-watchgod'
+makedepends='py3-setuptools'
+options="!check"
+source="${pkgname}-${pkgver}.tar.gz::https://pypi.io/packages/source/${_pyname:0:1}/$_pyname/$_pyname-${pkgver}.tar.gz"
+builddir="$srcdir"/$_pyname-$pkgver
+
+build() {
+  cd "$builddir"
+
+  python3 setup.py build
+}
+
+package() {
+  cd "$builddir"
+
+  python3 setup.py install --root="$pkgdir"/ --optimize=1 --skip-build
+
+  install -Dm644 LICENSE.md $pkgdir/usr/share/licenses/$pkgname/LICENSE
+}
+sha512sums="
+4a7cd5af623f19957546ce44594adf5c30fbd77c0649b77544630445e135bdae0d7ab019624b4b7bb121afd0f3ac44229f8ec8099d6e9957eb49d67264f4b171  py3-uvicorn-0.14.0.tar.gz
+"

@@ -1,0 +1,50 @@
+# Maintainer: Lenovsky <lenovsky@pm.me>
+# Contributor: aimileus <me at aimileus dot nl>
+
+pkgname=protonmail-bridge
+pkgver=1.1.6
+pkgrel=1
+pkgdesc="Integrate ProtonMail paid account with any program that supports IMAP and SMTP"
+arch='x86_64'
+url="https://www.protonmail.com/bridge"
+license='MIT'
+depends='hicolor-icon-theme libsecret qt5-qtmultimedia ttf-dejavu pass'
+makedepends='dpkg'
+options="!strip"
+source="https://protonmail.com/download/protonmail-bridge_${pkgver}-${pkgrel}_amd64.deb"
+builddir="$srcdir"
+
+prepare() {
+    cd $builddir
+    dpkg -x protonmail-bridge_${pkgver}-${pkgrel}_amd64.deb ./
+
+    mkdir -p usr/share/icons/hicolor/scalable/apps
+    mv usr/share/icons/protonmail/ProtonMail_Bridge.svg \
+        usr/share/icons/hicolor/scalable/apps/"${pkgname}".svg
+
+    mv usr/share/applications/ProtonMail_Bridge.desktop \
+        usr/share/applications/"${pkgname}".desktop
+    sed -i "s|Icon=.*|Icon=protonmail-bridge|" \
+        usr/share/applications/"${pkgname}".desktop
+}
+
+prepare_package() {
+	msg "Preparing ${subpkgname:+sub}package ${subpkgname:-$pkgname}..."
+	stripbin
+	prepare_metafiles \
+		&& prepare_symlinks \
+		&& prepare_pkgconfig_provides \
+		&& prepare_command_provides \
+		|| return 1
+	archcheck
+}
+
+package() {
+    cd $builddir
+    mkdir -p $pkgdir
+    mv $srcdir/usr "${pkgdir}"/
+
+    install -D -m644 "${pkgdir}"/usr/lib/protonmail/bridge/eula.txt -t "${pkgdir}"/usr/share/licenses/"${pkgname}"/eula.txt
+    install -D -m644 "${pkgdir}"/usr/lib/protonmail/bridge/LICENSE -t "${pkgdir}"/usr/share/licenses/"${pkgname}"/LICENSE
+}
+sha512sums="215da2266d9b143dffa9c718434422f526dc393c0a95bf794b64b926a4662c647a8e407c886d9bc717d59a9051af82ffc70dbdb633b3e581f29b2ae849c22238  protonmail-bridge_1.1.6-1_amd64.deb"

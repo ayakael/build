@@ -1,0 +1,22 @@
+# Maintainer: Antoine Martin (ayakael) <dev@ayakael.net>
+pkgname=craftbukkit-plugin-luckperms
+_pkgver=5.3.77
+_buildver=1376
+pkgver=$_pkgver.$_buildver
+pkgrel=2
+pkgdesc="An advanced permissions plugin for Bukkit/Spigot, BungeeCord and Sponge."
+options=!check
+arch='noarch'
+url="https://github.com/lucko/LuckPerms"
+license="MIT"
+depends="craftbukkit>=1.8.8 craftbukkit<=1.17.1"
+source="https://ci.lucko.me/job/LuckPerms/${_buildver}/artifact/bukkit/loader/build/libs/LuckPerms-Bukkit-${_pkgver}.jar"
+noextract="LuckPerms-Bukkit-$_pkgver.jar"
+
+package() {
+  install -Dm644 "${srcdir}"/LuckPerms-Bukkit-$_pkgver.jar "$pkgdir/var/lib/craftbukkit/plugins/LuckPerms.jar"
+  chown craftbukkit:craftbukkit "$pkgdir"/var/lib/craftbukkit/plugins/LuckPerms.jar
+}
+sha512sums="
+df1c3b467b1a39369d850acef3adc7a50900cb0bcd2655642ee10e23ec5c77d410eb7deab067636f8a0044ae9ee350429f60278fa4e80b985243b9aab02b4d3d  LuckPerms-Bukkit-5.3.77.jar
+"

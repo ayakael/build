@@ -1,0 +1,38 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+pkgname=mcpp
+pkgver=2.7.2
+pkgrel=0
+pkgdesc="Matsui's CPP implementation precisely conformed to standards"
+arch='x86_64'
+license='custom'
+url="http://mcpp.sourceforge.net"
+depends='musl'
+source="https://downloads.sourceforge.net/${pkgname}/${pkgname}-${pkgver}.tar.gz
+        namlen.patch
+        fs28284.patch"
+builddir="$srcdir"/$pkgname-$pkgver
+subpackages="$pkgname-doc"
+
+prepare() {
+  cd $builddir
+  patch -Np1 -i ../namlen.patch
+  patch -Np1 -i ../fs28284.patch
+}
+
+build() {
+  cd $builddir
+  ./configure --prefix=/usr --enable-mcpplib --disable-static
+  make
+}
+
+package() {
+  cd $builddir
+  make DESTDIR="${pkgdir}" install
+
+  install -m755 -d "${pkgdir}/usr/share/licenses/${pkgname}"
+  ln -sf ../../doc/${pkgname}/LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/"
+}
+sha512sums="1ca885cb13fdb684de9d0595a9215b52f48a93a69077d82cdcacafe40d9a61fb77b00a3ff2b8890e7bc0a0fcc0c8d70d4093c00c280351cd4459aba67c573235  mcpp-2.7.2.tar.gz
+b1c643178ef8f492c02ac0f37bc0446e8a296cd7aca590f46a09002d1a187e9949a96ee542bf878b3dcc3ce8cc108caca186d7996e291d3be1e9f00237718e7a  namlen.patch
+e8bc225a37ba8b7f72909357fb8a1c32f472fa178e2515a74fda1ff82cabe009ee1254f15059b498b23769430bac026bc7bd08865a4e847c54b72abe61528881  fs28284.patch"

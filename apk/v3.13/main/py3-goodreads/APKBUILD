@@ -3,7 +3,7 @@
 _pkgbase=goodreads
 pkgname=py3-goodreads
 pkgver=0.3.2
-pkgrel=0
+pkgrel=1
 pkgdesc="Python extension for computing string edit distances and similarities"
 url="https://pypi.python.org/pypi/Goodreads"
 license='GPL'

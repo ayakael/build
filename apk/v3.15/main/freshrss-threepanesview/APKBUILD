@@ -1,0 +1,48 @@
+# Maintainer: Antoine Martin <antoine@ayakael.net>
+pkgname=freshrss-threepanesview
+pkgver=1.9
+pkgrel=0
+pkgdesc="Adds a third vertical pane along the articles list, to display the articles content"
+url="https://framagit.org/nicofrand/xextension-threepanesview"
+arch="noarch"
+license="MIT"
+depends="freshrss"
+makedepends="git"
+source="$pkgname-$pkgver.tar.gz"
+_giturl="https://framagit.org/nicofrand/xextension-threepanesview"
+_gittag="01e7293e97b8ceb30b07069e2fcdb0364e11a8e0"
+builddir="$srcdir"
+options="!check"
+
+snapshot() {
+	mkdir -p "$srcdir"
+	cd "${SRCDEST:-$srcdir}"
+	if ! [ -d $pkgname.git ]; then
+		git clone $_giturl $pkgname.git || return 1
+		cd $pkgname.git
+	else
+		cd $pkgname.git
+		git fetch || return 1
+	fi
+
+	echo "Checking out"
+	git checkout $_gittag
+	echo "Repo archive"
+	git archive --prefix="$pkgname/" -o ${pkgname}-${pkgver}.tar --format "tar" $_gittag
+    
+   
+	gzip ${pkgname}-${pkgver}.tar -c > "$SRCDEST"/$pkgname-$pkgver.tar.gz
+	ln -s "$SRCDEST"/$pkgname-$pkgver.tar.gz "$startdir"/$pkgname-$pkgver.tar.gz 
+}
+
+build() {
+    return 0
+}
+
+package() {
+	cd "$builddir"
+	mkdir -p "${pkgdir}/usr/share/webapps/freshrss/extensions/xExtension-ThreePanesView"
+	cp -R "${pkgname}/"* "${pkgdir}/usr/share/webapps/freshrss/extensions/xExtension-ThreePanesView"
+}
+
+sha512sums="cacc888b86d23d8f0ea3e9658d04edf5cfaffde630011754d402850b82dea2368012156093de36adf463df2ba92fa513c113e5ab6a5e9e3cb14de716c4708bd2  freshrss-threepanesview-1.9.tar.gz"

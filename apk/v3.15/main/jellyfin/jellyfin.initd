@@ -1,0 +1,35 @@
+#!/sbin/openrc-run
+# Distributed under the terms of the GNU General Public License, v2 or later
+
+JELLYFIN_HOME=${JELLYFIN_HOME:-/var/lib/${SVCNAME}}
+JELLYFIN_USER=${JELLYFIN_USER:-${SVCNAME}}
+PIDFILE=/run/jellyfin/jellyfin.pid
+
+depend() {
+	after net
+}
+
+start() {
+	checkpath -dq -o jellyin:jellyfin -m 755 /run/jellyfin/
+	ebegin "Starting ${SVCNAME}"
+	start-stop-daemon \
+		--start --user "${JELLYFIN_USER}" --name jellyfin \
+		--env HOME="${JELLYFIN_HOME}" --exec /usr/bin/dotnet /usr/lib/jellyfin/jellyfin.dll \
+		--pidfile="${PIDFILE}" \
+		--nicelevel "${NICELEVEL}" \
+		-- \
+		--datadir "${JELLYFIN_DATA_DIRECTORY}" \
+		--cachedir "${JELLYFIN_CACHE_DIRECTORY}" \
+		${JELLYFIN_ADD_OPTS}
+	eend $?
+}
+
+stop() {
+	ebegin "Stopping ${SVCNAME}"
+	start-stop-daemon --stop --user "${JELLYFIN_USER}" \
+		--pidfile "${PIDFILE}" \
+		--wait 15000 \
+		--progress
+	eend $?
+}
+

@@ -1,0 +1,23 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+pkgname='py3-pyTelegramBotApi'
+pkgver=3.7.6
+pkgrel=0
+arch='noarch'
+pkgdesc="A simple, but extensible Python implementation for the Telegram Bot API."
+url="https://pypi.org/project/pyTelegramBotAPI/"
+license="GPL2"
+depends=python3
+makedepends="python3 py3-setuptools"
+source="${pkgname}-${pkgver}.tar.gz::https://github.com/eternnoir/pyTelegramBotAPI/archive/$pkgver.tar.gz"
+builddir="${srcdir}"/pyTelegramBotAPI-$pkgver
+options="!check"
+
+package() {
+
+    cd $builddir
+
+    python3 setup.py install --root=$pkgdir/
+
+}
+sha512sums="eab5bdfa0d4f9d114bace4764c63fdcaa76de30e59738a9b7f6206e43cb0552f6606947a09920e29fcd0fe480e30f8b187f75c6fae2cca58fd0d9b7917652051  py3-pyTelegramBotApi-3.7.6.tar.gz"

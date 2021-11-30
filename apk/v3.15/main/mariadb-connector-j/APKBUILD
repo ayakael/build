@@ -1,0 +1,22 @@
+# Maintainer: Antoine Martin <antoine@ayakael.net>
+
+pkgname=mariadb-connector-j
+pkgver=2.7.1
+pkgrel=1
+pkgdesc="The official Java library (Connector/J) to connect to MariaDB and MySQL"
+arch='noarch'
+url="https://downloads.mariadb.org/connector-java/"
+license='LGPL2.1'
+option="!nocheck"
+depends='openjdk8-jre'
+source="https://downloads.mariadb.com/Connectors/java/connector-java-${pkgver}/mariadb-java-client-${pkgver}.jar"
+
+
+package() {
+    install -D -m755 \
+	"${srcdir}/mariadb-java-client-${pkgver}.jar" \
+	"${pkgdir}/usr/share/java/${pkgname}/mariadb-java-client-${pkgver}.jar"
+    ln -s "/usr/share/java/${pkgname}/mariadb-java-client-${pkgver}.jar" \
+	"${pkgdir}/usr/share/java/${pkgname}/mariadb-java-client.jar"
+}
+sha512sums="95ab41f1935a58c70da22083d2f100e187f5c2c6c304b807a7979297bbe24b1bea8ecbe68948d5ae454ad762e30dbbedb87726b0ea9bc4526a908e00221d6c5b  mariadb-java-client-2.7.1.jar"

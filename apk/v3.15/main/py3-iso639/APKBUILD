@@ -1,0 +1,30 @@
+# Maintainer: Josip Ponjavic <josipponjavic@gmail.com>
+
+pkgname=py3-iso639
+_libname=iso639
+pkgver=0.4.5
+pkgrel=0
+pkgdesc="Python library for ISO 639 standard"
+arch='noarch'
+url="https://github.com/noumar/iso639"
+license='AGPL3'
+depends="python3"
+makedepends='py3-setuptools'
+source="$_libname-$pkgver.tar.gz::$url/archive/$pkgver.tar.gz"
+
+build() {
+  cd "$srcdir/$_libname-$pkgver"
+  python3 setup.py build
+}
+
+check() {
+  cd "$srcdir/$_libname-$pkgver"
+  python3 setup.py test || warning "Tests failed"
+}
+
+package() {
+  cd "$srcdir/$_libname-$pkgver"
+  python3 setup.py install --skip-build -O1 --root="$pkgdir"
+}
+
+sha512sums="6201535804d7d1af77f1f2961d8eb1c2fae323dc5d4361b44e23caa834de1dcb9abd257cda4068f12a1a2984000edfa49cb852ecef5baee2d78d9c9e587202e4  iso639-0.4.5.tar.gz"

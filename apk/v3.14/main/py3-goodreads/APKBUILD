@@ -1,0 +1,25 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+_pkgbase=goodreads
+pkgname=py3-goodreads
+pkgver=0.3.2
+pkgrel=0
+pkgdesc="Python extension for computing string edit distances and similarities"
+url="https://pypi.python.org/pypi/Goodreads"
+license='GPL'
+arch='noarch'
+depends='python3'
+makedepends='py3-setuptools python3-dev py3-xmltodict py3-requests py3-rauth'
+source="$_pkgbase-$pkgver.tar.gz::https://files.pythonhosted.org/packages/source/g/$_pkgbase/$_pkgbase-$pkgver.tar.gz"
+options=!check
+
+build() {
+  cd $srcdir/$_pkgbase-$pkgver
+  python3 setup.py build
+}
+
+package() {
+  cd $srcdir/$_pkgbase-$pkgver
+  python3 setup.py install -O1 --prefix=/usr --root="$pkgdir"
+}
+sha512sums="2c1f7be226bbbac3d60247a5dddc06c48ad1d72790e4ce61c8c369100358965926422958563f153661b91b561414e4b573b95098808cc25ac5c7e6edfc46e344  goodreads-0.3.2.tar.gz"

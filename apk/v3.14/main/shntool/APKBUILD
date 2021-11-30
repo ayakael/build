@@ -1,0 +1,72 @@
+# Contributor: Carlo Landmeter <clandmeter@gmail.com>
+# Maintainer: Jean-Louis Fuchs <ganwell@fangorn.ch>
+pkgname=shntool
+pkgver=3.0.10
+pkgrel=5
+pkgdesc="A multi-purpose WAVE data processing and reporting utility"
+url="http://www.etree.org/shnutils/shntool/"
+arch="all"
+license="GPL"
+makedepends="sox"
+subpackages="$pkgname-doc"
+source="
+http://shnutils.freeshell.org/shntool/dist/src/shntool-3.0.10.tar.gz
+cfd06e4edecdca2013e0fe04db135fd110a68203.patch
+large-size.patch
+large-times.patch
+no-cdquality-check.patch
+"
+
+builddir="$srcdir"/shntool-$pkgver
+
+
+build() {
+	cd "$builddir"
+	update_config_sub
+	./configure \
+		--build=$CBUILD \
+		--host=$CHOST \
+		--prefix=/usr \
+		--sysconfdir=/etc \
+		--mandir=/usr/share/man \
+		--infodir=/usr/share/info \
+		--localstatedir=/var
+	make
+}
+
+package() {
+	cd "$builddir"
+	make DESTDIR="$pkgdir" install
+}
+
+check() {
+	# Check if shntools are operational
+	mkdir -p "$builddir/test"
+	cd "$builddir/test"
+	ln -s ../src/shntool shninfo
+	ln -s ../src/shntool shncue
+	ln -s ../src/shntool shnsplit
+	ln -s ../src/shntool shnjoin
+	ln -s ../src/shntool shncmp
+	sox -r 44100 -b 16 -n beat1.wav synth 0.4 sin 347 sin 357 vol 0.5
+	sox -r 44100 -b 16 -n beat2.wav synth 0.5 sin 359 sin 357 vol 0.5
+	sox -r 44100 -b 16 -n beat3.wav synth 0.6 sin 459 sin 438 vol 0.5
+	./shninfo beat1.wav | grep -q 70604
+	./shninfo beat2.wav | grep -q 88244
+	./shncue beat1.wav beat2.wav beat3.wav > joined.cue
+	./shnjoin beat1.wav beat2.wav beat3.wav
+	./shninfo joined.wav | grep -q 265820
+	./shnsplit -f joined.cue joined.wav
+	./shninfo split-track01.wav | grep -q 70604
+	./shninfo split-track03.wav | grep -q 105884
+	./shncmp split-track01.wav beat1.wav
+	./shncmp split-track02.wav beat2.wav
+	cd "$builddir"
+	rm -r test
+}
+
+sha512sums="2150d7123860abb54a56a1615bda991ed3713d73c338723f28b7d01a63c49a47809be16dc57b5b4edeee1567b003f9a4b54945c1cd08440f9503d22b91eaa06d  shntool-3.0.10.tar.gz
+1eaed454e4a9c32e61ed6d564f9be5f870bc15c46863958be81a432c0be945969ab23eecb855d5029dc7fa4d72b9f9ba12c6fe3e5db79337cb1c2d61a03e402a  cfd06e4edecdca2013e0fe04db135fd110a68203.patch
+8dbd3ee61ce637a05fda4487eb6ed4c18a825984ba302037553f27a02ab22f035226ea0fec7bc4d8afdc7dd6f44e35b64a5b4404dc04a3e639a67f06a26caf1b  large-size.patch
+b44f1351d6a1830b5d6b509003dc960dfe7fef16139114fefe2a2afc52a7c2e04322c54b3d1b056299fc97f3e670d2a7c9bfac64ac2fb517c8be16dd10c1e934  large-times.patch
+e5b5fe4894eea92e026eec666900bde2b10ea33d4b0ffbf74a231e443c476e11b50eebc21bc2ff2b844ca48af0a41a7b6af77fdc524d0b1bd33d03f133d99992  no-cdquality-check.patch"

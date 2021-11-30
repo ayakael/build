@@ -1,0 +1,32 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+_pyname='pathvalidate'
+pkgname="py3-$_pyname"
+pkgver=2.4.1
+pkgrel=0
+arch='noarch'
+pkgdesc='Sanitize/validate strings in filenames/file-paths/etc'
+url="https://pypi.python.org/project/${_pyname}"
+license="BSD"
+depends='python3'
+makedepends='py3-setuptools'
+options="!check"
+source="${pkgname}-${pkgver}.tar.gz::https://pypi.io/packages/source/${_pyname:0:1}/$_pyname/$_pyname-${pkgver}.tar.gz"
+builddir="$srcdir"/$_pyname-$pkgver
+
+build() {
+  cd "$builddir"
+
+  python3 setup.py build
+}
+
+package() {
+  cd "$builddir"
+
+  python3 setup.py install --root="$pkgdir"/ --optimize=1 --skip-build
+
+  install -Dm644 LICENSE $pkgdir/usr/share/licenses/$pkgname/LICENSE
+}
+sha512sums="
+d7853e06fe37347c539498f7af41fc8111e9c14fecc2de69c64ebe9005e3a3056c010155408ee35de1bdaa51cb89972fb6ad09e4dfa2d9b49bfd1a1a28c2a84a  py3-pathvalidate-2.4.1.tar.gz
+"

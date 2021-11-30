@@ -1,0 +1,61 @@
+# Maintainer: Edouard Lafon <dev+arch@elafon.98.wf>
+
+pkgname=mumpi
+pkgver=2.27
+pkgrel=0
+pkgdesc="MumPI is your Webinterface written in PHP for your Mumble Server ("Murmur") using the Ice-Middleware."
+arch='noarch'
+url="https://github.com/Kissaki/MumPI"
+license='LGPL3'
+depends='php7-zeroc-ice35'
+source="$pkgname-$pkgver.tar.gz"
+_giturl="https://github.com/Kissaki/MumPI"
+_gittag="0b489576cba1dd5656344488f4be5de3dba6e77f"
+builddir="$srcdir/$pkgname"
+options="!check"
+subpackages="${pkgname}-openrc"
+
+snapshot() {
+	mkdir -p "$srcdir"
+	cd "${srcdir}"
+	if ! [ -d $pkgname.git ]; then
+		git clone $_giturl $pkgname.git || return 1
+		cd $pkgname.git
+	else
+		cd $pkgname.git
+		git fetch || return 1
+	fi
+
+	echo "Checking out"
+	git checkout $_gittag
+	echo "Repo archive"
+	git archive --prefix="$pkgname/" -o $pkgname.tar --format "tar" $_gittag
+
+	gzip $pkgname.tar -c > "$SRCDEST"/$pkgname-$pkgver.tar.gz
+	ln -s "$SRCDEST"/$pkgname-$pkgver.tar.gz "$startdir"/$pkgname-$pkgver.tar.gz 
+}
+
+
+
+package() {
+	cd ${builddir}
+    	install -d "${pkgdir}/usr/share/webapps/${pkgname}"
+    	cp -r . "${pkgdir}/usr/share/webapps/${pkgname}/"
+	
+	# Config
+	indall -d "${pkgdir}"/etc/${pkgname}
+	nstall -Dm644 settings.inc.php "${pkgdir}"/etc/${pkgname}/settings.inc.php
+	rm "${pkgdir}"/usr/share/webapps/${pkgname}/settings.inc.php
+	ln -s /etc/${pkgname}/settings.inc.php "${pkgdir}"/usr/share/webapps/${pkgname}/settings.inc.php
+
+	# Data
+    	install -d "${pkgdir}/var/lib/${pkgname}"
+    	cp -r ./data/. "${pkgdir}/var/lib/${pkgname}/"
+	rm -R "${pkgdir}"/usr/share/webapps/${pkgname}/data
+	ln -s /var/lib/${pkgname} "${pkgdir}"/usr/share/webapps/${pkgname}/data
+
+	# Tmp
+	install -d "${pkgdir}"/var/cache/${pkgname}
+	ln -s /var/cache/$pkgname "${pkgdir}"/usr/share/webapps/${pkgname}/tmp
+}
+sha512sums="bf16e399d1631626a51f12bbd07e5606994f086c44cd609d96c5761a8c023b99682c96cadcedbf250ebc01d71764d99f8fbce973a5db49b16adb0a5ac17989a0  mumpi-2.27.tar.gz"

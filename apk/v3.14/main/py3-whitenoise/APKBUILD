@@ -1,0 +1,39 @@
+# Maintainer: Antoine Martin <dev@ayakael.net>
+
+_pyname='whitenoise'
+pkgname="py3-$_pyname"
+pkgver=5.3.0
+pkgrel=0
+arch='noarch'
+pkgdesc='Radically simplified static file serving for WSGI applications'
+url="https://pypi.python.org/project/${_pyname}"
+license="MIT"
+depends='python3'
+options="!check"
+makedepends='py3-setuptools py3-brotli py3-django py3-pytest py3-requests'
+source="${pkgname}-${pkgver}.tar.gz::https://pypi.io/packages/source/${_pyname:0:1}/$_pyname/$_pyname-${pkgver}.tar.gz"
+builddir="$srcdir"/$_pyname-$pkgver
+
+build() {
+  cd "$builddir"
+
+  python3 setup.py build
+}
+
+check() {
+  cd "$builddir"
+
+  DJANGO_SETTINGS_MODULE=tests.django_settings pytest
+}
+
+
+package() {
+  cd "$builddir"
+
+  python3 setup.py install --root="$pkgdir"/ --optimize=1 --skip-build
+
+  install -Dm644 LICENSE $pkgdir/usr/share/licenses/$pkgname/LICENSE
+}
+sha512sums="
+cd42c4258ea541ef31e7b5034da9b01085a91c93d2b7ffd954b9a52d0b1b0601f69935c59e9c1cfc4228e7e8e4fae1030eb0553d16eb9560afbf79964c8f0b1b  py3-whitenoise-5.3.0.tar.gz
+"

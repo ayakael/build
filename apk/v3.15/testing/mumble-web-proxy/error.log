@@ -1,0 +1,26 @@
+   Compiling tokio-tungstenite v0.13.0
+error[E0282]: type annotations needed
+   --> /var/build/build/apk/v3.15/main/mumble-web-proxy/src/mumble-web-proxy/cargo/git/checkouts/rtp-23e67d7854ed482f/6c0223d/src/rfc3711.rs:477:19
+    |
+476 |         let iv = iv ^ (BigUint::from(1_u8) << (context.session_encr_key.len() * 8));
+    |             -- consider giving `iv` a type
+477 |         let iv = &iv.to_bytes_be()[1..context.session_encr_key.len() + 1];
+    |                   ^^ cannot infer type
+    |
+    = note: type must be known at this point
+
+error[E0282]: type annotations needed
+   --> /var/build/build/apk/v3.15/main/mumble-web-proxy/src/mumble-web-proxy/cargo/git/checkouts/rtp-23e67d7854ed482f/6c0223d/src/rfc3711.rs:511:19
+    |
+510 |         let iv = iv ^ (BigUint::from(1_u8) << (context.session_encr_key.len() * 8));
+    |             -- consider giving `iv` a type
+511 |         let iv = &iv.to_bytes_be()[1..context.session_encr_key.len() + 1];
+    |                   ^^ cannot infer type
+    |
+    = note: type must be known at this point
+
+For more information about this error, try `rustc --explain E0282`.
+error: could not compile `rtp` due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: build failed
+
