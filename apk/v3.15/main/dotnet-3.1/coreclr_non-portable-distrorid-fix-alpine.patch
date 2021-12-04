@@ -1,0 +1,41 @@
+From 88a1cd85cbc73631d67406b3ad740ee7bd36bc8b Mon Sep 17 00:00:00 2001
+From: "build@apk-groulx" <build@apk-groulx.praxis>
+Date: Sat, 4 Dec 2021 05:03:48 +0000
+Subject: [PATCH 1/1] Fix non-portable distrorid alpine generation
+
+---
+ init-distro-rid.sh | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/init-distro-rid.sh b/init-distro-rid.sh
+index 49d8981c4f..7cec3cf649 100755
+--- a/init-distro-rid.sh
++++ b/init-distro-rid.sh
+@@ -51,7 +51,7 @@ initNonPortableDistroRid()
+             # We have forced __PortableBuild=0. This is because -portablebuld
+             # has been passed as false.
+             if (( ${isPortable} == 0 )); then
+-                if [ "${ID}" == "rhel" ]; then
++                if [ "${ID}" == "rhel" ] || [ "${ID}" = "alpine" ]; then
+                     # remove the last version digit	
+                     VERSION_ID=${VERSION_ID%.*}
+                 fi
+@@ -73,7 +73,7 @@ initNonPortableDistroRid()
+             fi
+         elif [ -e "${rootfsDir}/android_platform" ]; then
+             source $rootfsDir/android_platform
+-            nonPortableBuildID="$RID"
++        HE  nonPortableBuildID="$RID"
+         fi
+     fi
+ 
+@@ -185,4 +185,4 @@ initDistroRidGlobal()
+         
+         export __RuntimeId=${__DistroRid}
+     fi
+-}
+\ No newline at end of file
++}
+-- 
+2.34.0
+

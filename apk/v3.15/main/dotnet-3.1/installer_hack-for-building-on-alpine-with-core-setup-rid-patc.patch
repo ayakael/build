@@ -1,0 +1,26 @@
+From 4f60524a67ef11744dfcf5b5a9bd098938b0ca3b Mon Sep 17 00:00:00 2001
+From: "build@apk-groulx" <build@apk-groulx.praxis>
+Date: Sat, 4 Dec 2021 20:18:40 +0000
+Subject: [PATCH 1/1] Hack for building on alpine with core-setup rid patch
+
+---
+ src/redist/targets/GenerateLayout.targets | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/redist/targets/GenerateLayout.targets b/src/redist/targets/GenerateLayout.targets
+index 42277cf98..ae9ade23c 100644
+--- a/src/redist/targets/GenerateLayout.targets
++++ b/src/redist/targets/GenerateLayout.targets
+@@ -12,7 +12,8 @@
+   <PropertyGroup>
+     <!-- Blob storage directories are not stabilized, so these must refer to a package that does not stabilize -->
+     <AspNetCoreBlobVersion>$(MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion)</AspNetCoreBlobVersion>
+-    <CoreSetupBlobVersion>$(MicrosoftNETCoreAppInternalPackageVersion)</CoreSetupBlobVersion>
++    <CoreSetupBlobRid>alpine.3.15</CoreSetupBlobRid>
++    <CoreSetupBlobVersion>$(MicrosoftNETCoreAppRuntimePackageVersion)-$(CoreSetupBlobRid)</CoreSetupBlobVersion>
+ 
+     <!-- Change these individually to or $(CoreSetupBlobVersion), $(AspNetCoreBlobVersion), or appropriate fixed version depending if corresponding .Ref packages are unpinned. -->
+     <NETCoreAppTargetingPackBlobVersion Condition="'$(Rid)' != 'win-arm64'">3.1.0-rtm.19565.2</NETCoreAppTargetingPackBlobVersion>
+-- 
+2.34.0
+

@@ -1,0 +1,32 @@
+From c65a25ff18fa16dd0f134897b93919eab6a57bb9 Mon Sep 17 00:00:00 2001
+From: "build@apk-groulx" <build@apk-groulx.praxis>
+Date: Sat, 4 Dec 2021 06:12:30 +0000
+Subject: [PATCH 1/1] Fixed __rid_plat generation on alpine for core-setup
+
+---
+ src/corehost/build.sh | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
+
+diff --git a/src/corehost/build.sh b/src/corehost/build.sh
+index fb503e74..854b7f8a 100755
+--- a/src/corehost/build.sh
++++ b/src/corehost/build.sh
+@@ -21,14 +21,11 @@ init_rid_plat()
+         __rid_plat=""
+         if [ -e /etc/os-release ]; then
+             source /etc/os-release
+-            if [[ "$ID" == "rhel" ]]; then
++            if [ "$ID" == "rhel" ] || [ "$ID" == "alpine" ] ; then
+                 # remove the last version number
+                 VERSION_ID=${VERSION_ID%.*}
+             fi
+             __rid_plat="$ID.$VERSION_ID"
+-            if [[ "$ID" == "alpine" ]]; then
+-                __rid_plat="linux-musl"
+-            fi
+         elif [ -e /etc/redhat-release ]; then
+             local redhatRelease=$(</etc/redhat-release)
+             if [[ $redhatRelease == "CentOS release 6."* || $redhatRelease == "Red Hat Enterprise Linux Server release 6."* ]]; then
+-- 
+2.34.0
+
