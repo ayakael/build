@@ -1,0 +1,359 @@
+# Maintainer: Antoine Martin (ayakael) <dev@ayakael.net>
+
+# Based on Archlinux PKGBUILD by:
+# Maxime Gauduin <alucryd@archlinux.org>
+# Kristian Mosegaard <kristian@mosen.me>
+# Max Liebkies <mail@maxliebkies.de>
+# Krzysztof Bogacki <krzysztof.bogacki@leancode.pl>
+
+#
+# Build vars
+#
+# Sets whether we use pre-built bootstraps from microsoft or repo-provided bootstraps for building
+_bootstrap=true
+_bootstrap_sdk=6.0.8-r0
+_bootstrap_runtime=3.1.17-r2
+_bootstrapver=0.1.0-6.0.100-bootstrap.29
+# LLVM version
+_llvmver=12
+# One packaging step that needs this set. Needs some work, but I'm sure there's a way to remove this.
+_targetrid=alpine.3.15-x64
+
+pkgname=dotnet-6.0
+pkgdesc='The .NET Core SDK'
+pkgver=6.0.0
+pkgrel=0
+arch='x86_64'
+url=https://www.microsoft.com/net/core
+license='MIT'
+makedepends="
+  bash
+  clang
+  cmake
+  git
+  icu-dev
+  inetutils-syslogd
+  krb5-dev
+  libgit2-dev
+  libunwind-dev
+  libunwind
+  libxml2-dev
+  libxml2-utils
+  lldb-dev
+  mono
+  llvm$_llvmver-dev
+  lttng-ust-dev
+  nodejs
+  openssl-dev
+  linux-headers
+  zlib-dev
+"
+if [ ${_bootstrap} != 'true' ]; then
+  makedepends=" 
+    ${makedepends}
+    dotnet-bootstrap-runtime-3.1=$_bootstrap_runtime
+    dotnet-bootstrap-sdk-6.0=$_bootstrap_sdk
+  "
+fi
+
+subpackages="dotnet-sdk-5.0:sdk dotnet-host:host dotnet-runtime-5.0:runtime aspnet-runtime-5.0:aspnet_runtime:noarch netstandard-targeting-pack:netstandard_targeting_pack:noarch dotnet-targeting-pack-5.0:targeting_pack aspnet-targeting-pack-5.0:aspnet_targeting_pack:noarch" 
+_gittag=v6.0.100
+_giturl=https://github.com/dotnet/installer
+options="!check !archcheck"
+source="
+  $pkgname-$pkgver.git.zip
+  dotnet.sh
+  Private.SourceBuilt.Artifacts.${_bootstrapver}.noextract::https://dotnetcli.azureedge.net/source-built-artifacts/assets/Private.SourceBuilt.Artifacts.${_bootstrapver}.tar.gz
+"
+#
+# Patches description
+#
+# runtime_add-rid-for-alpine-315.patch/_
+#   As of version 5.0.12, runtime does not have the RIDs for Alpine Linux 3.15. This patch adds them. See dotnet/core issue #6985 
+#
+# runtime_link-order.patch
+#   For some reason, runtime does not link in the right order. This fixes that.
+#
+# runtime_non-portable-distrorid-fix-alpine.patch
+#   Runtime adds the extra subversion in its calculation of Alpine's DistroRID when a non-portable build, but does so inconsistently. This creates an error when it generates its nuget package
+#   Might be fixed by just making making package a portable build, which would make runtime_add-rid defunct, and make the targetRID linux-musl-x64 like for the dotnet-3.1 package
+#
+# build_darc-fix-alpine.patch
+#   Darc has a segmentation fault on Alpine due to not chosing the correct binary architecture. This patch deletes all the wrong ones so that it is forced to chose the correct one. 
+#   See dotnet/source-build issue #1868, and dotnet/source-build issue #297 (which would also fix all the other RID issues.
+#
+
+source="
+  ${source}
+  runtime_disable-package-validation.patch
+  runtime_add-rid-for-alpine-315.patch
+  sdk_telemetry-optout.patch
+"
+
+builddir="$srcdir/sources"
+
+
+# TODO
+# Fix ilasm issue in src/source-build-reference-packages.fc184172bf8144f7c91a7bc0226b7d90c5821576
+# Error: 
+# /var/build/build/apk/v3.15/main/dotnet-6.0/src/sources/src/source-build-reference-packages.fc184172bf8144f7c91a7bc0226b7d90c5821576/artifacts/source-build/self/src/src/targetPacks/build-il.sh: line 11: /var/build/build/apk/v3.15/main/dotnet-6.0/src/sources/src/source-build-reference-packages.fc184172bf8144f7c91a7bc0226b7d90c5821576/artifacts/source-build/self/package-cache/runtime.linux-x64.microsoft.netcore.ilasm/6.0.0/runtimes/linux-x64/native/ilasm: No such file or directory
+# This is due to ilasm being precompiled for libc rather than musl.
+# Need to figure out how to have it use musl binaries
+#
+# Tried adjusting /var/build/build/apk/v3.15/main/dotnet-6.0/src/sources/src/source-build-reference-packages.fc184172bf8144f7c91a7bc0226b7d90c5821576/artifacts/source-build/self/src/src/targetPacks/Directory.Build.targets 
+# to use mono's version of ilasm, but anything past artifacts get regenerated. Need to figure out what patch mecanism source-build-reference-packages uses to patch Directory.Build.targets
+#
+
+#
+# A custom version of snapshot is used because Darc expects the build directory to be a git repo, thus the auto-generated tar.gz on github is not sufficient.
+# There's a way to trick Darc into thinking its in a git repo but it's hardly elegant. Thus make sure to 'abuild snapshot' before 'abuild -r'
+# 
+
+snapshot() {
+        mkdir -p "$srcdir"
+        cd "${srcdir}"
+        if ! [ -d $pkgname.git ]; then
+                git clone $_giturl $pkgname.git || return 1
+                cd $pkgname.git
+        else
+                cd $pkgname.git
+                git fetch || return 1
+        fi
+
+        echo "Repo archive"
+        mkfifo $pkgname-$pkgver.git
+        git bundle create - $_gittag > $pkgname-$pkgver.git &
+        zip --fifo "${SRCDEST}"/$pkgname-$pkgver.git.zip $pkgname-$pkgver.git
+        rm $pkgname-$pkgver.git
+
+        ln -s "$SRCDEST"/$pkgname-$pkgver.git.zip "$startdir"/$pkgname-$pkgver.git.zip
+}
+
+unpack() {
+  default_unpack
+  cd "${srcdir}"
+  git clone $pkgname-$pkgver.git $pkgname --branch $_gittag 1>/dev/null 2>&1
+}
+
+
+_patch(){
+  local i failed=                                        
+  cd $builddir
+
+  if ! have_patches; then
+    return 0
+  fi
+  [ -d "$builddir" ] || { error "Is \$builddir set correctly?"; return 1; }
+
+  msg "Deploying patches"
+  for i in $source; do
+    case ${i%::*} in
+      build_*.patch) 
+        patch ${patch_args:--p1} -i "$srcdir/$(filename_from_uri $i)" || failed="$failed $i"
+      ;;           
+      *.patch)              
+        local _package=$(echo ${i} | sed 's|_.*||')
+        local _patch=$(echo ${i} | sed "s|${_package}_||")
+        echo "Applying $_patch -> $_package"
+	if [ -d src/$_package.* ]; then
+		cd src/$_package.*
+	else
+		echo "$_package does not exist for patch"
+		continue
+	fi
+	patch -Np1 -i "$srcdir"/${i}
+	cd "$builddir"
+      ;;
+    esac                                          
+  done                                               
+  if [ -z "$failed" ]; then                             
+    return 0                                                
+  fi                                                        
+  error "The following patches failed to apply:"
+  for i in $failed; do                                                                                                                                                       
+    printf "  %s\n" "$i"
+  done
+  return 1
+}
+
+prepare() {
+  cd "${srcdir}"/$pkgname
+  git remote set-url origin https://github.com/dotnet/installer.git
+
+  ./build.sh \
+    /p:ArcadeBuildTarball=true \
+    /p:TarballDir="${srcdir}"/sources
+
+  _patch
+
+  ln -sf "${srcdir}"/Private.SourceBuilt.Artifacts.${_bootstrapver}.noextract "$builddir"/packages/archive/Private.SourceBuilt.Artifacts.${_bootstrapver}.tar.gz
+}
+
+pkgver() {
+  cd "$builddir"
+
+  if [[ $(git describe --tags) != v6.0.* ]]; then
+    echo "Invalid SDK version"
+    exit 1
+  fi
+
+  local _standardver=$(xmllint --xpath "//*[local-name()='NETStandardLibraryRefPackageVersion']/text()" eng/Versions.props)
+
+  if [[ $_standardver != 2.1.0 ]]; then
+    echo "Invalid Standard version"
+    exit 1
+  fi
+
+  local _sdkver=$(xmllint --xpath "//*[local-name()='VersionSDKMinor']/text()" eng/Versions.props)$(xmllint --xpath "//*[local-name()='VersionFeature']/text()" eng/Versions.props)
+  local _runtimever=$(xmllint --xpath "//*[local-name()='MicrosoftNETCoreAppRuntimewinx64PackageVersion']/text()" eng/Versions.props)
+
+
+  echo "${_runtimever}.sdk${_sdkver}"
+}
+
+
+build() {
+  cd "${builddir}"
+  msg "Building $pkgname-$pkgver"
+  ./prep.sh
+  ./build.sh
+}
+
+package() {
+  depends='
+	dotnet-sdk-5.0
+	dotnet-host
+	dotnet-runtime-5.0
+	dotnet-targetting-pack-5.0
+	aspnet-runtime-5.0
+	aspnet-targeting-pack-5.0
+	netstandard-targeting-pack
+  '
+  mkdir -p "${pkgdir}"
+}
+
+sdk() {
+  depends='
+    dotnet-runtime-5.0
+    dotnet-targeting-pack-5.0
+    musl
+    libgcc
+    netstandard-targeting-pack
+    aspnet-targeting-pack-5.0
+  '
+
+  # XXX: This is a hack to allow this abuild to depend on itself. Adding "dotnet"
+  # to makedepends would not work, because abuild implicitly removes $pkgname
+  # and $subpackages from the abuild's dependencies.
+  provides="dotnet-bootstrap-sdk-5.0=$pkgver-r$pkgrel"
+
+  cd "$builddir"/artifacts/x64/Release
+
+  install -dm 755 "$subpkgdir"/usr/share/dotnet "$subpkgdir"/usr/share/licenses
+  bsdtar -xf dotnet-sdk-*.tar.gz -C "${subpkgdir}"/usr/share/dotnet/ --no-same-owner sdk templates
+  ln -s dotnet-host "${subpkgdir}"/usr/share/licenses/dotnet-sdk-5.0
+}
+
+
+host() {
+  pkgdesc='A generic driver for the .NET Core Command Line Interface'
+  depends='
+    gcc
+    musl
+  '
+
+  cd $builddir/artifacts/x64/Release
+
+  install -dm 755 "$subpkgdir"/etc/profile.d "$subpkgdir"/usr/bin "$subpkgdir"/usr/lib "$subpkgdir"/usr/share/dotnet "$subpkgdir"/usr/share/licenses/dotnet-host 
+
+  bsdtar -xf dotnet-sdk-*.tar.gz -C "${subpkgdir}"/usr/share/dotnet/ --no-same-owner dotnet host
+  bsdtar -xf dotnet-sdk-*.tar.gz -C "${subpkgdir}"/usr/share/licenses/dotnet-host/ --no-same-owner LICENSE.txt ThirdPartyNotices.txt
+  ln -s /usr/share/dotnet/dotnet "${subpkgdir}"/usr/bin/dotnet
+  ln -s /usr/share/dotnet/host/fxr/${pkgver}/libhostfxr.so "${subpkgdir}"/usr/lib/libhostfxr.so
+  install -Dm 644 "${srcdir}"/dotnet.sh -t "${subpkgdir}"/etc/profile.d/
+}
+
+runtime() {
+  pkgdesc='The .NET Core runtime'
+  makedepends='
+    icu-dev
+    krb5-dev
+    libunwind-dev
+    zlib-dev
+    openssl-dev
+    '
+  depends='
+    dotnet-host
+    libgcc
+    musl
+    icu
+    krb5-libs
+    libunwind
+    zlib
+    openssl
+  '
+  # XXX: This is a hack to allow this abuild to depend on itself. Adding "dotnet"
+  #   # to makedepends would not work, because abuild implicitly removes $pkgname  
+  #     # and $subpackages from the abuild's dependencies.                       
+  #
+  provides="dotnet-bootstrap-runtime-5.0=$pkgver-r$pkgrel"
+
+  cd "$builddir"/artifacts/x64/Release
+
+  install -dm 755 "$subpkgdir"/usr/share/dotnet "$subpkgdir"/usr/share/licenses
+  bsdtar -xf dotnet-sdk-*.tar.gz -C "${subpkgdir}"/usr/share/dotnet/ --no-same-owner shared/Microsoft.NETCore.App
+  ln -s dotnet-host "${subpkgdir}"/usr/share/licenses/dotnet-runtime-5.0
+}
+
+aspnet_runtime() {
+  pkgdesc='The ASP.NET Core runtime'
+  depends='dotnet-runtime-5.0'
+
+  cd "$builddir"/artifacts/x64/Release
+
+  install -dm 755 "$subpkgdir"/usr/share/dotnet "$subpkgdir"/usr/share/licenses
+  bsdtar -xf dotnet-sdk-*.tar.gz -C "${subpkgdir}"/usr/share/dotnet/ --no-same-owner shared/Microsoft.AspNetCore.App
+  ln -s dotnet-host "${subpkgdir}"/usr/share/licenses/aspnet-runtime-5.0
+}
+
+netstandard_targeting_pack() {
+  pkgdesc='The .NET Standard targeting pack'
+
+  cd "$builddir"/artifacts/x64/Release
+
+  install -dm 755 "$subpkgdir"/usr/share/dotnet "$subpkgdir"/usr/share/licenses
+  bsdtar -xf dotnet-sdk-*.tar.gz -C "${subpkgdir}"/usr/share/dotnet/ --no-same-owner packs/NETStandard.Library.Ref
+  ln -s dotnet-host "${subpkgdir}"/usr/share/licenses/netstandard-targeting-pack-5.0
+}
+
+targeting_pack() {
+  pkgdesc='The .NET Core targeting pack'
+  depends='netstandard-targeting-pack'
+
+  cd "$builddir"/artifacts/x64/Release
+
+  install -dm 755 "$subpkgdir"/usr/share/dotnet "$subpkgdir"/usr/share/licenses
+  bsdtar -xf dotnet-sdk-*.tar.gz -C "${subpkgdir}"/usr/share/dotnet/ --no-same-owner packs/Microsoft.NETCore.App.Host.$_targetrid packs/Microsoft.NETCore.App.Ref
+  ln -s dotnet-host "${subpkgdir}"/usr/share/licenses/dotnet-targeting-pack-5.0
+}
+
+aspnet_targeting_pack() {
+  pkgdesc='The ASP.NET Core targeting pack'
+  depends='dotnet-targeting-pack-5.0'
+
+  cd "$builddir"/artifacts/x64/Release
+
+  install -dm 755 "$subpkgdir"/usr/share/dotnet "$subpkgdir"/usr/share/licenses
+  bsdtar -xf dotnet-sdk-*.tar.gz -C "${subpkgdir}"/usr/share/dotnet/ --no-same-owner packs/Microsoft.AspNetCore.App.Ref
+  ln -s dotnet-host "${subpkgdir}"/usr/share/licenses/aspnet-targeting-pack-5.0
+}
+
+# vim: ts=2 sw=2 et:
+sha512sums="
+27241416cb847597fb770b2964f7054122fc94c6f92ec533bd4ec00ef85c8a4c3fdae33f8292da2d79cc8077643d3e6b4c782cf255296c79ffcd1e4cba1da3a6  dotnet-6.0-6.0.0.git.zip
+e61b9e3e5a2305646a616d598378230c9755c5dd5363692cc363f8f4add3807563c324dd86f3a7ae9d358c82d730608e7b293935a2b6c81c0c0f62d752a0a1cf  dotnet.sh
+db502b7fe368d45093c8f3747a34df2b51fc5bcba7602248afb4352a445228f82b19cb3019fe6e20f5246b1b0b4ab6e3f5acea56a769a1a5815d153d24178207  Private.SourceBuilt.Artifacts.0.1.0-6.0.100-bootstrap.29.noextract
+352b28eeb84b8ef0354ec8f27bc85babb9f7976acf5c3219a4d47e4930e63ab3a60cea3f95d7fa23ac88796e33b9cbd3d36e1e2833046c5cfee6c95213b3a21b  runtime_disable-package-validation.patch
+7fd6e99b0eaaa7ebf3acb0947d553b6f52a27a43287447940586f97f478ae4b5d94ce74b2cb3ca932ed6ae64edac949590b8e066d984dfda9d2bceb1e477aff8  runtime_add-rid-for-alpine-315.patch
+ec8fdf712b996bfec8384edca3de6c1f9e77c1b7b3569bf461380932a163416920132d7d83843d86b212a0d54542304c754544f2a1f8f881654d352c4adff73d  sdk_telemetry-optout.patch
+"
