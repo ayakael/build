@@ -5,7 +5,7 @@
 #
 
 pkgname=git-annex
-pkgver=8.20211123
+pkgver=8.20211203
 pkgrel=0
 pkgdesc="Manage files with git, without checking their contents into git"
 url="http://git-annex.branchable.com"
@@ -13,12 +13,13 @@ arch="i686 x86_64"
 license="GPL3"
 depends="git lsof rsync curl gmp zlib gnupg file gnutls libxml2 openssh util-linux libidn libgsasl"
 makedepends="cabal ghc zlib-dev file-dev gnutls-dev libxml2-dev libgsasl-dev ncurses-dev happy alex libffi-dev"
+_gittag=490689f122f4cce63cbd6aa29f5b59c6caf09d09 
+_giturl=https://git.joeyh.name/index.cgi/git-annex.git
 source="
-	https://git.joeyh.name/index.cgi/git-annex.git/snapshot/$pkgname-$pkgver.tar.gz
-	0001-Added-dependency-for-ghc-9.0.1-for-cabal.patch
+        $_giturl/snapshot/$pkgname-${_gittag}.tar.gz
 "
 subpackages="$pkgname-doc"
-builddir="$srcdir/$pkgname-$pkgver"
+builddir="$srcdir/$pkgname-$_gittag"
 
 #
 # Build feature flags
@@ -168,6 +169,5 @@ package() {
 
 
 sha512sums="
-cd5eb30e71bd580867b9a92d33dc2338f239919765a7c03f5caf1b772cf9059d6d4b6899087a62d141968546d1a6187dbac11858fe93ba7fabcaa543be863613  git-annex-8.20211123.tar.gz
-67c231183468503202b064822eaabbf3597e6a8bec8c0f74596187b8ad804cf0bbdf056627d6e78f7d188c34ca099291a592ce640b1362b618fc2473cd464823  0001-Added-dependency-for-ghc-9.0.1-for-cabal.patch
+329cdb1acd54d33298c528297e6e102b6f02618ca8b132e45fa9c5007bf3fce9c1d0d336ff5135e8e1f1bd7f3fd6fea641a7da1a1658721d89681d0f1249706d  git-annex-490689f122f4cce63cbd6aa29f5b59c6caf09d09.tar.gz
 "
