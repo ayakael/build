@@ -6,12 +6,17 @@
 # Max Liebkies <mail@maxliebkies.de>
 # Krzysztof Bogacki <krzysztof.bogacki@leancode.pl>
 
+#
 # Build vars
+#
+# Sets whether we use pre-built bootstraps from microsoft or repo-provided bootstraps for building
 _bootstrap=false
 _bootstrap_sdk=5.0.8-r1
 _bootstrap_runtime=3.1.17-r2
-_targetrid=alpine.3.15-x64
+# LLVM version
 _llvmver=12
+# One packaging step that needs this set. Needs some work, but I'm sure there's a way to remove this.
+_targetrid=alpine.3.15-x64
 
 pkgname=dotnet-5.0
 pkgdesc='The .NET Core SDK'
@@ -38,6 +43,7 @@ makedepends="
   lttng-ust-dev
   nodejs
   openssl-dev
+  linux-headers
   zlib-dev
 "
 if [ ${_bootstrap} != 'true' ]; then
@@ -48,15 +54,6 @@ if [ ${_bootstrap} != 'true' ]; then
   "
 fi
 
-#depends='
-#  icu-libs
-#  krb5-libs
-#  libgcc
-#  #libgdiplus
-#  libintl
-#  libssl1.1
-#  libstdc++zlib
-#'
 subpackages="dotnet-sdk-5.0:sdk dotnet-host:host dotnet-runtime-5.0:runtime aspnet-runtime-5.0:aspnet_runtime:noarch netstandard-targeting-pack:netstandard_targeting_pack:noarch dotnet-targeting-pack-5.0:targeting_pack aspnet-targeting-pack-5.0:aspnet_targeting_pack:noarch" 
 _gittag=v${pkgver}-runtime
 _giturl=https://github.com/dotnet/source-build
@@ -66,20 +63,42 @@ source="
   dotnet.sh
   https://dot.net/v1/dotnet-install.sh
 "
-# Patches
+#
+# Patches description
+#
+# runtime_add-rid-for-alpine-315.patch/_
+#   As of version 5.0.12, runtime does not have the RIDs for Alpine Linux 3.15. This patch adds them. See dotnet/core issue #6985 
+#
+# runtime_link-order.patch
+#   For some reason, runtime does not link in the right order. This fixes that.
+#
+# runtime_non-portable-distrorid-fix-alpine.patch
+#   Runtime adds the extra subversion in its calculation of Alpine's DistroRID when a non-portable build, but does so inconsistently. This creates an error when it generates its nuget package
+#   Might be fixed by just making making package a portable build, which would make runtime_add-rid defunct, and make the targetRID linux-musl-x64 like for the dotnet-3.1 package
+#
+# build_darc-fix-alpine.patch
+#   Darc has a segmentation fault on Alpine due to not chosing the correct binary architecture. This patch deletes all the wrong ones so that it is forced to chose the correct one. 
+#   See dotnet/source-build issue #1868, and dotnet/source-build issue #297 (which would also fix all the other RID issues.
+#
+# sdk_telemetry-optout.patch
+#   Optouts of telemetry gathering
+#
+
 source="
   ${source}
-  runtime_link-order.patch
   runtime_add-rid-for-alpine-315.patch
-  runtime_fix-last-version-digit-present-on-alpine-non-portable.patch
-  application-insights_fix-net40-location.patch
-  sdk_telemetry-optout.patch
+  runtime_link-order.patch
+  runtime_non-portable-distrorid-fix-alpine.patch
   build_darc-fix-alpine.patch
-  build_remove-runtime-install.patch
-  build_applicationinsights-alternative-source.patch
+  sdk_telemetry-optout.patch
 "
 
 builddir="$srcdir/$pkgname"
+
+#
+# A custom version of snapshot is used because Darc expects the build directory to be a git repo, thus the auto-generated tar.gz on github is not sufficient.
+# There's a way to trick Darc into thinking its in a git repo but it's hardly elegant. Thus make sure to 'abuild snapshot' before 'abuild -r'
+# 
 
 snapshot() {
         mkdir -p "$srcdir"
@@ -169,6 +188,14 @@ build() {
 
    export SOURCE_BUILD_SKIP_SUBMODULE_CHECK=1
 
+   #
+   # Notes
+   #
+   # Ideally would like some parity between dotnet-3.1 and dotnet-5.0 on the question of the TargetRid. Builds on 3.1 work only if TargetRid is set to linux-musl-* while builds
+   # on 5.0 work well when we let the build system generate its own (barring above patches, of course). It would probably be best to let the system do its thing and fix 3.1's 
+   # RID generator functions.
+   #
+	
   ./build.sh \
     --with-sdk ../$pkgname \
     /p:ArchiveDownloadedPackages=true \
@@ -177,7 +204,6 @@ build() {
     /p:SkipPrebuiltEnforcement=true \
     /p:UseSystemLibraries=true \
     /p:UseSystemLibunwind=true
-#    /p:TargetRid=$_targetrid \
 }
 
 package() {
@@ -314,12 +340,9 @@ sha512sums="
 8ad768f65bd0358282ed80a1e60cfccbe003b9fdd087918d56839701a02a2fe9ebf00bde0213293743fbb7602db5064de10251419b7b53df0fdd708e761a0d15  dotnet-5.0-5.0.12.git.zip
 f58bd83b709dcb4b0b67830756069c34258a167b33cb290cbf30f21d69d75402d38e013fd7bbf00640fe19e397f78df6ff787cf8484ee8967d5b8809f033eafb  dotnet.sh
 ecab4809e617e9cd30940b1c1a700e16b37b5974c850a60da7f1a25bf81516850e4533ef39d2d8786381e0e4e325d3b53fbb2377ecaa6c0813bb00fc1c92b784  dotnet-install.sh
-ad57d02371d351106e043fa104e31afbb0d6799e7ce0ea1a26f585abbfbab7bcba734c7e70491c4af5bfbed965a9ed3235cf4bc1019f504baf482518193b10a7  runtime_link-order.patch
-96cae734054ae9e5b41a214b33ca45397f54761dc5ff5497d4f9f790fd16c34a7211a473c414f3923cefec87766755d76d216eb9fa205461c72c35a8a6b89a8f  runtime_add-rid-for-alpine-315.patch
-944461da9ed50d536195ab3572b15fdfa74713344a4ca5e31bed627f09fbf328dd0d1f66599553d474e766cacdba7146c701180810383245fcdce1aba39bfef3  runtime_fix-last-version-digit-present-on-alpine-non-portable.patch
-0469d571d0f7634d3794761f04e1cbff9d27d642d134a11a13560574280e5cab6f366eb8820e61a449eca99470fdea8d9f6a7d97b633059b2fe25257ed1579e6  application-insights_fix-net40-location.patch
-c96700138ea919c169c3a394f1bf9548c7f86b1ba42b193d6e7bb0a1e2bd6f7f202befbc61246a8720181cd40e1f7fa36a6c208eb19b03a23e21994136fb2507  sdk_telemetry-optout.patch
+4899175597a1d4cd14c382469fe17e6d8d4644b784dca02eb2d4f71afa8e898e60269d5b0cdfea6e3ed6dc92feb676c6db21aae3bcb206d859c02cd10cdcaca0  runtime_add-rid-for-alpine-315.patch
+0d6ca9b4c6bb0999102f8a51b408c6f938d7262af552d63ef180fdc9a48bba940d0437d0d06916c3f7be7e70e2717a46a4ebc91c0f85467cbc7776b944eca83e  runtime_link-order.patch
+6dd3ff4db79aa95fa37ba4011da82c74d8ac83a7a92124fc4a97bd78b818b024b569df293b1edae2b16d8161c76b6a00e1c81bd421480e367925af64673b0f84  runtime_non-portable-distrorid-fix-alpine.patch
 74767c34f15e0eaee3682516e093296621efaeeb6d84e62d826587db9b559fb7c00c42aafbf4fdfd34460d1cf16edad3fd5f720f2b37f8bf52b26d7f73f79d5e  build_darc-fix-alpine.patch
-b3bf420ddd2bba28a012800af3bb740429b19b81fe7ca7c252de9fa65ee99d601f9d2484ac516d224799fc8586e9ce00cd730f9f6113d0411fe326f149ec7e3c  build_remove-runtime-install.patch
-58a3e93e5fb6247569c291f86db127cbbc6cc6842eaf0973c2a211d4806f08dcabd9781b7da567088d820a337d58d6375230ade991dcc77e170266675c4a97e5  build_applicationinsights-alternative-source.patch
+c96700138ea919c169c3a394f1bf9548c7f86b1ba42b193d6e7bb0a1e2bd6f7f202befbc61246a8720181cd40e1f7fa36a6c208eb19b03a23e21994136fb2507  sdk_telemetry-optout.patch
 "
