@@ -12,15 +12,15 @@
 # Sets whether we use pre-built bootstraps from microsoft or repo-provided 
 # bootstraps for building
 _bootstrap=false
-_bootstrap_sdk=5.0.8-r1
-_bootstrap_runtime=3.1.17-r2
+_bootstrap_sdk=5.0.12-r0
+_bootstrap_runtime=3.1.20-r2
 # LLVM version
 _llvmver=12
 
 pkgname=dotnet-5.0
 pkgdesc='The .NET Core SDK'
 pkgver=5.0.12
-pkgrel=0
+pkgrel=1
 arch='x86_64'
 url=https://www.microsoft.com/net/core
 license='MIT'
@@ -61,11 +61,11 @@ subpackages="
 	netstandard-targeting-pack:netstandard_targeting_pack:noarch
 	dotnet-targeting-pack-5.0:targeting_pack
 	aspnet-targeting-pack-5.0:aspnet_targeting_pack:noarch"
-_gittag=v$pkgver-runtime
+_gittag=v$pkgver.1-runtime
 _giturl=https://github.com/dotnet/source-build
 options="!check"
 source="
-	$pkgname-$pkgver.git.zip
+	$pkgname-$_gittag.git.zip
 	dotnet.sh
 	https://dot.net/v1/dotnet-install.sh
 	runtime_add-rid-for-alpine-315.patch
@@ -94,18 +94,18 @@ snapshot() {
 	fi
 
 	echo "Repo archive"
-	mkfifo $pkgname-$pkgver.git
-	git bundle create - $_gittag > $pkgname-$pkgver.git &
-	zip --fifo "$SRCDEST"/$pkgname-$pkgver.git.zip $pkgname-$pkgver.git
-	rm $pkgname-$pkgver.git
+	mkfifo $pkgname-$_gittag.git
+	git bundle create - $_gittag > $pkgname-$_gittag.git &
+	zip --fifo "$SRCDEST"/$pkgname-$_gittag.git.zip $pkgname-$_gittag.git
+	rm $pkgname-$_gittag.git
 
-	ln -s "$SRCDEST"/$pkgname-$pkgver.git.zip "$startdir"/$pkgname-$pkgver.git.zip
+	ln -s "$SRCDEST"/$pkgname-$_gittag.git.zip "$startdir"/$pkgname-$_gittag.git.zip
 }
 
 unpack() {
 	default_unpack
 	cd "$srcdir"
-	git clone $pkgname-$pkgver.git $pkgname --branch $_gittag 1>/dev/null 2>&1
+	git clone $pkgname-$_gittag.git $pkgname --branch $_gittag 1>/dev/null 2>&1
 }
 
 default_prepare() {
@@ -286,7 +286,7 @@ targeting_pack() {
 	cd "$builddir"/artifacts/x64/Release
 
 	install -dm 755 "$subpkgdir"/usr/share/dotnet "$subpkgdir"/usr/share/licenses
-	bsdtar -xf dotnet-sdk-*.tar.gz -C "$subpkgdir"/usr/share/dotnet/ --no-same-owner packs/Microsoft.NETCore.App.Host.* packs/Microsoft.NETCore.App.Ref
+	bsdtar -xf dotnet-sdk-*.tar.gz -C "$subpkgdir"/usr/share/dotnet/ --no-same-owner 'packs/Microsoft.NETCore.App.Host.*' packs/Microsoft.NETCore.App.Ref
 	ln -s dotnet-host "$subpkgdir"/usr/share/licenses/dotnet-targeting-pack-5.0
 }
 
@@ -302,7 +302,7 @@ aspnet_targeting_pack() {
 }
 
 sha512sums="
-8ad768f65bd0358282ed80a1e60cfccbe003b9fdd087918d56839701a02a2fe9ebf00bde0213293743fbb7602db5064de10251419b7b53df0fdd708e761a0d15  dotnet-5.0-5.0.12.git.zip
+7899483157a32012137e4ee44b03173908f6325085b7ee352ee329a208a0d1e5b434d1f24099e5b346ec9753e23c6a94553e76dc76a1ea6633392758132ed492  dotnet-5.0-v5.0.12.1-runtime.git.zip
 f58bd83b709dcb4b0b67830756069c34258a167b33cb290cbf30f21d69d75402d38e013fd7bbf00640fe19e397f78df6ff787cf8484ee8967d5b8809f033eafb  dotnet.sh
 ecab4809e617e9cd30940b1c1a700e16b37b5974c850a60da7f1a25bf81516850e4533ef39d2d8786381e0e4e325d3b53fbb2377ecaa6c0813bb00fc1c92b784  dotnet-install.sh
 4899175597a1d4cd14c382469fe17e6d8d4644b784dca02eb2d4f71afa8e898e60269d5b0cdfea6e3ed6dc92feb676c6db21aae3bcb206d859c02cd10cdcaca0  runtime_add-rid-for-alpine-315.patch
