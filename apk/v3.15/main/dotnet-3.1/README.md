@@ -55,4 +55,6 @@ a way to adjust this, but for now this will do.
    Darc has a segmentation fault on Alpine due to not chosing the correct
    binary architecture. This patch deletes all the wrong ones so that it
    is forced to chose the correct one. See issue dotnet/source-build #1868
-   
+## sdk_telemetry-optout.patch
+   Optouts of telemetry gathering
+

@@ -78,6 +78,7 @@ source="
 	corefx_added-alpine-315-rid.patch
 	build_coreclr-tools-path.patch
 	build_darc-fix-alpine.patch
+	sdk_telemetry-optout.patch
 "
 builddir="$srcdir/$pkgname"
 
@@ -316,4 +317,5 @@ eb107ae9765d9eebe2f2ab4cebda4d3f76d683e21d88f806bb008e29051ad196ea637d410075b7ed
 72092a7323bb91e8d011ad09cefcc3fd0e4ebfc7c258895d454cc1d015eda36c7de97b09af76a492fa689f39b9216435faace77edd0ca75d8e39a34ed6641840  corefx_added-alpine-315-rid.patch
 2334e36d5bb24b9b834800407c6110c09262af20a4353e92ef1897855f27eab117270dda0637071010a7a5ac8c4a5d4032240a7b659d8576801b503b66b14ab7  build_coreclr-tools-path.patch
 74767c34f15e0eaee3682516e093296621efaeeb6d84e62d826587db9b559fb7c00c42aafbf4fdfd34460d1cf16edad3fd5f720f2b37f8bf52b26d7f73f79d5e  build_darc-fix-alpine.patch
+c96700138ea919c169c3a394f1bf9548c7f86b1ba42b193d6e7bb0a1e2bd6f7f202befbc61246a8720181cd40e1f7fa36a6c208eb19b03a23e21994136fb2507  sdk_telemetry-optout.patch
 "
