@@ -9,7 +9,7 @@
 #
 # Build vars
 #
-# Sets whether we use pre-built bootstraps from microsoft or repo-provided 
+# Sets whether we use pre-built bootstraps from microsoft or repo-provided
 # bootstraps for building
 _bootstrap=false
 _bootstrap_sdk=5.0.12-r0
