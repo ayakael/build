@@ -17,7 +17,10 @@ upstreaming to clear them out
 directory as the top-most git  directory. Thus, an error occurs when one 
 attempts a build within aports (or other git repos). There's likely
 a way to adjust this, but for now this will do.
-
+* No check() mechanism, havn't found any docs for source-build tests
+* Tested only build for x86_64. While dotnet supports x86, aarch64 and
+armv7, I have not attempted a build on these architectures due to lack
+of time and hardware.
 
 # Patch notes
 

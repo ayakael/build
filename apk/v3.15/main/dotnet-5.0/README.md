@@ -5,7 +5,7 @@ APKBUILD for dotnet 5.0.
 If built for the first time, make sure that _bootstrap=true, as build
 needs either Microsoft bootstrap or repo's bootstrap to build
 * abuild snapshot
-* abuild -r
+* abuild -r:w
 If you built with _bootstrap=true, push pkgrel by one and rebuild with
 _bootstrap=false as build with bootstrap creates packages that confuse
 dependencies between dotnet-3.1 and dotnet-5.0
@@ -17,6 +17,10 @@ addresses. Please feel free to share any notes from your build environment.
 directory as the top-most git  directory. Thus, an error occurs when one 
 attempts a build within aports (or other git repos). There's likely
 a way to adjust this, but for now this will do.
+* No check() mechanism, havn't found any docs for source-build tests
+* Tested only build for x86_64. While dotnet supports x86, aarch64 and
+armv7, I have not attempted a build on these architectures due to lack
+of time and hardware.
 
 
 # Patch notes
