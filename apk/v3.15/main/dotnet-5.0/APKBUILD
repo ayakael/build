@@ -76,12 +76,6 @@ source="
 "
 builddir="$srcdir/$pkgname"
 
-#
-# A custom version of snapshot is used because Darc expects the build directory
-# to be a git repo, thus the auto-generated tar.gz on github is not sufficient.
-# There's a way to trick Darc into thinking its in a git repo but it's hardly
-# elegant. Thus make sure to 'abuild snapshot' before 'abuild -r'
-#
 snapshot() {
 	mkdir -p "$srcdir"
 	cd "$srcdir"
