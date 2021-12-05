@@ -5,18 +5,18 @@
 #
 
 pkgname=git-annex
-pkgver=8.20211203
+pkgver=8.20211123
 pkgrel=0
 pkgdesc="Manage files with git, without checking their contents into git"
 url="http://git-annex.branchable.com"
-arch="i686 x86_64"
+arch="x86 x86_64"
 license="GPL3"
 depends="git lsof rsync curl gmp zlib gnupg file gnutls libxml2 openssh util-linux libidn libgsasl"
 makedepends="cabal ghc zlib-dev file-dev gnutls-dev libxml2-dev libgsasl-dev ncurses-dev happy alex libffi-dev"
-_gittag=490689f122f4cce63cbd6aa29f5b59c6caf09d09 
+_gittag=$pkgver
 _giturl=https://git.joeyh.name/index.cgi/git-annex.git
 source="
-        $_giturl/snapshot/$pkgname-${_gittag}.tar.gz
+	$_giturl/snapshot/$pkgname-$_gittag.tar.gz
 "
 subpackages="$pkgname-doc"
 builddir="$srcdir/$pkgname-$_gittag"
@@ -71,11 +71,10 @@ _cabal_libdepends="exceptions hslogger async tasty filepath-bytestring split uni
 #
 _features=""
 gitannexfeature() {
-    case $1 in
-        (0) _features="${_features} -f-$2";;
-
-        (*) _features="${_features} -f$2";;
-    esac
+	case $1 in
+		(0) _features="$_features -f-$2";;
+		(*) _features="$_features -f$2";;
+	esac
 }
 
 
@@ -93,81 +92,76 @@ gitannexfeature $_gitlfs GitLfs
 gitannexfeature $_httpclientrestricted HttpClientRestricted
 
 
-# 
+#
 # APKBUILD functions
 #
 
-_localize_home(){
-  ORIG_HOME="$HOME"
-  ORIG_TMPDIR="$TMPDIR"
-  export HOME="${srcdir}"/cabal
-  export TMPDIR="${srcdir}"/cabal/tmp
-  export PATH="$HOME/.cabal/bin:$PATH"
+_localize_home() {
+	ORIG_HOME="$HOME"
+	ORIG_TMPDIR="$TMPDIR"
+	export HOME="$srcdir"/cabal
+	export TMPDIR="$srcdir"/cabal/tmp
+	export PATH="$HOME/.cabal/bin:$PATH"
 }
 
-_restore_home(){
-  export HOME="$ORIG_HOME"
-  export TMPDIR="$ORIG_TMPDIR"
+_restore_home() {
+	export HOME="$ORIG_HOME"
+	export TMPDIR="$ORIG_TMPDIR"
 }
 
 pkgver() {
-  cd "$srcdir/${pkgname%-git}"
-  git describe --long | sed 's/^v//;s/-/_/g'
+	cd "$srcdir/${pkgname%-git}"
+	git describe --long | sed 's/^v//;s/-/_/g'
 }
 
 asking() {
-  read -p "$@ (Y/n)" answer
-  case "$answer" in
-    n|N|no|NO|No|nO) false;;
-    *) true;;
-  esac
+	read -p "$@ (Y/n)" answer
+	case "$answer" in
+		n|N|no|NO|No|nO) false;;
+	*) true;;
+	esac
 }
 
 prepare() {
-    default_prepare
-    cd "$builddir"
-    _localize_home
-    mkdir -p "$HOME" "$TMPDIR"
+	default_prepare
+	_localize_home
+	mkdir -p "$HOME" "$TMPDIR"
 
-    msg "Features: $_features"
+	msg "Features: $_features"
 
-    msg "Installing missing cabal dependencies..."
-    cabal update
-    cabal install ${_cabal_makedepends}
-    cabal install --lib ${_cabal_libdepends}
-    
-    cabal install ${_cabal_flags} --user --only-dependencies ${_features}
-    _restore_home
+	msg "Installing missing cabal dependencies..."
+	cabal update
+	cabal install $_cabal_makedepends
+	cabal install --lib $_cabal_libdepends
+
+	cabal install $_cabal_flags --user --only-dependencies $_features
+	_restore_home
 }
 
 build() {
-    cd "$builddir"    
-    _localize_home
+	_localize_home
 
-    msg "Configuring..."
-    cabal configure ${_features}
+	msg "Configuring..."
+	cabal configure $_features
 
-    msg "Starting build..."
-    make
-    _restore_home
+	msg "Starting build..."
+	make
+	_restore_home
 }
 
 check() {
-    cd "$builddir"
-    _localize_home
-    make test || asking "Tests failed. Continue?"
-    _restore_home
-    
+	_localize_home
+	make test || asking "Tests failed. Continue?"
+	_restore_home
 }
 
 package() {
-	cd "$builddir"
-    _localize_home
-    make DESTDIR="$pkgdir" install
-    _restore_home
+	_localize_home
+	make DESTDIR="$pkgdir" install
+	_restore_home
 }
 
 
 sha512sums="
-329cdb1acd54d33298c528297e6e102b6f02618ca8b132e45fa9c5007bf3fce9c1d0d336ff5135e8e1f1bd7f3fd6fea641a7da1a1658721d89681d0f1249706d  git-annex-490689f122f4cce63cbd6aa29f5b59c6caf09d09.tar.gz
+cd5eb30e71bd580867b9a92d33dc2338f239919765a7c03f5caf1b772cf9059d6d4b6899087a62d141968546d1a6187dbac11858fe93ba7fabcaa543be863613  git-annex-8.20211123.tar.gz
 "
