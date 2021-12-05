@@ -1,15 +1,33 @@
-From b2148eeb23bd54513a11682c025976ee1798d682 Mon Sep 17 00:00:00 2001
+From 4603257752b01b60f1c1f2d1c2a77e07ae814647 Mon Sep 17 00:00:00 2001
 From: "build@apk-groulx" <build@apk-groulx.praxis>
-Date: Wed, 14 Jul 2021 04:15:54 +0000
-Subject: [PATCH 1/1] dotnet-source-build-coreclr-tools-path.patch
+Date: Sun, 5 Dec 2021 15:46:08 +0000
+Subject: [PATCH 1/1] Ildasm and ilasm paths changed to where they actually
+ apper
 
 ---
+ Directory.Build.props       | 4 ++--
  repos/coreclr-portable.proj | 2 +-
+ repos/coreclr.common.props  | 2 +-
  repos/coreclr.proj          | 4 ++--
- 2 files changed, 3 insertions(+), 3 deletions(-)
+ 4 files changed, 6 insertions(+), 6 deletions(-)
 
+diff --git a/Directory.Build.props b/Directory.Build.props
+index f6a6f54..8247c3e 100644
+--- a/Directory.Build.props
++++ b/Directory.Build.props
+@@ -133,8 +133,8 @@
+     <AspNetRazorBuildServerLogDir>$(BaseOutputPath)aspnet-debug</AspNetRazorBuildServerLogDir>
+     <AspNetRazorBuildServerLogFile>$(AspNetRazorBuildServerLogDir)razor-build-server.log</AspNetRazorBuildServerLogFile>
+     <IlasmPath Condition="'$(OfflineBuild)' != 'true'">invalid: ILAsm is not expected to be needed in the online build</IlasmPath>
+-    <IlasmPath Condition="'$(OfflineBuild)' == 'true'">$(PrebuiltSourceBuiltPackagesPath)coreclr-tools/$(BuildArchitecture)/ilasm</IlasmPath>
+-    <IldasmPath Condition="'$(OfflineBuild)' != 'true'">$(ToolPackageExtractDir)coreclr-tools/$(BuildArchitecture)/ildasm</IldasmPath>
++    <IlasmPath Condition="'$(OfflineBuild)' == 'true'">$(PrebuiltSourceBuiltPackagesPath)coreclr-tools/ilasm</IlasmPath>
++    <IldasmPath Condition="'$(OfflineBuild)' != 'true'">$(ToolPackageExtractDir)coreclr-tools/ildasm</IldasmPath>
+     <IldasmPath Condition="'$(OfflineBuild)' == 'true'">invalid: ILDasm is not expected to be needed in the offline build</IldasmPath>
+     <!-- Dir where git info is generated during online builds. -->
+     <GitInfoOutputDir>$(BaseOutputPath)git-info/</GitInfoOutputDir>
 diff --git a/repos/coreclr-portable.proj b/repos/coreclr-portable.proj
-index 78adc146..378547ea 100644
+index 78adc14..378547e 100644
 --- a/repos/coreclr-portable.proj
 +++ b/repos/coreclr-portable.proj
 @@ -19,7 +19,7 @@
@@ -22,7 +40,7 @@ index 78adc146..378547ea 100644
        <AssemblyExtension Condition="'$(TargetOS)' == 'FreeBSD'">so</AssemblyExtension>
        <AssemblyExtension Condition="'$(TargetOS)' == 'OSX'">dylib</AssemblyExtension>
 diff --git a/repos/coreclr.proj b/repos/coreclr.proj
-index 7e67b283..6f7851b1 100644
+index 7e67b28..037c68a 100644
 --- a/repos/coreclr.proj
 +++ b/repos/coreclr.proj
 @@ -15,11 +15,11 @@
@@ -40,5 +58,5 @@ index 7e67b283..6f7851b1 100644
        <AssemblyExtension Condition="'$(TargetOS)' == 'FreeBSD'">so</AssemblyExtension>
        <AssemblyExtension Condition="'$(TargetOS)' == 'OSX'">dylib</AssemblyExtension>
 -- 
-2.30.2
+2.34.0
 
