@@ -21,9 +21,9 @@ a way to adjust this, but for now this will do.
 
 # Patch notes
 
-## applications-insights_fix-net40-location.patch
+## applicationsinsights-dotnet_fix-net40-location.patch
    Because paths on Linux are case sensitive. Applications insights looks
-   for <dotnet/applications-insights>/src/Core/Managed/net40 in net40 
+   for <dotnet/applicationsinsights>/src/Core/Managed/net40 in net40 
    while the repo has a Net40. Patch moves whatever is in Net40 to net40
 ## build_darc-fix-alpine.patch
    Darc has a segmentation fault on Alpine due to not chosing the correct
