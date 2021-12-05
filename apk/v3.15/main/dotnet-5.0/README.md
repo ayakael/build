@@ -21,6 +21,14 @@ a way to adjust this, but for now this will do.
 
 # Patch notes
 
+## applications-insights_fix-net40-location.patch
+   Because paths on Linux are case sensitive. Applications insights looks
+   for <dotnet/applications-insights>/src/Core/Managed/net40 in net40 
+   while the repo has a Net40. Patch moves whatever is in Net40 to net40
+## build_darc-fix-alpine.patch
+   Darc has a segmentation fault on Alpine due to not chosing the correct
+   binary architecture. This patch deletes all the wrong ones so that it
+   is forced to chose the correct one. See dotnet/source-build issue #1868.
 ## runtime_add-rid-for-alpine-315.patch/_
    As of version 5.0.12, runtime does not have the RIDs for Alpine Linux 3.15.
    This patch adds them. See dotnet/core issue #6985 
@@ -30,10 +38,6 @@ a way to adjust this, but for now this will do.
    Runtime adds the extra subversion in its calculation of Alpine's DistroRID
    when a non-portable build, but does so inconsistently. This creates an error
    when it generates its nuget package.
-## build_darc-fix-alpine.patch
-   Darc has a segmentation fault on Alpine due to not chosing the correct
-   binary architecture. This patch deletes all the wrong ones so that it
-   is forced to chose the correct one. See dotnet/source-build issue #1868.
 ## sdk_telemetry-optout.patch
    Optouts of telemetry gathering
 
