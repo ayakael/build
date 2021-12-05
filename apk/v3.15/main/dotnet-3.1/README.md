@@ -21,6 +21,20 @@ a way to adjust this, but for now this will do.
 
 # Patch notes
 
+## applications-insights_fix-net40-location.patch
+   Because paths on Linux are case sensitive. Applications insights looks
+   for <dotnet/applications-insights>/src/Core/Managed/net40 in net40 
+   while the repo has a Net40. Patch moves whatever is in Net40 to net40.
+## build_coreclr-tools-path.patch
+   Various steps in the build process looks for ilasm in ildasm in 
+   $builddir/src/dotnet-3.1/Tools/source-built/coreclr-tools/x64 while they are
+   built to $builddir/src/dotnet-3.1/Tools/source-built/coreclr-tools.
+   This patches <dotnet/source-build> to look for ilasm and ildasm
+   in correct path.
+## build_darc-fix-alpine.patch         
+   Darc has a segmentation fault on Alpine due to not chosing the correct
+   binary architecture. This patch deletes all the wrong ones so that it
+   is forced to chose the correct one. See issue dotnet/source-build #1868
 ## coreclr_fix-build-on-Alpine-edge-45352.patch
    Fixes a build error for Alpine Linux. It has since been fixed in dotnet-5.0,
    see issue dotnet/runtime 45352.
@@ -41,20 +55,6 @@ a way to adjust this, but for now this will do.
    blobs/Runtime/3.1.20-alpine.3.15 while installer expects them in 3.1.20.
    This patches <dotnet/installer>/src/redist/targets/GenerateLayout.targets
    to point to actual path.
-## applications-insights_fix-net40-location.patch
-   Because paths on Linux are case sensitive. Applications insights looks
-   for <dotnet/applications-insights>/src/Core/Managed/net40 in net40 
-   while the repo has a Net40. Patch moves whatever is in Net40 to net40.
-## build_coreclr-tools-path.patch
-   Various steps in the build process looks for ilasm in ildasm in 
-   $builddir/src/dotnet-3.1/Tools/source-built/coreclr-tools/x64 while they are
-   built to $builddir/src/dotnet-3.1/Tools/source-built/coreclr-tools.
-   This patches <dotnet/source-build> to look for ilasm and ildasm
-   in correct path.
-## build_darc-fix-alpine.patch         
-   Darc has a segmentation fault on Alpine due to not chosing the correct
-   binary architecture. This patch deletes all the wrong ones so that it
-   is forced to chose the correct one. See issue dotnet/source-build #1868
 ## sdk_telemetry-optout.patch
    Optouts of telemetry gathering
 
