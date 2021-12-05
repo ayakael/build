@@ -67,9 +67,9 @@ _gittag=v$pkgver-runtime
 _giturl=https://github.com/dotnet/source-build
 options="!check"
 source="
-	$pkgname-$pkgver.git.zip
+	$pkgname-$_gittag.git.zip
 	dotnet.sh
-	applicationsinsights-dotnet_fix-net40-location.patch
+	application-insights_fix-net40-location.patch
 	build_coreclr-tools-path.patch
 	build_darc-fix-alpine.patch
 	coreclr_fix-build-on-Alpine-edge-45352.patch
@@ -78,7 +78,6 @@ source="
 	corefx_fix-build-clang10.patch
 	corefx_added-alpine-315-rid.patch
 	installer_generate-layout-core-setup-blob-path-fix.patch
-	sdk_telemetry-optout.patch
 "
 builddir="$srcdir/$pkgname"
 
@@ -150,10 +149,13 @@ prepare() {
 		"$srcdir"/dotnet-install.sh --install-dir ./ --runtime dotnet
 	else
 		cp -r /usr/share/dotnet/* ./
+		if [[ $(find sdk -type d -not -name '3.1.*' -maxdepth 1 -mindepth 1) ]]; then
+			find sdk -type d -not -name '3.1.*' -maxdepth 1 -mindepth 1 -print0 | xargs -0 rm -R --
+		fi
 	fi
 
 	# disable warnings
-	sed -i 's|skiptests|skiptests ignorewarnings|' repos/runtime.common.props
+	sed -i 's|skiptests|skiptests ignorewarnings|' repos/coreclr.common.props
 }
 
 
@@ -306,9 +308,9 @@ aspnet_targeting_pack() {
 }
 
 sha512sums="
-9e5e2bccb4338a18996e53e80c45525b3ba332d11cd896d1ba72bd8406735281aae7b98f614212a99475621000ca3fa5daf2d639953b163196aa2884c8773f2e  dotnet-3.1-3.1.20.git.zip
+27cdb0cc7d77b2c5c1faf9dbab3e79933497ec02c6837eb1e4ff4d3248b6bd016aff6d3c7b3a64038a03e4903ca0a103f9b612ad5516364ecca49e7a5d270a76  dotnet-3.1-v3.1.20-runtime.git.zip
 e61b9e3e5a2305646a616d598378230c9755c5dd5363692cc363f8f4add3807563c324dd86f3a7ae9d358c82d730608e7b293935a2b6c81c0c0f62d752a0a1cf  dotnet.sh
-0469d571d0f7634d3794761f04e1cbff9d27d642d134a11a13560574280e5cab6f366eb8820e61a449eca99470fdea8d9f6a7d97b633059b2fe25257ed1579e6  applicationsinsights-dotnet_fix-net40-location.patch
+0469d571d0f7634d3794761f04e1cbff9d27d642d134a11a13560574280e5cab6f366eb8820e61a449eca99470fdea8d9f6a7d97b633059b2fe25257ed1579e6  application-insights_fix-net40-location.patch
 2334e36d5bb24b9b834800407c6110c09262af20a4353e92ef1897855f27eab117270dda0637071010a7a5ac8c4a5d4032240a7b659d8576801b503b66b14ab7  build_coreclr-tools-path.patch
 74767c34f15e0eaee3682516e093296621efaeeb6d84e62d826587db9b559fb7c00c42aafbf4fdfd34460d1cf16edad3fd5f720f2b37f8bf52b26d7f73f79d5e  build_darc-fix-alpine.patch
 b3475c0b727c5258c7bc6f4c53305f9ced991e57f9f46a2ad323bed40627662eb8bf57286bf6a22d9a22bfdea9282da4630dd094166f0805c783aece5df5dff3  coreclr_fix-build-on-Alpine-edge-45352.patch
@@ -317,5 +319,4 @@ b3475c0b727c5258c7bc6f4c53305f9ced991e57f9f46a2ad323bed40627662eb8bf57286bf6a22d
 eb107ae9765d9eebe2f2ab4cebda4d3f76d683e21d88f806bb008e29051ad196ea637d410075b7ed61f4997a22085e4c36021860b82c4c0822c23ba9ded9656a  corefx_fix-build-clang10.patch
 72092a7323bb91e8d011ad09cefcc3fd0e4ebfc7c258895d454cc1d015eda36c7de97b09af76a492fa689f39b9216435faace77edd0ca75d8e39a34ed6641840  corefx_added-alpine-315-rid.patch
 e67f4f92659892aa65de7192dfbbf2cafab17e1a4ef60e4981507c7309da61b866864a18b0452e47cee2ce9253032c3f4c39e4426b7b2216ffa73236239c9669  installer_generate-layout-core-setup-blob-path-fix.patch
-c96700138ea919c169c3a394f1bf9548c7f86b1ba42b193d6e7bb0a1e2bd6f7f202befbc61246a8720181cd40e1f7fa36a6c208eb19b03a23e21994136fb2507  sdk_telemetry-optout.patch
 "

@@ -21,7 +21,7 @@ a way to adjust this, but for now this will do.
 
 # Patch notes
 
-## applicationsinsights-dotnet_fix-net40-location.patch
+## application-insights_fix-net40-location.patch
    Because paths on Linux are case sensitive. Applications insights looks
    for <dotnet/applications-insights>/src/Core/Managed/net40 in net40 
    while the repo has a Net40. Patch moves whatever is in Net40 to net40.
@@ -55,6 +55,3 @@ a way to adjust this, but for now this will do.
    blobs/Runtime/3.1.20-alpine.3.15 while installer expects them in 3.1.20.
    This patches <dotnet/installer>/src/redist/targets/GenerateLayout.targets
    to point to actual path.
-## sdk_telemetry-optout.patch
-   Optouts of telemetry gathering
-
